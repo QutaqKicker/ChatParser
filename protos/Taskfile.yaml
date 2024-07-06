@@ -1,0 +1,9 @@
+version: "3"
+
+tasks:
+  generateRouter:
+    aliases:
+      - genRouter
+    desc: "Generate code from protofiles"
+    cmds:
+      - protoc -I proto proto/router/router.proto --go_out=./gen/go --go_opt=paths=source_relative --go-grpc_out=./gen/go --go-grpc_opt=paths=source_relative
