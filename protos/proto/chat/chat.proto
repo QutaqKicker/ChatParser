@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "chatParser.chat.v1;chatv1";
+
+service Chat {
+  rpc
+}

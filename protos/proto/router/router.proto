@@ -1,0 +1,18 @@
+
+syntax = "proto3";
+
+package router;
+
+option go_package = "chatParser.router.v1;routerv1";
+
+service Router {
+  rpc ParseHtml (ParseHtmlRequest) returns (ParseHtmlResponse);
+}
+
+message ParseHtmlRequest {
+  string dirPath = 1;
+}
+
+message ParseHtmlResponse {
+  bool isSuccess = 1;
+}
