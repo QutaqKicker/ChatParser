@@ -1,0 +1,31 @@
+
+syntax = "proto3";
+
+package backup;
+
+option go_package = "chatParser.backup.v1;backupv1";
+
+service Chat {
+  rpc ExportToFile (ExportToFileRequest) returns (ExportToFileResponse);
+  rpc ImportFromFile (ImportFromFileRequest) returns (ImportFromFileResponse);
+}
+
+message ExportToFileRequest {
+  ExportType type = 1;
+  string exportDir = 2;
+}
+
+message ExportToFileResponse {
+  bool isSuccess = 1;
+}
+message ImportFromFileRequest {
+  string exportDir = 1;
+}
+message ImportFromFileResponse {
+  bool isSuccess = 1;
+}
+
+enum ExportType{
+  CSV = 0;
+  PARQUET = 1;
+}

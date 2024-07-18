@@ -1,3 +1,3 @@
-module github.com/QutaqKicker/ChatParser/protos
+module protos
 
 go 1.21

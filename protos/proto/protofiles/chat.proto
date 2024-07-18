@@ -1,0 +1,42 @@
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package chat;
+
+option go_package = "chatParser.chat.v1;chatv1";
+
+service Chat {
+  rpc ParseHtml (ParseHtmlRequest) returns (ParseHtmlResponse);
+  rpc SearchByDate (SearchMessagesRequest) returns (SearchMessagesResponse);
+  rpc GetStatistics (GetStatisticsRequest) returns (GetStatisticsResponse);
+}
+
+message ParseHtmlRequest {
+  string dirPath = 1;
+}
+
+message ParseHtmlResponse {
+  bool isSuccess = 1;
+}
+message SearchMessagesRequest {
+  google.protobuf.Timestamp minDate = 1;
+  google.protobuf.Timestamp maxDate = 2;
+  repeated string userIds = 3;
+}
+message SearchMessagesResponse {
+  repeated ChatMessage messages = 1;
+}
+message GetStatisticsRequest {
+  repeated string userIds = 1;
+}
+message GetStatisticsResponse {
+  bool isSuccess = 1;
+}
+
+message ChatMessage {
+  string userId = 1;
+  string text = 2;
+  google.protobuf.Timestamp createDate = 3;
+}

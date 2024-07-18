@@ -1,0 +1,36 @@
+
+syntax = "proto3";
+
+package user;
+
+option go_package = "chatParser.user.v1;userv1";
+
+service Chat {
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse);
+  rpc SearchUser (SearchUserRequest) returns (SearchUserResponse);
+  rpc EditUser (UpdateUserRequest) returns (UpdateUserResponse);
+}
+
+message GetUsersRequest {}
+message GetUsersResponse {
+  repeated User users = 1;
+}
+message SearchUserRequest {
+  string userId = 1;
+}
+message SearchUserResponse {
+  string name = 1;
+  int64 messagesCount = 2;
+}
+message UpdateUserRequest {
+  string id = 1;
+  string newName = 2;
+}
+message UpdateUserResponse {
+  bool isSuccess = 1;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+}

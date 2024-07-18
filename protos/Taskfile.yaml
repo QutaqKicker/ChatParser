@@ -1,9 +1,21 @@
 version: "3"
 
 tasks:
-  generateRouter:
+  generateChat:
     aliases:
-      - genRouter
+      - genChat
     desc: "Generate code from protofiles"
     cmds:
-      - protoc -I proto proto/router/router.proto --go_out=./gen/go --go_opt=paths=source_relative --go-grpc_out=./gen/go --go-grpc_opt=paths=source_relative
+      - protoc -I proto proto/protofiles/chat.proto --go_out=./gen/go/chat --go_opt=paths=source_relative --go-grpc_out=./gen/go/chat --go-grpc_opt=paths=source_relative
+  generateUser:
+    aliases:
+      - genUser
+    desc: "Generate code from protofiles"
+    cmds:
+      - protoc -I proto proto/protofiles/user.proto --go_out=./gen/go/user --go_opt=paths=source_relative --go-grpc_out=./gen/go/user --go-grpc_opt=paths=source_relative
+  generateBackup:
+    aliases:
+      - genBackup
+    desc: "Generate code from protofiles"
+    cmds:
+      - protoc -I proto proto/protofiles/backup.proto --go_out=./gen/go/backup --go_opt=paths=source_relative --go-grpc_out=./gen/go/backup --go-grpc_opt=paths=source_relative
