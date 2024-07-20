@@ -9,7 +9,7 @@ option go_package = "chatParser.chat.v1;chatv1";
 
 service Chat {
   rpc ParseHtml (ParseHtmlRequest) returns (ParseHtmlResponse);
-  rpc SearchByDate (SearchMessagesRequest) returns (SearchMessagesResponse);
+  rpc SearchMessages (SearchMessagesRequest) returns (SearchMessagesResponse);
   rpc GetStatistics (GetStatisticsRequest) returns (GetStatisticsResponse);
 }
 
