@@ -5,7 +5,7 @@ package backup;
 
 option go_package = "chatParser.backup.v1;backupv1";
 
-service Chat {
+service Backup {
   rpc ExportToFile (ExportToFileRequest) returns (ExportToFileResponse);
   rpc ImportFromFile (ImportFromFileRequest) returns (ImportFromFileResponse);
 }

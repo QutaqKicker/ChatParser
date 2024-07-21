@@ -5,7 +5,7 @@ package user;
 
 option go_package = "chatParser.user.v1;userv1";
 
-service Chat {
+service User {
   rpc GetUsers (GetUsersRequest) returns (GetUsersResponse);
   rpc SearchUser (SearchUserRequest) returns (SearchUserResponse);
   rpc EditUser (UpdateUserRequest) returns (UpdateUserResponse);
@@ -13,7 +13,7 @@ service Chat {
 
 message GetUsersRequest {}
 message GetUsersResponse {
-  repeated User users = 1;
+  repeated UserInfo users = 1;
 }
 message SearchUserRequest {
   string userId = 1;
@@ -30,7 +30,7 @@ message UpdateUserResponse {
   bool isSuccess = 1;
 }
 
-message User {
+message UserInfo {
   string id = 1;
   string name = 2;
 }

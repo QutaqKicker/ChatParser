@@ -18,122 +18,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// ChatClient is the client API for Chat service.
+// BackupClient is the client API for Backup service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ChatClient interface {
+type BackupClient interface {
 	ExportToFile(ctx context.Context, in *ExportToFileRequest, opts ...grpc.CallOption) (*ExportToFileResponse, error)
 	ImportFromFile(ctx context.Context, in *ImportFromFileRequest, opts ...grpc.CallOption) (*ImportFromFileResponse, error)
 }
 
-type chatClient struct {
+type backupClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewChatClient(cc grpc.ClientConnInterface) ChatClient {
-	return &chatClient{cc}
+func NewBackupClient(cc grpc.ClientConnInterface) BackupClient {
+	return &backupClient{cc}
 }
 
-func (c *chatClient) ExportToFile(ctx context.Context, in *ExportToFileRequest, opts ...grpc.CallOption) (*ExportToFileResponse, error) {
+func (c *backupClient) ExportToFile(ctx context.Context, in *ExportToFileRequest, opts ...grpc.CallOption) (*ExportToFileResponse, error) {
 	out := new(ExportToFileResponse)
-	err := c.cc.Invoke(ctx, "/backup.Chat/ExportToFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/backup.Backup/ExportToFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *chatClient) ImportFromFile(ctx context.Context, in *ImportFromFileRequest, opts ...grpc.CallOption) (*ImportFromFileResponse, error) {
+func (c *backupClient) ImportFromFile(ctx context.Context, in *ImportFromFileRequest, opts ...grpc.CallOption) (*ImportFromFileResponse, error) {
 	out := new(ImportFromFileResponse)
-	err := c.cc.Invoke(ctx, "/backup.Chat/ImportFromFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/backup.Backup/ImportFromFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ChatServer is the server API for Chat service.
-// All implementations must embed UnimplementedChatServer
+// BackupServer is the server API for Backup service.
+// All implementations must embed UnimplementedBackupServer
 // for forward compatibility
-type ChatServer interface {
+type BackupServer interface {
 	ExportToFile(context.Context, *ExportToFileRequest) (*ExportToFileResponse, error)
 	ImportFromFile(context.Context, *ImportFromFileRequest) (*ImportFromFileResponse, error)
-	mustEmbedUnimplementedChatServer()
+	mustEmbedUnimplementedBackupServer()
 }
 
-// UnimplementedChatServer must be embedded to have forward compatible implementations.
-type UnimplementedChatServer struct {
+// UnimplementedBackupServer must be embedded to have forward compatible implementations.
+type UnimplementedBackupServer struct {
 }
 
-func (UnimplementedChatServer) ExportToFile(context.Context, *ExportToFileRequest) (*ExportToFileResponse, error) {
+func (UnimplementedBackupServer) ExportToFile(context.Context, *ExportToFileRequest) (*ExportToFileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExportToFile not implemented")
 }
-func (UnimplementedChatServer) ImportFromFile(context.Context, *ImportFromFileRequest) (*ImportFromFileResponse, error) {
+func (UnimplementedBackupServer) ImportFromFile(context.Context, *ImportFromFileRequest) (*ImportFromFileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ImportFromFile not implemented")
 }
-func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
+func (UnimplementedBackupServer) mustEmbedUnimplementedBackupServer() {}
 
-// UnsafeChatServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ChatServer will
+// UnsafeBackupServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BackupServer will
 // result in compilation errors.
-type UnsafeChatServer interface {
-	mustEmbedUnimplementedChatServer()
+type UnsafeBackupServer interface {
+	mustEmbedUnimplementedBackupServer()
 }
 
-func RegisterChatServer(s grpc.ServiceRegistrar, srv ChatServer) {
-	s.RegisterService(&Chat_ServiceDesc, srv)
+func RegisterBackupServer(s grpc.ServiceRegistrar, srv BackupServer) {
+	s.RegisterService(&Backup_ServiceDesc, srv)
 }
 
-func _Chat_ExportToFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Backup_ExportToFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExportToFileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).ExportToFile(ctx, in)
+		return srv.(BackupServer).ExportToFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/backup.Chat/ExportToFile",
+		FullMethod: "/backup.Backup/ExportToFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).ExportToFile(ctx, req.(*ExportToFileRequest))
+		return srv.(BackupServer).ExportToFile(ctx, req.(*ExportToFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_ImportFromFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Backup_ImportFromFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ImportFromFileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).ImportFromFile(ctx, in)
+		return srv.(BackupServer).ImportFromFile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/backup.Chat/ImportFromFile",
+		FullMethod: "/backup.Backup/ImportFromFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).ImportFromFile(ctx, req.(*ImportFromFileRequest))
+		return srv.(BackupServer).ImportFromFile(ctx, req.(*ImportFromFileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
+// Backup_ServiceDesc is the grpc.ServiceDesc for Backup service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Chat_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "backup.Chat",
-	HandlerType: (*ChatServer)(nil),
+var Backup_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "backup.Backup",
+	HandlerType: (*BackupServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ExportToFile",
-			Handler:    _Chat_ExportToFile_Handler,
+			Handler:    _Backup_ExportToFile_Handler,
 		},
 		{
 			MethodName: "ImportFromFile",
-			Handler:    _Chat_ImportFromFile_Handler,
+			Handler:    _Backup_ImportFromFile_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
