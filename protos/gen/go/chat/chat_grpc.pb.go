@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatClient interface {
 	ParseHtml(ctx context.Context, in *ParseHtmlRequest, opts ...grpc.CallOption) (*ParseHtmlResponse, error)
-	SearchByDate(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
+	SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
 	GetStatistics(ctx context.Context, in *GetStatisticsRequest, opts ...grpc.CallOption) (*GetStatisticsResponse, error)
 }
 
@@ -44,9 +44,9 @@ func (c *chatClient) ParseHtml(ctx context.Context, in *ParseHtmlRequest, opts .
 	return out, nil
 }
 
-func (c *chatClient) SearchByDate(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error) {
+func (c *chatClient) SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error) {
 	out := new(SearchMessagesResponse)
-	err := c.cc.Invoke(ctx, "/chat.Chat/SearchByDate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/chat.Chat/SearchMessages", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (c *chatClient) GetStatistics(ctx context.Context, in *GetStatisticsRequest
 // for forward compatibility
 type ChatServer interface {
 	ParseHtml(context.Context, *ParseHtmlRequest) (*ParseHtmlResponse, error)
-	SearchByDate(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
+	SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
 	GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error)
 	mustEmbedUnimplementedChatServer()
 }
@@ -79,8 +79,8 @@ type UnimplementedChatServer struct {
 func (UnimplementedChatServer) ParseHtml(context.Context, *ParseHtmlRequest) (*ParseHtmlResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParseHtml not implemented")
 }
-func (UnimplementedChatServer) SearchByDate(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchByDate not implemented")
+func (UnimplementedChatServer) SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchMessages not implemented")
 }
 func (UnimplementedChatServer) GetStatistics(context.Context, *GetStatisticsRequest) (*GetStatisticsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStatistics not implemented")
@@ -116,20 +116,20 @@ func _Chat_ParseHtml_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_SearchByDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Chat_SearchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).SearchByDate(ctx, in)
+		return srv.(ChatServer).SearchMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/chat.Chat/SearchByDate",
+		FullMethod: "/chat.Chat/SearchMessages",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).SearchByDate(ctx, req.(*SearchMessagesRequest))
+		return srv.(ChatServer).SearchMessages(ctx, req.(*SearchMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -164,8 +164,8 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_ParseHtml_Handler,
 		},
 		{
-			MethodName: "SearchByDate",
-			Handler:    _Chat_SearchByDate_Handler,
+			MethodName: "SearchMessages",
+			Handler:    _Chat_SearchMessages_Handler,
 		},
 		{
 			MethodName: "GetStatistics",
