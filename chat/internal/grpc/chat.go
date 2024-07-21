@@ -18,7 +18,7 @@ type Chat interface {
 	SearchMessages(ctx context.Context,
 		min time.Time,
 		max time.Time,
-		userIds []string) ([]chatv1.ChatMessage, error)
+		userIds []string) ([]*chatv1.ChatMessage, error)
 	GetStatistics(ctx context.Context,
 		userIds []string) (bool, error)
 }
@@ -36,22 +36,23 @@ func (s *serverAPI) ParseHtml(ctx context.Context, req *chatv1.ParseHtmlRequest)
 	if req.DirPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
 	}
+
 	isSuccess, err := s.chat.ParseHtml(ctx, req.DirPath)
 	return &chatv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
 }
+
 func (s *serverAPI) SearchMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
-	if req.DirPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
+	if req.MinDate == nil && req.MaxDate == nil && req.UserIds == nil {
+		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
 	}
-	isSuccess, err := s.chat.ParseHtml(ctx, req.DirPath)
-	return &chatv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
+
+	messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
+	return &chatv1.SearchMessagesResponse{Messages: messages}, err
 }
+
 func (s *serverAPI) GetStatistics(ctx context.Context, req *chatv1.GetStatisticsRequest) (*chatv1.GetStatisticsResponse, error) {
-	if req.DirPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
-	}
-	isSuccess, err := s.chat.ParseHtml(ctx, req.DirPath)
-	return &chatv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
+	isSuccess, err := s.chat.GetStatistics(ctx, req.UserIds)
+	return &chatv1.GetStatisticsResponse{IsSuccess: isSuccess}, err
 }
 
 type App struct {
@@ -91,6 +92,8 @@ func (a *App) Run() error {
 }
 
 func (a *App) Stop() {
-	const op = "RouterApp.Stop"
+	const op = "ChatApp.Stop"
+	log := a.log.With(slog.String("op", op))
+	log.Info("stopping Grpc server")
 	a.gRPCServer.GracefulStop()
 }

@@ -7,17 +7,15 @@ import (
 )
 
 type Config struct {
-	Env        string     `yaml:"env" env-default:"local"`
-	Port       int        `yaml:"port" env-required:"true"`
-	ChatPort   int        `yaml:"chatPort" env-required:"true"`
-	UsersPort  int        `yaml:"usersPort" env-required:"true"`
-	BackupPort int        `yaml:"backupPort" env-required:"true"`
-	Grpc       GrpcConfig `yaml:"grpc"`
+	Env  string     `yaml:"env" env-default:"local"`
+	Grpc GrpcConfig `yaml:"grpc"`
 }
 
 type GrpcConfig struct {
-	Port    int           `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
+	Port       int           `yaml:"port" env-required:"true"`
+	ChatPort   int           `yaml:"chatPort" env-required:"true"`
+	BackupPort int           `yaml:"backupPort" env-required:"true"`
+	Timeout    time.Duration `yaml:"timeout"`
 }
 
 func MustLoad() *Config {

@@ -3,7 +3,7 @@ module chat
 go 1.21
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20240718195738-c95beeeea474
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721102048-50adf3e8acfc
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.65.0
 )

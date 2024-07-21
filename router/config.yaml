@@ -1,8 +1,7 @@
 env: "dev"
-port: 8081
-chatPort: 8082
-usersPort: 8083
-backupPort: 8084
 grpc:
-  port: 8040
+  port: 8081
+  chatPort: 8082
+  usersPort: 8083
+  backupPort: 8084
   timeout: 60s

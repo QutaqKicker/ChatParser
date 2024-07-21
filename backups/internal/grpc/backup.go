@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
-	routerv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/router"
+	backupv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/backup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type Chat interface {
+type Backup interface {
 	ParseHtml(ctx context.Context,
 		diPath string)
 	SearchByDate(ctx context.Context,
@@ -30,12 +30,12 @@ type Router interface {
 }
 
 type serverAPI struct {
-	routerv1.UnimplementedRouterServer
+	backupv1.UnimplementedBackupServer
 	router Router
 }
 
 func Register(gRPC *grpc.Server) {
-	routerv1.RegisterRouterServer(gRPC, &serverAPI{})
+	backupv1.RegisterChatServer(gRPC, &serverAPI{})
 }
 
 func (s *serverAPI) ParseHtml(ctx context.Context, req *routerv1.ParseHtmlRequest) (*routerv1.ParseHtmlResponse, error) {

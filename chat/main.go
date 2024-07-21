@@ -1,11 +1,11 @@
 package main
 
 import (
+	config "chat/internal"
+	"chat/internal/grpc"
 	"log/slog"
 	"os"
 	"os/signal"
-	config "router/internal"
-	"router/internal/grpc"
 	"syscall"
 )
 
