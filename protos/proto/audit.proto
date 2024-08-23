@@ -1,0 +1,25 @@
+
+syntax = "proto3";
+
+package audit;
+
+option go_package = "chatParser.audit.v1;auditv1";
+
+service Audit {
+  rpc AuditInfo (AuditInfoRequest) returns (AuditInfoResponse);
+}
+
+message AuditInfoRequest {
+  string ServiceName = 1;
+  AuditType Type = 2;
+  string Message = 3;
+}
+message AuditInfoResponse {
+  bool Ok = 1;
+}
+
+enum AuditType{
+  INFO = 0;
+  WARNING = 1;
+  ERROR = 2;
+}
