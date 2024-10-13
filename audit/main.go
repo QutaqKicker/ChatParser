@@ -1,12 +1,12 @@
 package main
 
 import (
+	config "audit/internal"
+	"audit/internal/grpc"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
-	config "users/internal"
-	"users/internal/grpc"
 )
 
 func main() {

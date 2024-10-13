@@ -4,18 +4,33 @@ tasks:
   generateChat:
     aliases:
       - genChat
-    desc: "Generate code from protofiles"
+    desc: "Generate code for chat service from protofiles"
     cmds:
       - protoc -I proto proto/chat.proto --go_out=./gen/go/chat --go_opt=paths=source_relative --go-grpc_out=./gen/go/chat --go-grpc_opt=paths=source_relative
   generateUser:
     aliases:
       - genUser
-    desc: "Generate code from protofiles"
+    desc: "Generate code for user service from protofiles"
     cmds:
       - protoc -I proto proto/user.proto --go_out=./gen/go/user --go_opt=paths=source_relative --go-grpc_out=./gen/go/user --go-grpc_opt=paths=source_relative
   generateBackup:
     aliases:
       - genBackup
-    desc: "Generate code from protofiles"
+    desc: "Generate code for backup service from protofiles"
     cmds:
       - protoc -I proto proto/backup.proto --go_out=./gen/go/backup --go_opt=paths=source_relative --go-grpc_out=./gen/go/backup --go-grpc_opt=paths=source_relative
+  generateAudit:
+    aliases:
+      - genAudit
+    desc: "Generate code for audit service from protofiles"
+    cmds:
+      - protoc -I proto proto/audit.proto --go_out=./gen/go/audit --go_opt=paths=source_relative --go-grpc_out=./gen/go/audit --go-grpc_opt=paths=source_relative
+  generateAll:
+    aliases:
+      - genAll
+    desc: "Generate code for all services from protofiles"
+    cmds:
+      - task genChat
+      - task genUser
+      - task genBackup
+      - task genAudit

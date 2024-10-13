@@ -9,41 +9,39 @@ import (
 	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
-	"time"
 )
 
 type Backup interface {
-	ParseHtml(ctx context.Context,
-		diPath string)
-	SearchByDate(ctx context.Context,
-		min time.Time,
-		max time.Time)
-	SearchByUser(ctx context.Context,
-		userId string)
-	GetStatistics(ctx context.Context,
-		userId string)
-}
-
-type Router interface {
-	ParseHtml(ctx context.Context,
-		diPath string) (bool, error)
+	ExportToFile(ctx context.Context,
+		exportType backupv1.ExportType,
+		exportDir string) (bool, error)
+	ImportFromFile(ctx context.Context,
+		exportDir string) (bool, error)
 }
 
 type serverAPI struct {
 	backupv1.UnimplementedBackupServer
-	router Router
+	backup Backup
 }
 
 func Register(gRPC *grpc.Server) {
-	backupv1.RegisterChatServer(gRPC, &serverAPI{})
+	backupv1.RegisterBackupServer(gRPC, &serverAPI{})
 }
 
-func (s *serverAPI) ParseHtml(ctx context.Context, req *routerv1.ParseHtmlRequest) (*routerv1.ParseHtmlResponse, error) {
-	if req.DirPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
+func (s *serverAPI) ExportToFile(ctx context.Context, req *backupv1.ExportToFileRequest) (*backupv1.ExportToFileResponse, error) {
+	if req.ExportDir == "" {
+		return nil, status.Error(codes.InvalidArgument, "exportDir is empty")
 	}
-	isSuccess, err := s.router.ParseHtml(ctx, req.DirPath)
-	return &routerv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
+	isSuccess, err := s.backup.ExportToFile(ctx, req.Type, req.ExportDir)
+	return &backupv1.ExportToFileResponse{IsSuccess: isSuccess}, err
+}
+
+func (s *serverAPI) ImportFromFile(ctx context.Context, req *backupv1.ImportFromFileRequest) (*backupv1.ImportFromFileResponse, error) {
+	if req.ExportDir == "" { //TODO Поменять на нормальное название
+		return nil, status.Error(codes.InvalidArgument, "exportDir is empty")
+	}
+	isSuccess, err := s.backup.ImportFromFile(ctx, req.ExportDir)
+	return &backupv1.ImportFromFileResponse{IsSuccess: isSuccess}, err
 }
 
 type App struct {
@@ -64,7 +62,7 @@ func New(log *slog.Logger, port int) *App {
 }
 
 func (a *App) Run() error {
-	const op = "RouterApp.Run"
+	const op = "BackupApp.Run"
 
 	log := a.log.With(slog.String("op", op))
 
@@ -83,6 +81,6 @@ func (a *App) Run() error {
 }
 
 func (a *App) Stop() {
-	const op = "RouterApp.Stop"
+	const op = "BackupApp.Stop"
 	a.gRPCServer.GracefulStop()
 }

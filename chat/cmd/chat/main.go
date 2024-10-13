@@ -1,8 +1,10 @@
 package main
 
 import (
-	config "chat/internal"
+	"chat/internal/config"
 	"chat/internal/grpc"
+	"database/sql"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -12,11 +14,19 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
+	db, err := connectDb(cfg.Db)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+
 	logger := setupLogger(cfg.Env)
 
 	logger.Info("started application", slog.Any("config", cfg))
 
-	application := grpc.New(logger, cfg.Grpc.Port)
+	application := grpc.New(logger, db, cfg.Grpc.Port)
 
 	go application.Run()
 
@@ -25,6 +35,23 @@ func main() {
 
 	<-stop
 	application.Stop()
+}
+
+func connectDb(cfg config.DbConfig) (*sql.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DbName)
+	db, err := sql.Open("postgres", psqlInfo)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }
 
 func setupLogger(env string) *slog.Logger {

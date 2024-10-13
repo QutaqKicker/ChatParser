@@ -1,15 +1,15 @@
-module backups
+module audit
 
 go 1.21
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.65.0
 )
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20240823184512-da8443026d91 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
