@@ -24,7 +24,7 @@ func New(storagePath string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) SaveMessages(ctx context.Context, []models.ChatMessage) error {
+func (s *Storage) SaveMessages(ctx context.Context, []models.Message) error {
 	const op = "storage.postgres.SaveMessages"
 
 	stmt, err := s.db.Prepare("INSERT ATYATYA VALUES (?, ?)")
@@ -44,7 +44,7 @@ func (s *Storage) SaveMessages(ctx context.Context, []models.ChatMessage) error 
 	return nil
 }
 
-func (s *Storage) Messages(ctx context.Context, filter models.ChatFilter) ([]models.ChatMessage, error) {
+func (s *Storage) Messages(ctx context.Context, filter models.MessageFilter) ([]models.Message, error) {
 	const op = "storage.postgres.Messages"
 
 	stmt, err := s.db.Prepare("select where ????")
@@ -55,7 +55,7 @@ func (s *Storage) Messages(ctx context.Context, filter models.ChatFilter) ([]mod
 	rows, err := stmt.QueryContext(ctx, " ")
 
 	for _, value := range rows.{
-		var message models.ChatMessage
+		var message models.Message
 
 		value
 	}

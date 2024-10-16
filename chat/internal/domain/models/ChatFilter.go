@@ -2,8 +2,12 @@ package models
 
 import "time"
 
-type ChatFilter struct {
-	minDate time.Time
-	maxDate time.Time
-	userIds []string
+type MessageFilter struct {
+	MinDate       time.Time
+	MaxDate       time.Time
+	SubText       string
+	UserIds       []int
+	ChatIds       []int
+	Sorts         []string
+	SpecifySelect string
 }

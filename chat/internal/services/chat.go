@@ -23,12 +23,12 @@ type HtmlParser interface {
 type MessageSaver interface {
 	SaveMessages(
 		ctx context.Context,
-		message []models.ChatMessage) error
+		message []models.Message) error
 }
 
 type MessageProvider interface {
 	GetMessages(
-		filter models.ChatFilter) ([]models.ChatMessage, error)
+		filter models.MessageFilter) ([]models.Message, error)
 }
 
 // New returns new instance of chat service
@@ -61,7 +61,7 @@ func (s *ChatService) Parse(ctx context.Context,
 func (s *ChatService) SearchMessages(ctx context.Context,
 	min time.Time,
 	max time.Time,
-	userIds []string) ([]*models.ChatMessage, error) {
+	userIds []string) ([]*models.Message, error) {
 	panic("not implemented")
 }
 

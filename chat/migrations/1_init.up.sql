@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS messages
 (
-    id uuid primary key,
+    id integer primary key generated always as identity,
     chat_id integer,
     user_id integer,
     text text,
