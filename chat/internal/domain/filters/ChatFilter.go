@@ -1,8 +1,9 @@
-package models
+package filters
 
 import "time"
 
 type MessageFilter struct {
+	Id            int
 	MinDate       time.Time
 	MaxDate       time.Time
 	SubText       string

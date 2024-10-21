@@ -2,10 +2,8 @@ package models
 
 import "time"
 
-type Message struct {
+type User struct {
 	Id      int
-	ChatId  int `column:"chat_id"`
-	UserId  int `column:"user_id"`
-	Text    string
+	Name    string
 	Created time.Time
 }

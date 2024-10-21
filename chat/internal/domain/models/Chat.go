@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Message struct {
+type Chat struct {
 	Id      int
 	Name    string
 	Created time.Time

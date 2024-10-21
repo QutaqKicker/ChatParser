@@ -1,6 +1,7 @@
 package services
 
 import (
+	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
 	"context"
 	"log/slog"
@@ -28,7 +29,7 @@ type MessageSaver interface {
 
 type MessageProvider interface {
 	GetMessages(
-		filter models.MessageFilter) ([]models.Message, error)
+		filter filters.MessageFilter) ([]models.Message, error)
 }
 
 // New returns new instance of chat service

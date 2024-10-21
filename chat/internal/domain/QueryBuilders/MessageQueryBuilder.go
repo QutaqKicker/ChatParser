@@ -1,13 +1,16 @@
 package QueryBuilders
 
 import (
+	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
-func BuildQuery(filter *models.MessageFilter) string {
+func BuildQuery(filter *filters.MessageFilter) string {
 	queryBuilder := strings.Builder{}
 
 	if filter.SpecifySelect != "" {
@@ -16,8 +19,7 @@ func BuildQuery(filter *models.MessageFilter) string {
 		queryBuilder.WriteString(BuildSelect[models.Message]())
 	}
 
-	queryBuilder.WriteString("\n where 1 == 1")
-	queryBuilder.WriteString(BuildFilter(filter))
+	queryBuilder.WriteString(BuildWhere(filter))
 	queryBuilder.WriteString(BuildSorter(filter))
 	return queryBuilder.String()
 }
@@ -41,8 +43,54 @@ func BuildSelect[T any]() string {
 	return selectQuery.String()
 }
 
-func BuildFilter(filter *models.MessageFilter) string {
+type MessageUpdateValue struct {
+	Field          reflect.StructField
+	NewValueInt    int
+	NewValueString string
+	NewValueTime   time.Time
+}
+
+func BuildUpdate(filter *filters.MessageFilter, values []MessageUpdateValue) string {
+	updateBuilder := strings.Builder{}
+	updateBuilder.WriteString("update messages")
+	for i, value := range values {
+		if i > 0 {
+			updateBuilder.WriteString(",")
+		}
+		updateBuilder.WriteString("\n set ")
+		sqlColumn := value.Field.Tag.Get("column")
+
+		if sqlColumn != "" {
+			updateBuilder.WriteString(fmt.Sprintf("%s = ", sqlColumn))
+		} else {
+			updateBuilder.WriteString(fmt.Sprintf("%s = ", value.Field.Name))
+		}
+
+		switch value.Field.Type.Name() {
+		case "int32":
+			updateBuilder.WriteString(strconv.Itoa(value.NewValueInt))
+		case "string":
+			updateBuilder.WriteString(value.NewValueString)
+		case "time.Time": //TODO ??
+			updateBuilder.WriteString(value.NewValueTime.Format("YYYY.MM.DD hh.mm.ss"))
+		}
+	}
+
+	updateBuilder.WriteString(BuildWhere(filter))
+
+	return updateBuilder.String()
+}
+
+func BuildDelete(filter *filters.MessageFilter) string {
+	deleteBuilder := strings.Builder{}
+	deleteBuilder.WriteString("delete from messages")
+	deleteBuilder.WriteString(BuildWhere(filter))
+	return deleteBuilder.String()
+}
+
+func BuildWhere(filter *filters.MessageFilter) string {
 	whereBuilder := strings.Builder{}
+	whereBuilder.WriteString("\n where 1 == 1")
 
 	if !filter.MinDate.IsZero() {
 		whereBuilder.WriteString(fmt.Sprintf("\n and %s < created", filter.MinDate.Format("YYYY.MM.DD")))
@@ -75,7 +123,7 @@ func BuildFilter(filter *models.MessageFilter) string {
 	return whereBuilder.String()
 }
 
-func BuildSorter(filter *models.MessageFilter) string {
+func BuildSorter(filter *filters.MessageFilter) string {
 	if filter.Sorts != nil {
 		return fmt.Sprintf("\n order by %s", strings.Join(filter.Sorts, ", "))
 	}
@@ -84,4 +132,5 @@ func BuildSorter(filter *models.MessageFilter) string {
 
 func RowToEntity() models.Message {
 	//TODO Разобраться что приходит из БД и сделать парс
+	return models.Message{}
 }
