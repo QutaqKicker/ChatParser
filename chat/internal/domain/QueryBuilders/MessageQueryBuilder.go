@@ -10,37 +10,70 @@ import (
 	"time"
 )
 
-func BuildQuery(filter *filters.MessageFilter) string {
+type Entity interface {
+	TableName() string
+}
+
+func BuildQuery(request *filters.QueryBuildRequest) string {
 	queryBuilder := strings.Builder{}
 
-	if filter.SpecifySelect != "" {
-		queryBuilder.WriteString(fmt.Sprintf("select %s", filter.SpecifySelect))
-	} else {
-		queryBuilder.WriteString(BuildSelect[models.Message]())
-	}
+	queryBuilder.WriteString(BuildSelect[*models.Message](request.SelectType, request.SpecialSelect))
 
-	queryBuilder.WriteString(BuildWhere(filter))
-	queryBuilder.WriteString(BuildSorter(filter))
+	queryBuilder.WriteString(BuildWhere(request.Filter))
+	queryBuilder.WriteString(BuildSorter(request.Sorter))
 	return queryBuilder.String()
 }
 
-func BuildSelect[T any]() string {
-	selectQuery := strings.Builder{}
-	selectQuery.WriteString("select ")
+func BuildSelect[T Entity](selectType filters.SelectType, specialSelect string) string {
+	if specialSelect == "" {
+		specialSelect = "*"
+	}
+
+	switch selectType {
+	case filters.All:
+		return fmt.Sprintf("select %s", ColumnNamesWithAliases[T]())
+	case filters.Sum:
+		return fmt.Sprintf("select sum(%s)", specialSelect)
+	case filters.Count:
+		return fmt.Sprintf("select count(%s)", specialSelect)
+	default:
+		return fmt.Sprintf("select %s", specialSelect)
+	}
+}
+
+func ColumnNames[T Entity]() string {
 	t := reflect.TypeOf(new(T))
+	sqlColumns := make([]string, 0, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		sqlColumn := field.Tag.Get("column")
+		if sqlColumn != "" {
+			sqlColumn = field.Name
+		}
+
+		sqlColumns = append(sqlColumns, sqlColumn)
+	}
+
+	return strings.Join(sqlColumns, ", ")
+}
+
+func ColumnNamesWithAliases[T Entity]() string {
+	t := reflect.TypeOf(new(T))
+
+	sqlColumns := make([]string, 0, t.NumField())
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
 		sqlColumn := field.Tag.Get("column")
 
 		if sqlColumn != "" {
-			selectQuery.WriteString(fmt.Sprintf("%s as %s", sqlColumn, field.Name))
+			sqlColumns = append(sqlColumns, fmt.Sprintf("%s as %s", sqlColumn, field.Name))
 		} else {
-			selectQuery.WriteString(field.Name)
+			sqlColumns = append(sqlColumns, field.Name)
 		}
 	}
 
-	return selectQuery.String()
+	return strings.Join(sqlColumns, ", ")
 }
 
 type MessageUpdateValue struct {
@@ -92,12 +125,12 @@ func BuildWhere(filter *filters.MessageFilter) string {
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("\n where 1 == 1")
 
-	if !filter.MinDate.IsZero() {
-		whereBuilder.WriteString(fmt.Sprintf("\n and %s < created", filter.MinDate.Format("YYYY.MM.DD")))
+	if !filter.MinCreatedDate.IsZero() {
+		whereBuilder.WriteString(fmt.Sprintf("\n and %s < created", filter.MinCreatedDate.Format("YYYY.MM.DD")))
 	}
 
-	if !filter.MaxDate.IsZero() {
-		whereBuilder.WriteString(fmt.Sprintf("\n and created < %s", filter.MinDate.Format("YYYY.MM.DD")))
+	if !filter.MaxCreatedDate.IsZero() {
+		whereBuilder.WriteString(fmt.Sprintf("\n and created < %s", filter.MinCreatedDate.Format("YYYY.MM.DD")))
 	}
 
 	if filter.SubText != "" {
@@ -123,9 +156,38 @@ func BuildWhere(filter *filters.MessageFilter) string {
 	return whereBuilder.String()
 }
 
-func BuildSorter(filter *filters.MessageFilter) string {
-	if filter.Sorts != nil {
-		return fmt.Sprintf("\n order by %s", strings.Join(filter.Sorts, ", "))
+func BuildInsert[T Entity](entity T, withReturning bool) string {
+	insertQuery := strings.Builder{}
+	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(nil)))
+	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", ColumnNames[T]()))
+
+	entityValue := reflect.ValueOf(entity)
+
+	values := make([]string, 0, entityValue.NumField())
+	for i := 0; i < entityValue.NumField(); i++ {
+		field := entityValue.Field(i).Interface()
+		switch fieldValue := field.(type) {
+		case int32:
+			values = append(values, strconv.Itoa(int(fieldValue)))
+		case string:
+			values = append(values, fmt.Sprintf("'%s'", fieldValue))
+		case time.Time:
+			values = append(values, fmt.Sprintf("'%s'", fieldValue.Format("YYYY.MM.DD HH:MM:SS")))
+		}
+	}
+
+	insertQuery.WriteString(fmt.Sprintf("\nvalues\n\t(%s)", strings.Join(values, ", ")))
+
+	if withReturning {
+		insertQuery.WriteString(fmt.Sprintf("\nreturning %s", ColumnNamesWithAliases[T]()))
+	}
+
+	return insertQuery.String()
+}
+
+func BuildSorter(sorter []string) string {
+	if sorter != nil {
+		return fmt.Sprintf("\n order by %s", strings.Join(sorter, ", "))
 	}
 	return "\n order by created desc"
 }

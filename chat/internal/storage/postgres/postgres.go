@@ -45,7 +45,7 @@ func (s *Storage) SaveMessages(ctx context.Context, []models.Message) error {
 	return nil
 }
 
-func (s *Storage) Messages(ctx context.Context, filter filters.MessageFilter) ([]models.Message, error) {
+func (s *Storage) Messages(ctx context.Context, filter filters.QueryBuildRequest) ([]models.Message, error) {
 	const op = "storage.postgres.Messages"
 
 	stmt, err := s.db.Prepare("select where ????")

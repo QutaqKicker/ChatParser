@@ -9,3 +9,7 @@ type Message struct {
 	Text    string
 	Created time.Time
 }
+
+func (m *Message) TableName() string {
+	return "messages"
+}

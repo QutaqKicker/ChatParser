@@ -29,7 +29,7 @@ type MessageSaver interface {
 
 type MessageProvider interface {
 	GetMessages(
-		filter filters.MessageFilter) ([]models.Message, error)
+		filter filters.QueryBuildRequest) ([]models.Message, error)
 }
 
 // New returns new instance of chat service
