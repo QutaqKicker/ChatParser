@@ -14,13 +14,19 @@ import (
 )
 
 type HtmlReader struct {
+	wg              *sync.WaitGroup
+	outMessagesChan chan<- models.Message
+}
+
+func NewHtmlReader(wg *sync.WaitGroup, outMessagesChan chan<- models.Message) *HtmlReader {
+	return &HtmlReader{wg, outMessagesChan}
 }
 
 func (r *HtmlReader) ReaderType() models.DumpType {
 	return models.Html
 }
 
-func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string, outChan <-chan models.Message, wg *sync.WaitGroup) {
+func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
@@ -100,8 +106,10 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string, outChan 
 				message.UserId = lastSenderId
 				message.Text = messageBodyChild.Data
 			}
+			r.outMessagesChan <- message
 		}
 	}
+	r.wg.Done()
 }
 
 func getAttributeValueByName(node *html.Node, attrName string) (string, error) {

@@ -3,6 +3,7 @@ package services
 import (
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"chat/internal/parser"
 	"context"
 	"log/slog"
 	"time"
@@ -10,15 +11,13 @@ import (
 
 type ChatService struct {
 	log *slog.Logger
-	HtmlParser
+	parser.Parser
 	MessageSaver
 	MessageProvider
 }
 
 type HtmlParser interface {
-	ParseFromDir(
-		ctx context.Context,
-		directory string) error
+	ParseFromDir(ctx context.Context, dumpDir string) (<-chan models.Message, error)
 }
 
 type MessageSaver interface {
@@ -35,12 +34,12 @@ type MessageProvider interface {
 // New returns new instance of chat service
 func New(
 	log *slog.Logger,
-	htmlParser HtmlParser,
+	parser parser.Parser,
 	messageSaver MessageSaver,
 	messageProvider MessageProvider) *ChatService {
 	return &ChatService{
 		log:             log,
-		HtmlParser:      htmlParser,
+		Parser:          parser,
 		MessageSaver:    messageSaver,
 		MessageProvider: messageProvider,
 	}
@@ -54,9 +53,13 @@ func (s *ChatService) Parse(ctx context.Context,
 		slog.String("dirPath", dirPath))
 
 	log.Info("parsing " + dirPath)
-	err := s.ParseFromDir(ctx, dirPath)
 
-	panic("not implemented")
+	err := s.ParseFromDir(ctx, dirPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *ChatService) SearchMessages(ctx context.Context,

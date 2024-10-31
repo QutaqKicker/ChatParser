@@ -2,8 +2,12 @@ package parser
 
 import (
 	"chat/internal/domain/models"
+	"chat/internal/domain/queryBuilders"
+	"chat/internal/parser/readers"
 	"context"
+	"database/sql"
 	"errors"
+	"log"
 	"log/slog"
 	"os"
 	"strings"
@@ -17,39 +21,71 @@ type DumpReader interface {
 
 type Parser struct {
 	logger *slog.Logger
-	reader *DumpReader
+	db     *sql.DB
 }
 
-func New(logger *slog.Logger, reader *DumpReader) *Parser {
+func New(logger *slog.Logger, db *sql.DB) *Parser {
 	return &Parser{
 		logger,
-		reader,
+		db,
 	}
 }
 
-func (p *Parser) ParseDir(ctx context.Context, dumpDir string) (<-chan models.Message, error) {
+type Reader interface {
+	ReaderType() models.DumpType
+	ReadMessages(ctx context.Context, fileName string)
+}
+
+func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
+	var reader Reader
+	messagesChan := make(chan models.Message, 30)
+	readersWg := &sync.WaitGroup{}
+	dumpType, err := GetDumpType(dumpDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	switch dumpType {
+	case models.Html:
+		reader = readers.NewHtmlReader(readersWg, messagesChan)
+	}
+
 	files, err := os.ReadDir(dumpDir)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	outChan := make(chan models.Message, 30)
-
-	wg := &sync.WaitGroup{}
 
 	for _, file := range files {
 		if file.IsDir() {
 			continue
 		}
 
-		if strings.HasSuffix(file.Name(), string((*p.reader).ReaderType())) {
-			wg.Add(1)
-			go (*p.reader).ReadMessages(ctx, dumpDir+"/"+file.Name(), outChan, wg)
+		if strings.HasSuffix(file.Name(), string(reader.ReaderType())) {
+			readersWg.Add(1)
+			go reader.ReadMessages(ctx, dumpDir+"/"+file.Name())
 		}
 	}
 
-	return outChan, nil
+	insertsWg := &sync.WaitGroup{}
+	insertsWg.Add(1)
+	go InsertMessages(ctx, p.db, messagesChan, insertsWg)
+
+	readersWg.Wait()
+	close(messagesChan)
+	insertsWg.Wait()
+
+	return nil
+}
+
+func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.Message, wg *sync.WaitGroup) {
+	insertQuery := queryBuilders.BuildInsert[*models.Message](false)
+	for message := range messagesChan {
+		_, err := db.ExecContext(ctx, insertQuery, message.FieldValuesAsArray())
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	wg.Done()
 }
 
 func GetDumpType(dumpDir string) (models.DumpType, error) {

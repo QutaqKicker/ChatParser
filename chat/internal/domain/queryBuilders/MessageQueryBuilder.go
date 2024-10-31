@@ -1,4 +1,4 @@
-package QueryBuilders
+package queryBuilders
 
 import (
 	"chat/internal/domain/filters"
@@ -164,24 +164,16 @@ func BuildWhere(filter *filters.MessageFilter) string {
 	return whereBuilder.String()
 }
 
-func BuildInsert[T Entity](entity T, withReturning bool) string {
+func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery := strings.Builder{}
 	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(nil)))
 	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", ColumnNames[T]()))
 
-	entityValue := reflect.ValueOf(entity)
+	entityType := reflect.TypeOf(new(T))
 
-	values := make([]string, 0, entityValue.NumField())
-	for i := 0; i < entityValue.NumField(); i++ {
-		field := entityValue.Field(i).Interface()
-		switch fieldValue := field.(type) {
-		case int32:
-			values = append(values, strconv.Itoa(int(fieldValue)))
-		case string:
-			values = append(values, fmt.Sprintf("'%s'", fieldValue))
-		case time.Time:
-			values = append(values, fmt.Sprintf("'%s'", fieldValue.Format("YYYY.MM.DD HH:MM:SS")))
-		}
+	values := make([]string, 0, entityType.NumField())
+	for i := 0; i < entityType.NumField(); i++ {
+		values = append(values, fmt.Sprintf("$%d", i+1))
 	}
 
 	insertQuery.WriteString(fmt.Sprintf("\nvalues\n\t(%s)", strings.Join(values, ", ")))
