@@ -46,6 +46,11 @@ func ColumnNames[T Entity]() string {
 	sqlColumns := make([]string, 0, t.NumField())
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
+
+		if field.Tag.Get("not-mapped") == "true" {
+			continue
+		}
+
 		sqlColumn := field.Tag.Get("column")
 		if sqlColumn != "" {
 			sqlColumn = field.Name
@@ -64,8 +69,11 @@ func ColumnNamesWithAliases[T Entity]() string {
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
-		sqlColumn := field.Tag.Get("column")
+		if field.Tag.Get("not-mapped") == "true" {
+			continue
+		}
 
+		sqlColumn := field.Tag.Get("column")
 		if sqlColumn != "" {
 			sqlColumns = append(sqlColumns, fmt.Sprintf("%s as %s", sqlColumn, field.Name))
 		} else {

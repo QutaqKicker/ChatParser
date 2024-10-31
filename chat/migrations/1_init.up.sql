@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS chats
 
 CREATE TABLE IF NOT EXISTS users
 (
-    id integer primary key generated always as identity,
+    id text primary key,
     name text not null unique,
     created timestamp with time zone
 );
@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS messages
 (
     id integer primary key generated always as identity,
     chat_id integer,
-    user_id integer,
+    user_id text,
+    reply_to_message_id integer,
     text text,
     created timestamp with time zone,
     constraint fk_chat
