@@ -1,4 +1,4 @@
-package migrator
+package main
 
 import (
 	"errors"
@@ -16,7 +16,6 @@ func main() {
 	flag.StringVar(&migrationPath, "migrations-path", "", "path of migrations")
 	flag.StringVar(&migrationsTable, "migrations-table", "", "path of migrations table")
 	flag.Parse()
-	storagePath = "jdbc:postgresql://localhost:5432/postgres"
 	//test := "?x-migrations-table="+migrationsTable
 
 	if storagePath == "" || migrationPath == "" {

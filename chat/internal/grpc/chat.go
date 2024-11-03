@@ -1,6 +1,7 @@
 package grpc
 
 import (
+	"chat/internal/services"
 	"context"
 	"database/sql"
 	"fmt"
@@ -26,11 +27,11 @@ type Chat interface {
 
 type serverAPI struct {
 	chatv1.UnimplementedChatServer
-	chat Chat
+	chat *services.ChatService
 }
 
-func Register(gRPC *grpc.Server) {
-	chatv1.RegisterChatServer(gRPC, &serverAPI{})
+func Register(gRPC *grpc.Server, log *slog.Logger, db *sql.DB) {
+	chatv1.RegisterChatServer(gRPC, &serverAPI{chat: services.NewChatService(log, db)})
 }
 
 func (s *serverAPI) ParseHtml(ctx context.Context, req *chatv1.ParseHtmlRequest) (*chatv1.ParseHtmlResponse, error) {
@@ -38,7 +39,11 @@ func (s *serverAPI) ParseHtml(ctx context.Context, req *chatv1.ParseHtmlRequest)
 		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
 	}
 
-	isSuccess, err := s.chat.ParseHtml(ctx, req.DirPath)
+	err := s.chat.Parse(ctx, req.DirPath)
+	isSuccess := true
+	if err != nil {
+		isSuccess = false
+	}
 	return &chatv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
 }
 
@@ -47,8 +52,8 @@ func (s *serverAPI) SearchMessages(ctx context.Context, req *chatv1.SearchMessag
 		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
 	}
 
-	messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
-	return &chatv1.SearchMessagesResponse{Messages: messages}, err
+	//messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
+	return &chatv1.SearchMessagesResponse{Messages: nil}, nil
 }
 
 func (s *serverAPI) GetStatistics(ctx context.Context, req *chatv1.GetStatisticsRequest) (*chatv1.GetStatisticsResponse, error) {
@@ -65,7 +70,7 @@ type App struct {
 
 func New(log *slog.Logger, db *sql.DB, port int) *App {
 	grpcServer := grpc.NewServer()
-	Register(grpcServer)
+	Register(grpcServer, log, db)
 
 	return &App{
 		log:        log,

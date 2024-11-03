@@ -5,13 +5,14 @@ import (
 	"chat/internal/domain/models"
 	"chat/internal/parser"
 	"context"
+	"database/sql"
 	"log/slog"
 	"time"
 )
 
 type ChatService struct {
 	log *slog.Logger
-	parser.Parser
+	db  *sql.DB
 	MessageSaver
 	MessageProvider
 }
@@ -32,16 +33,12 @@ type MessageProvider interface {
 }
 
 // New returns new instance of chat service
-func New(
+func NewChatService(
 	log *slog.Logger,
-	parser parser.Parser,
-	messageSaver MessageSaver,
-	messageProvider MessageProvider) *ChatService {
+	db *sql.DB) *ChatService {
 	return &ChatService{
-		log:             log,
-		Parser:          parser,
-		MessageSaver:    messageSaver,
-		MessageProvider: messageProvider,
+		log: log,
+		db:  db,
 	}
 }
 
@@ -54,7 +51,8 @@ func (s *ChatService) Parse(ctx context.Context,
 
 	log.Info("parsing " + dirPath)
 
-	err := s.ParseFromDir(ctx, dirPath)
+	parser1 := parser.New(s.log, s.db)
+	err := parser1.ParseFromDir(ctx, dirPath)
 	if err != nil {
 		return err
 	}

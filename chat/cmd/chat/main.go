@@ -5,6 +5,7 @@ import (
 	"chat/internal/grpc"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"os/signal"

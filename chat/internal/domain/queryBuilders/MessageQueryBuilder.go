@@ -42,7 +42,7 @@ func BuildSelect[T Entity](selectType filters.SelectType, specialSelect string) 
 }
 
 func ColumnNames[T Entity]() string {
-	t := reflect.TypeOf(new(T))
+	t := reflect.TypeOf(*new(T))
 	sqlColumns := make([]string, 0, t.NumField())
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -166,7 +166,7 @@ func BuildWhere(filter *filters.MessageFilter) string {
 
 func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery := strings.Builder{}
-	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(nil)))
+	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(*new(T))))
 	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", ColumnNames[T]()))
 
 	entityType := reflect.TypeOf(new(T))
