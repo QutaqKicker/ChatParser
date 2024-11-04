@@ -52,7 +52,7 @@ func ColumnNames[T Entity]() string {
 		}
 
 		sqlColumn := field.Tag.Get("column")
-		if sqlColumn != "" {
+		if sqlColumn == "" {
 			sqlColumn = field.Name
 		}
 
@@ -166,14 +166,21 @@ func BuildWhere(filter *filters.MessageFilter) string {
 
 func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery := strings.Builder{}
-	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(*new(T))))
+	t := *new(T)
+	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(t)))
 	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", ColumnNames[T]()))
 
-	entityType := reflect.TypeOf(new(T))
+	entityType := reflect.TypeOf(t)
 
 	values := make([]string, 0, entityType.NumField())
+	currParamIndex := 1
 	for i := 0; i < entityType.NumField(); i++ {
-		values = append(values, fmt.Sprintf("$%d", i+1))
+		if entityType.Field(i).Tag.Get("not-mapped") == "true" {
+			continue
+		}
+
+		values = append(values, fmt.Sprintf("$%d", currParamIndex))
+		currParamIndex++
 	}
 
 	insertQuery.WriteString(fmt.Sprintf("\nvalues\n\t(%s)", strings.Join(values, ", ")))

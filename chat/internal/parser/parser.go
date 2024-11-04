@@ -78,9 +78,9 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 }
 
 func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.Message, wg *sync.WaitGroup) {
-	insertQuery := queryBuilders.BuildInsert[*models.Message](false)
+	insertQuery := queryBuilders.BuildInsert[models.Message](false)
 	for message := range messagesChan {
-		_, err := db.ExecContext(ctx, insertQuery, message.FieldValuesAsArray())
+		_, err := db.ExecContext(ctx, insertQuery, message.FieldValuesAsArray()...)
 		if err != nil {
 			log.Fatal(err)
 		}

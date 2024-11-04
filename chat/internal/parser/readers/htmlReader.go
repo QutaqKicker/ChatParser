@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -56,7 +57,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 	//TODO getChatIdFromName
 	var chatId = getChatIdFromName(chatName)
 
-	historyNode, err := searchNode(bodyNode, NodeData, "history")
+	historyNode, err := searchNode(bodyNode, NodeClass, "history")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,19 +66,23 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 	numbersRegexp := regexp.MustCompile("[0-9]+")
 
 	for messageNode := historyNode.FirstChild; messageNode != nil; messageNode = messageNode.NextSibling {
-		//TODO Get message id
+		messageId, _ := getAttributeValueByName(messageNode, "id")
 		messageBodyNode, err := searchNode(messageNode, NodeClass, "body")
 		if err == nil {
 			var message models.Message
 			message.ChatId = chatId
 
-			messageBodyChild := messageBodyNode.FirstChild
+			Id, _ := strconv.Atoi(strings.Replace(messageId, "message", "", 1))
+			message.Id = int32(Id)
+
+			messageBodyChild := getElementNodeChild(messageBodyNode)
 			createdDateValue, err := getAttributeValueByName(messageBodyChild, "title")
 			if err != nil {
 				log.Fatal(err)
 			}
-			message.Created, _ = time.Parse(createdDateValue, "DD.MM.YYYY HH:MM:SS")
-			messageBodyChild = messageBodyChild.NextSibling
+
+			message.Created, _ = time.Parse("02.01.2006 15:04:05 MST-07:00", createdDateValue) //TODO Проверить часовой пояс
+			messageBodyChild = getElementNodeSibling(messageBodyChild)
 
 			nextClassName, err := getAttributeValueByName(messageBodyChild, "class")
 			if err != nil {
@@ -85,26 +90,27 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 			}
 
 			if nextClassName == "from_name" {
-				userId := getUserIdFromName(messageBodyChild.Data) //TODO Check
+				userId := strings.TrimSpace(messageBodyChild.FirstChild.Data) //getUserIdFromName(messageBodyChild.Data) //TODO Check
 				lastSenderId = userId
-				messageBodyChild = messageBodyChild.NextSibling
+				messageBodyChild = getElementNodeSibling(messageBodyChild)
 				nextClassName, err = getAttributeValueByName(messageBodyChild, "class")
 			}
 
 			if nextClassName == "reply_to details" {
-				hrefValue, err := getAttributeValueByName(messageBodyChild.LastChild, "href")
+				hrefValue, err := getAttributeValueByName(getElementNodeChild(messageBodyChild), "href")
 				if err != nil {
 					log.Fatal(err)
 				}
 				repliedMessageId, err := strconv.Atoi(numbersRegexp.FindString(hrefValue))
 
 				message.ReplyToMessageId = int32(repliedMessageId)
-				messageBodyChild = messageBodyChild.NextSibling
+				messageBodyChild = getElementNodeSibling(messageBodyChild)
 			}
 
 			if nextClassName == "text" {
 				message.UserId = lastSenderId
-				message.Text = messageBodyChild.Data
+				message.Text = strings.TrimSpace(messageBodyChild.FirstChild.Data)
+				//TODO GetText
 			}
 			r.outMessagesChan <- message
 		}
@@ -121,13 +127,33 @@ func getAttributeValueByName(node *html.Node, attrName string) (string, error) {
 	return "", fmt.Errorf("attribute with name %s does not exists", attrName)
 }
 
+func getElementNodeSibling(node *html.Node) *html.Node {
+	for currentNode := node.NextSibling; currentNode != nil; currentNode = currentNode.NextSibling {
+		if currentNode.Type == html.ElementNode {
+			return currentNode
+		}
+	}
+	return nil
+}
+
+func getElementNodeChild(node *html.Node) *html.Node {
+	return getElementNodeSibling(node.FirstChild)
+}
+
 func getChatNameFromBodyNode(bodyNode *html.Node) (string, error) {
 	pageHeaderNode, err := searchNode(bodyNode, NodeClass, "page_header")
 	if err != nil {
 		return "", err
 	}
-
-	return pageHeaderNode.FirstChild.FirstChild.FirstChild.Data, nil
+	for pageHeaderNodeChild := pageHeaderNode.FirstChild; pageHeaderNodeChild != nil; pageHeaderNodeChild = pageHeaderNodeChild.NextSibling {
+		if pageHeaderNodeChild.Type == html.ElementNode {
+			if class, err := getAttributeValueByName(pageHeaderNodeChild, NodeClass); err == nil && class == "text bold" {
+				return pageHeaderNodeChild.FirstChild.Data, nil
+			}
+			pageHeaderNodeChild = pageHeaderNodeChild.FirstChild
+		}
+	}
+	return "", err
 }
 
 func searchNode(node *html.Node, searchType searchType, value string) (*html.Node, error) {
