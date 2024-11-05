@@ -80,8 +80,9 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 			if err != nil {
 				log.Fatal(err)
 			}
+			createdDateValue = strings.Replace(createdDateValue, "UTC", "MSK", 1)
 
-			message.Created, _ = time.Parse("02.01.2006 15:04:05 MST-07:00", createdDateValue) //TODO Проверить часовой пояс
+			message.Created, _ = time.Parse("02.01.2006 15:04:05 MST-07:00", createdDateValue) //TODO вынести формат в константы
 			messageBodyChild = getElementNodeSibling(messageBodyChild)
 
 			nextClassName, err := getAttributeValueByName(messageBodyChild, "class")
@@ -96,6 +97,11 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 				nextClassName, err = getAttributeValueByName(messageBodyChild, "class")
 			}
 
+			if nextClassName == "media_wrap clearfix" {
+				messageBodyChild = getElementNodeSibling(messageBodyChild)
+				nextClassName, err = getAttributeValueByName(messageBodyChild, "class")
+			}
+
 			if nextClassName == "reply_to details" {
 				hrefValue, err := getAttributeValueByName(getElementNodeChild(messageBodyChild), "href")
 				if err != nil {
@@ -105,6 +111,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 
 				message.ReplyToMessageId = int32(repliedMessageId)
 				messageBodyChild = getElementNodeSibling(messageBodyChild)
+				nextClassName, err = getAttributeValueByName(messageBodyChild, "class")
 			}
 
 			if nextClassName == "text" {
