@@ -96,6 +96,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 				messageBodyChild = getElementNodeSibling(messageBodyChild)
 				nextClassName, err = getAttributeValueByName(messageBodyChild, "class")
 			}
+			message.UserId = lastSenderId
 
 			if nextClassName == "media_wrap clearfix" {
 				messageBodyChild = getElementNodeSibling(messageBodyChild)
@@ -115,9 +116,20 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 			}
 
 			if nextClassName == "text" {
-				message.UserId = lastSenderId
-				message.Text = strings.TrimSpace(messageBodyChild.FirstChild.Data)
-				//TODO GetText
+				text := strings.Builder{}
+				for textNode := messageBodyChild.FirstChild; textNode != nil; textNode = textNode.NextSibling {
+					if textNode.Type == html.TextNode {
+						text.WriteString(strings.TrimSpace(textNode.Data) + "\n")
+					}
+					if textNode.Type == html.ElementNode {
+						if textNode.Data == "br" {
+							text.WriteString("\n")
+						} else if textNode.Data == "a" {
+							text.WriteString(textNode.FirstChild.Data + " ")
+						}
+					}
+				}
+				message.Text = strings.TrimSpace(text.String())
 			}
 			r.outMessagesChan <- message
 		}
@@ -126,9 +138,11 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 }
 
 func getAttributeValueByName(node *html.Node, attrName string) (string, error) {
-	for _, attr := range node.Attr {
-		if attr.Key == attrName {
-			return attr.Val, nil
+	if node != nil {
+		for _, attr := range node.Attr {
+			if attr.Key == attrName {
+				return attr.Val, nil
+			}
 		}
 	}
 	return "", fmt.Errorf("attribute with name %s does not exists", attrName)
