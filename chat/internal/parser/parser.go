@@ -39,6 +39,7 @@ type Reader interface {
 func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	var reader Reader
 	messagesChan := make(chan models.Message, 30)
+	errorsChan := make(chan error, 30)
 	readersWg := &sync.WaitGroup{}
 	dumpType, err := GetDumpType(dumpDir)
 	if err != nil {
@@ -46,7 +47,7 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	}
 	switch dumpType {
 	case models.Html:
-		reader = readers.NewHtmlReader(readersWg, messagesChan)
+		reader = readers.NewHtmlReader(messagesChan, errorsChan)
 	}
 
 	files, err := os.ReadDir(dumpDir)
@@ -62,22 +63,37 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 
 		if strings.HasSuffix(file.Name(), string(reader.ReaderType())) {
 			readersWg.Add(1)
-			go reader.ReadMessages(ctx, dumpDir+"/"+file.Name())
+			go func() {
+				reader.ReadMessages(ctx, dumpDir+"/"+file.Name())
+				readersWg.Done()
+			}()
 		}
 	}
 
 	insertsWg := &sync.WaitGroup{}
 	insertsWg.Add(1)
-	go InsertMessages(ctx, p.db, messagesChan, insertsWg)
+	go func() {
+		InsertMessages(ctx, p.db, messagesChan)
+		insertsWg.Done()
+	}()
+
+	errorsWg := &sync.WaitGroup{}
+	errorsWg.Add(1)
+	go func() {
+		ProcessErrors(p.logger, errorsChan)
+		errorsWg.Done()
+	}()
 
 	readersWg.Wait()
 	close(messagesChan)
+	close(errorsChan)
 	insertsWg.Wait()
+	errorsWg.Wait()
 
 	return nil
 }
 
-func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.Message, wg *sync.WaitGroup) {
+func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.Message) {
 	insertQuery := queryBuilders.BuildInsert[models.Message](false)
 	for message := range messagesChan {
 		_, err := db.ExecContext(ctx, insertQuery, message.FieldValuesAsArray()...)
@@ -85,7 +101,12 @@ func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.
 			log.Fatal(err)
 		}
 	}
-	wg.Done()
+}
+
+func ProcessErrors(log *slog.Logger, errorsChan <-chan error) {
+	for err := range errorsChan {
+		log.Error(err.Error())
+	}
 }
 
 func GetDumpType(dumpDir string) (models.DumpType, error) {
