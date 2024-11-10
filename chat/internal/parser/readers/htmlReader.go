@@ -32,28 +32,28 @@ func (r *HtmlReader) ReaderType() models.DumpType {
 func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		r.errorsChan <- err
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatal(err)
+			r.errorsChan <- err
 		}
 	}(file)
 
 	doc, err := html.Parse(file)
 	if err != nil {
-		log.Fatal(err)
+		r.errorsChan <- err
 	}
 
 	bodyNode, err := searchNode(doc, NodeData, "body")
 	if err != nil {
-		log.Fatal(err)
+		r.errorsChan <- err
 	}
 
 	chatName, err := getChatNameFromBodyNode(bodyNode)
 	if err != nil {
-		log.Fatal(err)
+		r.errorsChan <- err
 	}
 
 	//TODO getChatIdFromName
@@ -92,6 +92,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 		select {
 		case <-ctx.Done():
 			r.errorsChan <- ctx.Err()
+			return
 
 		default:
 			processMessageNode(messageNode)

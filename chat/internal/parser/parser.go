@@ -48,6 +48,8 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	switch dumpType {
 	case models.Html:
 		reader = readers.NewHtmlReader(messagesChan, errorsChan)
+	case models.Json:
+		reader = readers.NewJsonReader(messagesChan, errorsChan)
 	}
 
 	files, err := os.ReadDir(dumpDir)
