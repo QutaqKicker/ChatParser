@@ -64,10 +64,10 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 		log.Fatal(err)
 	}
 
-	processMessageNode := func(node *html.Node) func() {
+	messageNodeProcessor := func() func(*html.Node) {
 		var lastSenderId string
 
-		return func() {
+		return func(node *html.Node) {
 			message, err := parseMessageNode(node)
 			if err != nil {
 				if message != nil && message.Id != 0 {
@@ -75,7 +75,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 				} else {
 					r.errorsChan <- fmt.Errorf("error on parse message of chat %s. error: %w", chatName, err)
 				}
-			} else {
+			} else if message != nil {
 				message.ChatId = chatId
 				if message.UserId != "" {
 					lastSenderId = message.UserId
@@ -88,6 +88,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 		}
 	}
 
+	processMessageNode := messageNodeProcessor()
 	for messageNode := historyNode.FirstChild; messageNode != nil; messageNode = messageNode.NextSibling {
 		select {
 		case <-ctx.Done():
@@ -112,7 +113,7 @@ func parseMessageNode(node *html.Node) (*models.Message, error) {
 
 		messageBodyChild := getElementNodeChild(messageBodyNode)
 
-		message.Created, err = getMessageCreated(&messageBodyNode)
+		message.Created, err = getMessageCreated(&messageBodyChild)
 		if err != nil {
 			return &message, err
 		}
