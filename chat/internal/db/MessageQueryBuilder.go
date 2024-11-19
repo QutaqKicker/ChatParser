@@ -1,8 +1,8 @@
-package queryBuilders
+package db
 
 import (
-	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"chat/internal/domain/queryFilters"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -14,27 +14,27 @@ type Entity interface {
 	TableName() string
 }
 
-func BuildQuery(request *filters.QueryBuildRequest) string {
+func BuildQuery[TFilter any](request *QueryBuildRequest[TFilter]) string {
 	queryBuilder := strings.Builder{}
 
 	queryBuilder.WriteString(BuildSelect[*models.Message](request.SelectType, request.SpecialSelect))
 
-	queryBuilder.WriteString(BuildWhere(request.Filter))
+	queryBuilder.WriteString(BuildWhere[TFilter](request.Filter))
 	queryBuilder.WriteString(BuildSorter(request.Sorter))
 	return queryBuilder.String()
 }
 
-func BuildSelect[T Entity](selectType filters.SelectType, specialSelect string) string {
+func BuildSelect[T Entity](selectType SelectType, specialSelect string) string {
 	if specialSelect == "" {
 		specialSelect = "*"
 	}
 
 	switch selectType {
-	case filters.All:
+	case All:
 		return fmt.Sprintf("select %s", ColumnNamesWithAliases[T]())
-	case filters.Sum:
+	case Sum:
 		return fmt.Sprintf("select sum(%s)", specialSelect)
-	case filters.Count:
+	case Count:
 		return fmt.Sprintf("select count(%s)", specialSelect)
 	default:
 		return fmt.Sprintf("select %s", specialSelect)
@@ -91,7 +91,7 @@ type MessageUpdateValue struct {
 	NewValueTime   time.Time
 }
 
-func BuildUpdate(filter *filters.MessageFilter, values []MessageUpdateValue) string {
+func BuildUpdate(filter *queryFilters.MessageFilter, values []MessageUpdateValue) string {
 	updateBuilder := strings.Builder{}
 	updateBuilder.WriteString("update messages")
 	for i, value := range values {
@@ -122,43 +122,45 @@ func BuildUpdate(filter *filters.MessageFilter, values []MessageUpdateValue) str
 	return updateBuilder.String()
 }
 
-func BuildDelete(filter *filters.MessageFilter) string {
+func BuildDelete(filter *queryFilters.MessageFilter) string {
 	deleteBuilder := strings.Builder{}
 	deleteBuilder.WriteString("delete from messages")
 	deleteBuilder.WriteString(BuildWhere(filter))
 	return deleteBuilder.String()
 }
 
-func BuildWhere(filter *filters.MessageFilter) string {
+func BuildWhere[TFilter any](filter *TFilter) string {
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("\n where 1 == 1")
 
-	if !filter.MinCreatedDate.IsZero() {
-		whereBuilder.WriteString(fmt.Sprintf("\n and %s < created", filter.MinCreatedDate.Format("YYYY.MM.DD")))
-	}
+	values := make([]interface{}, 0)
+	t := reflect.TypeOf(filter)
+	v := reflect.ValueOf(filter)
+	if v.Kind() == reflect.Struct {
+		for i := 0; i < v.NumField(); i++ {
+			fieldValue := v.Field(i)
+			columnName := t.Field(i).Tag.Get("column")
 
-	if !filter.MaxCreatedDate.IsZero() {
-		whereBuilder.WriteString(fmt.Sprintf("\n and created < %s", filter.MinCreatedDate.Format("YYYY.MM.DD")))
-	}
-
-	if filter.SubText != "" {
-		whereBuilder.WriteString(fmt.Sprintf("\n and text like '%%%s%%'", filter.SubText))
-	}
-
-	if len(filter.UserIds) > 0 {
-		userIdsFilter := strings.Builder{}
-		for _, value := range filter.UserIds {
-			userIdsFilter.WriteString(fmt.Sprintf("%d ,", value))
+			relation := t.Field(i).Tag.Get("relation")
+			switch relation {
+			case "=":
+			case "<":
+			case ">":
+				values = append(values, fieldValue.Interface())
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s %s $%d", columnName, relation, len(values)))
+			case "like":
+				values = append(values, fieldValue.String())
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)))
+			case "in":
+				inSlice := fieldValue.Interface().([]interface{})
+				inParams := make([]string, 0, len(inSlice))
+				for _, value := range inSlice {
+					values = append(values, value)
+					inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
+				}
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s in (%s)", columnName, strings.Join(inParams, ", ")))
+			}
 		}
-		whereBuilder.WriteString(fmt.Sprintf("\n and user_id in (%s)", userIdsFilter))
-	}
-
-	if len(filter.ChatIds) > 0 {
-		chatIdsFilter := strings.Builder{}
-		for _, value := range filter.ChatIds {
-			chatIdsFilter.WriteString(fmt.Sprintf("%d ,", value))
-		}
-		whereBuilder.WriteString(fmt.Sprintf("\n and chat_id in (%s)", chatIdsFilter))
 	}
 
 	return whereBuilder.String()

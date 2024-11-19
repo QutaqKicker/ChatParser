@@ -2,7 +2,6 @@ package parser
 
 import (
 	"chat/internal/domain/models"
-	"chat/internal/domain/queryBuilders"
 	"chat/internal/parser/readers"
 	"context"
 	"database/sql"
@@ -113,7 +112,7 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 }
 
 func InsertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(queryBuilders.BuildInsert[models.Message](false))
+	insertQuery, err := tx.Prepare(queryBuildRequest.BuildInsert[models.Message](false))
 	if err != nil {
 		log.Fatal(err)
 	}

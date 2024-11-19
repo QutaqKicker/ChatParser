@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"chat/internal/domain/filters"
+	"chat/internal/domain/queryFilters"
 	"chat/internal/domain/models"
 	"context"
 	"database/sql"
@@ -45,7 +45,7 @@ func (s *Storage) SaveMessages(ctx context.Context, []models.Message) error {
 	return nil
 }
 
-func (s *Storage) Messages(ctx context.Context, filter filters.QueryBuildRequest) ([]models.Message, error) {
+func (s *Storage) Messages(ctx context.Context, filter queryFilters.QueryBuildRequest) ([]models.Message, error) {
 	const op = "storage.postgres.Messages"
 
 	stmt, err := s.db.Prepare("select where ????")
