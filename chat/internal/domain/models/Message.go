@@ -5,7 +5,9 @@ import "time"
 type Message struct {
 	Id               int32
 	ChatId           int32    `column:"chat_id"`
+	ChatName         string   `not-mapped:"true"`
 	UserId           string   `column:"user_id"`
+	UserName         string   `not-mapped:"true"`
 	ReplyToMessageId int32    `column:"reply_to_message_id"`
 	RepliedMessage   *Message `not-mapped:"true"`
 	Text             string

@@ -56,9 +56,6 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 		r.errorsChan <- err
 	}
 
-	//TODO getChatIdFromName
-	var chatId = getChatIdFromName(chatName)
-
 	historyNode, err := searchNode(bodyNode, NodeClass, "history")
 	if err != nil {
 		log.Fatal(err)
@@ -76,7 +73,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 					r.errorsChan <- fmt.Errorf("error on parse message of chat %s. error: %w", chatName, err)
 				}
 			} else if message != nil {
-				message.ChatId = chatId
+				message.ChatName = chatName
 				if message.UserId != "" {
 					lastSenderId = message.UserId
 				} else {
@@ -123,13 +120,13 @@ func parseMessageNode(node *html.Node) (*models.Message, error) {
 			return &message, err
 		}
 
-		message.UserId, err = getMessageUserId(&messageBodyChild, &nextClassName)
+		message.UserName, err = getMessageUserId(&messageBodyChild, &nextClassName)
 		if err != nil {
 			//Ничего не делаем, идем дальше. Id автора пуст если это не первое сообщение в серии сообщений от одного пользователя.
 			//Возьмем автора с первого сообщения серии
 		}
 
-		err = SkipUnusedMessageBodyTags(&messageBodyChild, &nextClassName)
+		err = skipUnusedMessageBodyTags(&messageBodyChild, &nextClassName)
 		if err != nil {
 			return &message, err
 		}
@@ -176,7 +173,7 @@ func getMessageUserId(node **html.Node, className *string) (string, error) {
 	return "", errors.New("user id does not exists on this message, maybe that user id exists on previous message")
 }
 
-func SkipUnusedMessageBodyTags(node **html.Node, className *string) error {
+func skipUnusedMessageBodyTags(node **html.Node, className *string) error {
 	if *className == "media_wrap clearfix" {
 		*node = getElementNodeSibling(*node)
 		var err error

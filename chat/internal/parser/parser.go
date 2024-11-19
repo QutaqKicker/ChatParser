@@ -38,6 +38,7 @@ type Reader interface {
 
 func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	var reader Reader
+	rawMessagesChan := make(chan models.Message, 30)
 	messagesChan := make(chan models.Message, 30)
 	errorsChan := make(chan error, 30)
 	readersWg := &sync.WaitGroup{}
@@ -47,15 +48,20 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	}
 	switch dumpType {
 	case models.Html:
-		reader = readers.NewHtmlReader(messagesChan, errorsChan)
+		reader = readers.NewHtmlReader(rawMessagesChan, errorsChan)
 	case models.Json:
-		reader = readers.NewJsonReader(messagesChan, errorsChan)
+		reader = readers.NewJsonReader(rawMessagesChan, errorsChan)
 	}
 
 	files, err := os.ReadDir(dumpDir)
 
 	if err != nil {
 		return err
+	}
+
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, file := range files {
@@ -75,7 +81,13 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	insertsWg := &sync.WaitGroup{}
 	insertsWg.Add(1)
 	go func() {
-		InsertMessages(ctx, p.db, messagesChan)
+		ProcessRawMessages(ctx, tx, rawMessagesChan, messagesChan)
+		insertsWg.Done()
+	}()
+
+	insertsWg.Add(1)
+	go func() {
+		InsertMessages(ctx, tx, messagesChan)
 		insertsWg.Done()
 	}()
 
@@ -87,22 +99,54 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	}()
 
 	readersWg.Wait()
-	close(messagesChan)
+	close(rawMessagesChan)
 	close(errorsChan)
 	insertsWg.Wait()
 	errorsWg.Wait()
 
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return nil
 }
 
-func InsertMessages(ctx context.Context, db *sql.DB, messagesChan <-chan models.Message) {
-	insertQuery := queryBuilders.BuildInsert[models.Message](false)
+func InsertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
+	insertQuery, err := tx.Prepare(queryBuilders.BuildInsert[models.Message](false))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer insertQuery.Close()
+
 	for message := range messagesChan {
-		_, err := db.ExecContext(ctx, insertQuery, message.FieldValuesAsArray()...)
+		_, err := insertQuery.ExecContext(ctx, message.FieldValuesAsArray()...)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+}
+
+func ProcessRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-chan models.Message, outMessagesChan chan<- models.Message) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case rawMessage := <-inRawMessagesChan:
+			if rawMessage.ChatId == 0 {
+
+			} else { //На случай, если пришли четко определенные
+
+			}
+
+			if rawMessage.UserId == "" {
+
+			}
+
+			outMessagesChan <- rawMessage
+		}
+	}
+	close(outMessagesChan)
 }
 
 func ProcessErrors(log *slog.Logger, errorsChan <-chan error) {
