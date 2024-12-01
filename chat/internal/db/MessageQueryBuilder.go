@@ -19,7 +19,7 @@ func BuildQuery[TFilter any](request QueryBuildRequest[TFilter]) string {
 
 	queryBuilder.WriteString(BuildSelect[*models.Message](request.SelectType, request.SpecialSelect))
 
-	queryBuilder.WriteString(BuildWhere[TFilter](request.Filter))
+	queryBuilder.WriteString(BuildWhere[TFilter](&request.Filter))
 	queryBuilder.WriteString(BuildSorter(request.Sorter))
 	return queryBuilder.String()
 }
@@ -122,9 +122,9 @@ func BuildUpdate(filter *queryFilters.MessageFilter, values []MessageUpdateValue
 	return updateBuilder.String()
 }
 
-func BuildDelete(filter *queryFilters.MessageFilter) string {
+func BuildDelete[T Entity](filter *queryFilters.MessageFilter) string {
 	deleteBuilder := strings.Builder{}
-	deleteBuilder.WriteString("delete from messages")
+	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", (*new(T)).TableName()))
 	deleteBuilder.WriteString(BuildWhere(filter))
 	return deleteBuilder.String()
 }
@@ -201,8 +201,9 @@ func BuildSorter(sorter []string) string {
 	return "\n order by created desc"
 }
 
+/*
 func RowToEntity() models.Message {
 	//TODO Разобраться что приходит из БД и сделать парс
 	return models.Message{}
 	Подумать
-}
+}*/
