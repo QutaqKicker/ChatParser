@@ -14,7 +14,7 @@ type Entity interface {
 	TableName() string
 }
 
-func BuildQuery[TFilter any](request *QueryBuildRequest[TFilter]) string {
+func BuildQuery[TFilter any](request QueryBuildRequest[TFilter]) string {
 	queryBuilder := strings.Builder{}
 
 	queryBuilder.WriteString(BuildSelect[*models.Message](request.SelectType, request.SpecialSelect))
@@ -204,4 +204,5 @@ func BuildSorter(sorter []string) string {
 func RowToEntity() models.Message {
 	//TODO Разобраться что приходит из БД и сделать парс
 	return models.Message{}
+	Подумать
 }

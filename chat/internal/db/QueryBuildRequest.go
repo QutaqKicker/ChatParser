@@ -1,7 +1,7 @@
 package db
 
 type QueryBuildRequest[TFilter any] struct {
-	Filter        *TFilter
+	Filter        TFilter
 	Sorter        []string
 	SelectType    SelectType
 	SpecialSelect string
