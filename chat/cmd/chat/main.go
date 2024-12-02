@@ -2,6 +2,8 @@ package main
 
 import (
 	"chat/internal/config"
+	db2 "chat/internal/db"
+	"chat/internal/domain/queryFilters"
 	"chat/internal/grpc"
 	"database/sql"
 	"fmt"
@@ -14,6 +16,12 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
+
+	fmt.Println(db2.BuildQuery[queryFilters.MessageFilter](db2.QueryBuildRequest[queryFilters.MessageFilter]{Filter: queryFilters.MessageFilter{
+		SubText: "test",
+		ChatIds: []int{1, 2, 3},
+		UserIds: []string{"test", "test2"},
+	}}))
 
 	db, err := connectDb(cfg.Db)
 

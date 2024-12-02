@@ -2,23 +2,46 @@ package caches
 
 import (
 	"chat/internal/db"
+	"chat/internal/domain/models"
 	"chat/internal/domain/queryFilters"
-	"database/sql"
+	"sync"
 )
 
 var UsersCache = newUsersCache()
 
 type usersCache CacheOfNames[string]
 
-func cacheInitializer(tx *sql.Tx) {
-	rows, err := tx.Query(db.BuildQuery[queryFilters.UserFilter](db.QueryBuildRequest[queryFilters.UserFilter]{}))
+func usersCacheInitializer(querier dbOrTx) {
+	rows, err := querier.Query(db.BuildQuery[queryFilters.UserFilter](db.QueryBuildRequest[queryFilters.UserFilter]{}))
 	if err != nil {
 		panic(err)
 	}
 
-	for (row := rows.)
+	users, err := db.RowsToEntities[models.User](rows)
+	if err != nil {
+		panic(err)
+	}
+
+	UsersCache.elems = make(map[string]string, len(users))
+	for _, user := range users {
+		UsersCache.elems[user.Name] = user.Id
+	}
+}
+
+func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
+	//tx.Exec(db.BuildUpdate())
+}
+
+func usersCacheDbInserter(tx dbOrTx, name string, key string) {
+
 }
 
 func newUsersCache() *usersCache {
-	return &usersCache{}
+	return &usersCache{
+		mutex:       sync.RWMutex{},
+		once:        sync.Once{},
+		initializer: usersCacheInitializer,
+		dbUpdater:   usersCacheDbUpdater,
+		dbInserter:  usersCacheDbInserter,
+	}
 }

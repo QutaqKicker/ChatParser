@@ -3,6 +3,7 @@ package db
 import (
 	"chat/internal/domain/models"
 	"chat/internal/domain/queryFilters"
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -14,14 +15,15 @@ type Entity interface {
 	TableName() string
 }
 
-func BuildQuery[TFilter any](request QueryBuildRequest[TFilter]) string {
+func BuildQuery[TFilter any](request QueryBuildRequest[TFilter]) (string, []interface{}) {
 	queryBuilder := strings.Builder{}
 
-	queryBuilder.WriteString(BuildSelect[*models.Message](request.SelectType, request.SpecialSelect))
+	queryBuilder.WriteString(BuildSelect[models.Message](request.SelectType, request.SpecialSelect))
 
-	queryBuilder.WriteString(BuildWhere[TFilter](&request.Filter))
+	whereString, values := BuildWhere(request.Filter)
+	queryBuilder.WriteString(whereString)
 	queryBuilder.WriteString(BuildSorter(request.Sorter))
-	return queryBuilder.String()
+	return queryBuilder.String(), values
 }
 
 func BuildSelect[T Entity](selectType SelectType, specialSelect string) string {
@@ -63,7 +65,7 @@ func ColumnNames[T Entity]() string {
 }
 
 func ColumnNamesWithAliases[T Entity]() string {
-	t := reflect.TypeOf(new(T))
+	t := reflect.TypeOf(*new(T))
 
 	sqlColumns := make([]string, 0, t.NumField())
 	for i := 0; i < t.NumField(); i++ {
@@ -84,14 +86,14 @@ func ColumnNamesWithAliases[T Entity]() string {
 	return strings.Join(sqlColumns, ", ")
 }
 
-type MessageUpdateValue struct {
+type UpdateValue struct {
 	Field          reflect.StructField
 	NewValueInt    int
 	NewValueString string
 	NewValueTime   time.Time
 }
 
-func BuildUpdate(filter *queryFilters.MessageFilter, values []MessageUpdateValue) string {
+func BuildUpdate(filter *queryFilters.MessageFilter, values []UpdateValue) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
 	updateBuilder.WriteString("update messages")
 	for i, value := range values {
@@ -117,19 +119,21 @@ func BuildUpdate(filter *queryFilters.MessageFilter, values []MessageUpdateValue
 		}
 	}
 
-	updateBuilder.WriteString(BuildWhere(filter))
+	whereString, queryValues := BuildWhere(filter)
+	updateBuilder.WriteString(whereString)
 
-	return updateBuilder.String()
+	return updateBuilder.String(), queryValues
 }
 
-func BuildDelete[T Entity](filter *queryFilters.MessageFilter) string {
+func BuildDelete[T Entity](filter *queryFilters.MessageFilter) (string, []interface{}) {
 	deleteBuilder := strings.Builder{}
 	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", (*new(T)).TableName()))
-	deleteBuilder.WriteString(BuildWhere(filter))
-	return deleteBuilder.String()
+	whereString, values := BuildWhere(filter)
+	deleteBuilder.WriteString(whereString)
+	return deleteBuilder.String(), values
 }
 
-func BuildWhere[TFilter any](filter *TFilter) string {
+func BuildWhere[TFilter any](filter TFilter) (string, []interface{}) {
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("\n where 1 == 1")
 
@@ -152,19 +156,78 @@ func BuildWhere[TFilter any](filter *TFilter) string {
 				values = append(values, fieldValue.String())
 				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)))
 			case "in":
-				inSlice := fieldValue.Interface().([]interface{})
-				inParams := make([]string, 0, len(inSlice))
-				for _, value := range inSlice {
-					values = append(values, value)
-					inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
+				inParams := make([]string, 0, fieldValue.Len())
+				switch inSlice := fieldValue.Interface().(type) {
+				case []string:
+					for _, value := range inSlice {
+						values = append(values, value)
+						inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
+					}
+				case []int:
+					for _, value := range inSlice {
+						values = append(values, value)
+						inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
+					}
+				default:
+					panic("unknown type")
 				}
 				whereBuilder.WriteString(fmt.Sprintf("\n  and %s in (%s)", columnName, strings.Join(inParams, ", ")))
 			}
 		}
 	}
 
-	return whereBuilder.String()
+	return whereBuilder.String(), values
 }
+
+/*package main
+
+import (
+    "fmt"
+    "reflect"
+)
+
+type Address struct {
+    City  string
+    State string
+}
+
+type User struct {
+    Name    string
+    Age     int
+    Address // Встраиваем Address
+}
+
+func main() {
+    user := User{
+        Name: "Alice",
+        Age:  30,
+        Address: Address{
+            City:  "Wonderland",
+            State: "Fantasy",
+        },
+    }
+
+    // Используем рефлексию для перебора полей
+    val := reflect.ValueOf(user)
+    typ := reflect.TypeOf(user)
+
+    for i := 0; i < val.NumField(); i++ {
+        field := val.Field(i)
+        fieldType := typ.Field(i)
+
+        // Если поле встроенной структуры, выведем его с правильным именем
+        if fieldType.Anonymous {
+            for j := 0; j < field.NumField(); j++ {
+                includedField := field.Field(j)
+                includedFieldType := field.Type().Field(j)
+
+                fmt.Printf("%s: %v\n", includedFieldType.Name, includedField.Interface())
+            }
+        } else {
+            fmt.Printf("%s: %v\n", fieldType.Name, field.Interface())
+        }
+    }
+}*/
 
 func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery := strings.Builder{}
@@ -201,9 +264,36 @@ func BuildSorter(sorter []string) string {
 	return "\n order by created desc"
 }
 
-/*
-func RowToEntity() models.Message {
-	//TODO Разобраться что приходит из БД и сделать парс
-	return models.Message{}
-	Подумать
-}*/
+func RowsToEntities[T Entity](rows *sql.Rows) ([]T, error) {
+	entities := make([]T, 0)
+	entityType := reflect.TypeOf(new(T))
+	mappedFieldsIndexes := make([]int, 0)
+
+	for i := 0; i < entityType.NumField(); i++ {
+		if entityType.Field(i).Tag.Get("not-mapped") == "true" {
+			continue
+		} else {
+			mappedFieldsIndexes = append(mappedFieldsIndexes, i)
+		}
+	}
+
+	for rows != nil {
+		entity := new(T)
+		entityValue := reflect.ValueOf(&entity).Elem()
+
+		columns := make([]interface{}, 0, len(mappedFieldsIndexes))
+		for _, index := range mappedFieldsIndexes {
+			field := entityValue.Field(index)
+			columns = append(columns, field.Addr().Interface())
+		}
+
+		err := rows.Scan(columns...)
+
+		if err != nil {
+			return nil, err
+		}
+
+		entities = append(entities, *entity)
+	}
+	return entities, nil
+}

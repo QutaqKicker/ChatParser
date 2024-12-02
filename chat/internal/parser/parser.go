@@ -3,7 +3,6 @@ package parser
 import (
 	"chat/internal/db"
 	"chat/internal/domain/models"
-	"chat/internal/domain/queryFilters"
 	"chat/internal/parser/readers"
 	"context"
 	"database/sql"
@@ -142,7 +141,7 @@ func ProcessRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-cha
 			return
 		case rawMessage := <-inRawMessagesChan:
 			if rawMessage.ChatId == 0 {
-				chatQuery := db.BuildQuery(db.QueryBuildRequest[queryFilters.ChatFilter]{Filter: queryFilters.ChatFilter{Name: rawMessage.ChatName}})
+				//chatQuery := db.BuildQuery(db.QueryBuildRequest[queryFilters.ChatFilter]{Filter: queryFilters.ChatFilter{Name: rawMessage.ChatName}})
 
 			} else { //На случай, если пришли четко определенные
 
