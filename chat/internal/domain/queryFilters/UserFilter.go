@@ -1,6 +1,10 @@
 package queryFilters
 
+import "time"
+
 type UserFilter struct {
-	commonFilter
-	Name string `column:"text" relation:"="`
+	Id             string    `column:"id" relation:"="`
+	MinCreatedDate time.Time `column:"created" relation:"<"`
+	MaxCreatedDate time.Time `column:"created" relation:">"`
+	Name           string    `column:"text" relation:"="`
 }

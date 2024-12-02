@@ -1,101 +1,38 @@
 package db
 
 import (
-	"chat/internal/domain/models"
 	"chat/internal/domain/queryFilters"
 	"database/sql"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 )
 
 type Entity interface {
 	TableName() string
 }
 
-func BuildQuery[TFilter any](request QueryBuildRequest[TFilter]) (string, []interface{}) {
+func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 	queryBuilder := strings.Builder{}
 
-	queryBuilder.WriteString(BuildSelect[models.Message](request.SelectType, request.SpecialSelect))
+	queryBuilder.WriteString(buildSelect[T](request.SelectType, request.SpecialSelect))
 
-	whereString, values := BuildWhere(request.Filter)
+	whereString, values := buildWhere(request.Filter, 0)
 	queryBuilder.WriteString(whereString)
-	queryBuilder.WriteString(BuildSorter(request.Sorter))
+	queryBuilder.WriteString(buildSorter(request.Sorter))
 	return queryBuilder.String(), values
 }
 
-func BuildSelect[T Entity](selectType SelectType, specialSelect string) string {
-	if specialSelect == "" {
-		specialSelect = "*"
-	}
-
-	switch selectType {
-	case All:
-		return fmt.Sprintf("select %s", ColumnNamesWithAliases[T]())
-	case Sum:
-		return fmt.Sprintf("select sum(%s)", specialSelect)
-	case Count:
-		return fmt.Sprintf("select count(%s)", specialSelect)
-	default:
-		return fmt.Sprintf("select %s", specialSelect)
-	}
-}
-
-func ColumnNames[T Entity]() string {
-	t := reflect.TypeOf(*new(T))
-	sqlColumns := make([]string, 0, t.NumField())
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-
-		if field.Tag.Get("not-mapped") == "true" {
-			continue
-		}
-
-		sqlColumn := field.Tag.Get("column")
-		if sqlColumn == "" {
-			sqlColumn = field.Name
-		}
-
-		sqlColumns = append(sqlColumns, sqlColumn)
-	}
-
-	return strings.Join(sqlColumns, ", ")
-}
-
-func ColumnNamesWithAliases[T Entity]() string {
-	t := reflect.TypeOf(*new(T))
-
-	sqlColumns := make([]string, 0, t.NumField())
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-
-		if field.Tag.Get("not-mapped") == "true" {
-			continue
-		}
-
-		sqlColumn := field.Tag.Get("column")
-		if sqlColumn != "" {
-			sqlColumns = append(sqlColumns, fmt.Sprintf("%s as %s", sqlColumn, field.Name))
-		} else {
-			sqlColumns = append(sqlColumns, field.Name)
-		}
-	}
-
-	return strings.Join(sqlColumns, ", ")
-}
-
 type UpdateValue struct {
-	Field          reflect.StructField
-	NewValueInt    int
-	NewValueString string
-	NewValueTime   time.Time
+	Field    reflect.StructField
+	NewValue interface{}
 }
 
-func BuildUpdate(filter *queryFilters.MessageFilter, values []UpdateValue) (string, []interface{}) {
+func BuildUpdate(filter any, values []UpdateValue) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
 	updateBuilder.WriteString("update messages")
+	queryValues := make([]interface{}, 0)
+	paramIndex := 0
 	for i, value := range values {
 		if i > 0 {
 			updateBuilder.WriteString(",")
@@ -104,22 +41,15 @@ func BuildUpdate(filter *queryFilters.MessageFilter, values []UpdateValue) (stri
 		sqlColumn := value.Field.Tag.Get("column")
 
 		if sqlColumn != "" {
-			updateBuilder.WriteString(fmt.Sprintf("%s = ", sqlColumn))
+			updateBuilder.WriteString(fmt.Sprintf("%s = $%d", sqlColumn, paramIndex))
 		} else {
-			updateBuilder.WriteString(fmt.Sprintf("%s = ", value.Field.Name))
+			updateBuilder.WriteString(fmt.Sprintf("%s = $%d", value.Field.Name, paramIndex))
 		}
-
-		switch value.Field.Type.Name() {
-		case "int32":
-			updateBuilder.WriteString(strconv.Itoa(value.NewValueInt))
-		case "string":
-			updateBuilder.WriteString(value.NewValueString)
-		case "time.Time": //TODO ??
-			updateBuilder.WriteString(value.NewValueTime.Format("YYYY.MM.DD hh.mm.ss"))
-		}
+		queryValues = append(queryValues, value.NewValue)
 	}
 
-	whereString, queryValues := BuildWhere(filter)
+	whereString, whereValues := buildWhere(filter, paramIndex)
+	queryValues = append(queryValues, whereValues)
 	updateBuilder.WriteString(whereString)
 
 	return updateBuilder.String(), queryValues
@@ -128,112 +58,16 @@ func BuildUpdate(filter *queryFilters.MessageFilter, values []UpdateValue) (stri
 func BuildDelete[T Entity](filter *queryFilters.MessageFilter) (string, []interface{}) {
 	deleteBuilder := strings.Builder{}
 	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", (*new(T)).TableName()))
-	whereString, values := BuildWhere(filter)
+	whereString, values := buildWhere(filter, 0)
 	deleteBuilder.WriteString(whereString)
 	return deleteBuilder.String(), values
 }
-
-func BuildWhere[TFilter any](filter TFilter) (string, []interface{}) {
-	whereBuilder := strings.Builder{}
-	whereBuilder.WriteString("\n where 1 == 1")
-
-	values := make([]interface{}, 0)
-	t := reflect.TypeOf(filter)
-	v := reflect.ValueOf(filter)
-	if v.Kind() == reflect.Struct {
-		for i := 0; i < v.NumField(); i++ {
-			fieldValue := v.Field(i)
-			columnName := t.Field(i).Tag.Get("column")
-
-			relation := t.Field(i).Tag.Get("relation")
-			switch relation {
-			case "=":
-			case "<":
-			case ">":
-				values = append(values, fieldValue.Interface())
-				whereBuilder.WriteString(fmt.Sprintf("\n  and %s %s $%d", columnName, relation, len(values)))
-			case "like":
-				values = append(values, fieldValue.String())
-				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)))
-			case "in":
-				inParams := make([]string, 0, fieldValue.Len())
-				switch inSlice := fieldValue.Interface().(type) {
-				case []string:
-					for _, value := range inSlice {
-						values = append(values, value)
-						inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
-					}
-				case []int:
-					for _, value := range inSlice {
-						values = append(values, value)
-						inParams = append(inParams, fmt.Sprintf("$%d", len(values)))
-					}
-				default:
-					panic("unknown type")
-				}
-				whereBuilder.WriteString(fmt.Sprintf("\n  and %s in (%s)", columnName, strings.Join(inParams, ", ")))
-			}
-		}
-	}
-
-	return whereBuilder.String(), values
-}
-
-/*package main
-
-import (
-    "fmt"
-    "reflect"
-)
-
-type Address struct {
-    City  string
-    State string
-}
-
-type User struct {
-    Name    string
-    Age     int
-    Address // Встраиваем Address
-}
-
-func main() {
-    user := User{
-        Name: "Alice",
-        Age:  30,
-        Address: Address{
-            City:  "Wonderland",
-            State: "Fantasy",
-        },
-    }
-
-    // Используем рефлексию для перебора полей
-    val := reflect.ValueOf(user)
-    typ := reflect.TypeOf(user)
-
-    for i := 0; i < val.NumField(); i++ {
-        field := val.Field(i)
-        fieldType := typ.Field(i)
-
-        // Если поле встроенной структуры, выведем его с правильным именем
-        if fieldType.Anonymous {
-            for j := 0; j < field.NumField(); j++ {
-                includedField := field.Field(j)
-                includedFieldType := field.Type().Field(j)
-
-                fmt.Printf("%s: %v\n", includedFieldType.Name, includedField.Interface())
-            }
-        } else {
-            fmt.Printf("%s: %v\n", fieldType.Name, field.Interface())
-        }
-    }
-}*/
 
 func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery := strings.Builder{}
 	t := *new(T)
 	insertQuery.WriteString(fmt.Sprintf("insert into %s", T.TableName(t)))
-	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", ColumnNames[T]()))
+	insertQuery.WriteString(fmt.Sprintf("\n\t(%s)", columnNames[T]()))
 
 	entityType := reflect.TypeOf(t)
 
@@ -251,17 +85,10 @@ func BuildInsert[T Entity](withReturning bool) string {
 	insertQuery.WriteString(fmt.Sprintf("\nvalues\n\t(%s)", strings.Join(values, ", ")))
 
 	if withReturning {
-		insertQuery.WriteString(fmt.Sprintf("\nreturning %s", ColumnNamesWithAliases[T]()))
+		insertQuery.WriteString(fmt.Sprintf("\nreturning %s", columnNamesWithAliases[T]()))
 	}
 
 	return insertQuery.String()
-}
-
-func BuildSorter(sorter []string) string {
-	if sorter != nil {
-		return fmt.Sprintf("\n order by %s", strings.Join(sorter, ", "))
-	}
-	return "\n order by created desc"
 }
 
 func RowsToEntities[T Entity](rows *sql.Rows) ([]T, error) {
@@ -296,4 +123,115 @@ func RowsToEntities[T Entity](rows *sql.Rows) ([]T, error) {
 		entities = append(entities, *entity)
 	}
 	return entities, nil
+}
+
+func buildSelect[T Entity](selectType SelectType, specialSelect string) string {
+	if specialSelect == "" {
+		specialSelect = "*"
+	}
+
+	switch selectType {
+	case All:
+		return fmt.Sprintf("select %s", columnNamesWithAliases[T]())
+	case Sum:
+		return fmt.Sprintf("select sum(%s)", specialSelect)
+	case Count:
+		return fmt.Sprintf("select count(%s)", specialSelect)
+	default:
+		return fmt.Sprintf("select %s", specialSelect)
+	}
+}
+
+func columnNames[T Entity]() string {
+	t := reflect.TypeOf(*new(T))
+	sqlColumns := make([]string, 0, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+
+		if field.Tag.Get("not-mapped") == "true" {
+			continue
+		}
+
+		sqlColumn := field.Tag.Get("column")
+		if sqlColumn == "" {
+			sqlColumn = field.Name
+		}
+
+		sqlColumns = append(sqlColumns, sqlColumn)
+	}
+
+	return strings.Join(sqlColumns, ", ")
+}
+
+func columnNamesWithAliases[T Entity]() string {
+	t := reflect.TypeOf(*new(T))
+
+	sqlColumns := make([]string, 0, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+
+		if field.Tag.Get("not-mapped") == "true" {
+			continue
+		}
+
+		sqlColumn := field.Tag.Get("column")
+		if sqlColumn != "" {
+			sqlColumns = append(sqlColumns, fmt.Sprintf("%s as %s", sqlColumn, field.Name))
+		} else {
+			sqlColumns = append(sqlColumns, field.Name)
+		}
+	}
+
+	return strings.Join(sqlColumns, ", ")
+}
+
+func buildWhere[TFilter any](filter TFilter, firstParamIndex int) (string, []interface{}) {
+	whereBuilder := strings.Builder{}
+	whereBuilder.WriteString("\n where 1 == 1")
+
+	values := make([]interface{}, 0)
+	t := reflect.TypeOf(filter)
+	v := reflect.ValueOf(filter)
+	if v.Kind() == reflect.Struct {
+		for i := 0; i < v.NumField(); i++ {
+			fieldValue := v.Field(i)
+			columnName := t.Field(i).Tag.Get("column")
+
+			relation := t.Field(i).Tag.Get("relation")
+			switch relation {
+			case "=", "<", ">":
+				values = append(values, fieldValue.Interface())
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s %s $%d", columnName, relation, len(values)+firstParamIndex))
+			case "like":
+				values = append(values, fieldValue.String())
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)+firstParamIndex))
+			case "in":
+				inParams := make([]string, 0, fieldValue.Len())
+				switch inSlice := fieldValue.Interface().(type) {
+				case []string:
+					for _, value := range inSlice {
+						values = append(values, value)
+						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
+					}
+				case []int:
+					for _, value := range inSlice {
+						values = append(values, value)
+						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
+					}
+				default:
+					panic("unknown type")
+				}
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s in (%s)", columnName, strings.Join(inParams, ", ")))
+			}
+		}
+	}
+
+	return whereBuilder.String(), values
+}
+
+func buildSorter(sorter []string) string {
+	if sorter != nil {
+		return fmt.Sprintf("\n order by %s", strings.Join(sorter, ", "))
+	}
+	return "\n order by created desc"
 }

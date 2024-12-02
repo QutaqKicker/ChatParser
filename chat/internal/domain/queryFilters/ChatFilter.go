@@ -1,6 +1,10 @@
 package queryFilters
 
+import "time"
+
 type ChatFilter struct {
-	commonFilter
-	Name string `column:"text" relation:"="`
+	Id             int       `column:"id" relation:"="`
+	MinCreatedDate time.Time `column:"created" relation:"<"`
+	MaxCreatedDate time.Time `column:"created" relation:">"`
+	Name           string    `column:"text" relation:"="`
 }
