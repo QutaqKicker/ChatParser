@@ -1,9 +1,11 @@
 package caches
 
 import (
-	"chat/internal/db"
+	"chat/internal/dbHelper"
+	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
 	"sync"
+	"time"
 )
 
 var UsersCache = newUsersCache()
@@ -11,12 +13,12 @@ var UsersCache = newUsersCache()
 type usersCache CacheOfNames[string]
 
 func usersCacheInitializer(querier dbOrTx) {
-	rows, err := querier.Query(db.BuildQuery[models.User](db.QueryBuildRequest{}))
+	rows, err := querier.Query(dbHelper.BuildQuery[models.User](dbHelper.QueryBuildRequest{}))
 	if err != nil {
 		panic(err)
 	}
 
-	users, err := db.RowsToEntities[models.User](rows)
+	users, err := dbHelper.RowsToEntities[models.User](rows)
 	if err != nil {
 		panic(err)
 	}
@@ -28,10 +30,20 @@ func usersCacheInitializer(querier dbOrTx) {
 }
 
 func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
-	//tx.Exec(db.BuildUpdate())
+	updateUserQuery, userParams := dbHelper.BuildUpdate(dbHelper.SetUpdate("id", newKey),
+		filters.NewUserFilter().WhereId(oldKey))
+	tx.Exec(updateUserQuery, userParams...)
+
+	updateMessagesQuery, messageParams := dbHelper.BuildUpdate(dbHelper.SetUpdate("user_id", newKey),
+		filters.NewMessageFilter().WhereUserId(oldKey))
+
+	tx.Exec(updateMessagesQuery, messageParams...)
 }
 
 func usersCacheDbInserter(tx dbOrTx, name string, key string) {
+	newUser := models.User{Id: key, Name: name, Created: time.Now()}
+	insertQuery := dbHelper.BuildInsert[models.User](false)
+	tx.Exec(insertQuery, newUser.FieldValuesAsArray())
 
 }
 

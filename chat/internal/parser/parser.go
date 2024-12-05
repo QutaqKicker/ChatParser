@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"chat/internal/db"
+	"chat/internal/dbHelper"
 	"chat/internal/domain/models"
 	"chat/internal/parser/readers"
 	"context"
@@ -113,7 +113,7 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 }
 
 func InsertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(db.BuildInsert[models.Message](false))
+	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](false))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func ProcessRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-cha
 			return
 		case rawMessage := <-inRawMessagesChan:
 			if rawMessage.ChatId == 0 {
-				//chatQuery := db.BuildQuery(db.QueryBuildRequest[queryFilters.ChatFilter]{Filter: queryFilters.ChatFilter{Name: rawMessage.ChatName}})
+				//chatQuery := dbHelper.BuildQuery(dbHelper.QueryBuildRequest[filters.ChatFilter]{Filter: filters.ChatFilter{Name: rawMessage.ChatName}})
 
 			} else { //На случай, если пришли четко определенные
 

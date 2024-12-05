@@ -1,8 +1,8 @@
 package services
 
 import (
+	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
-	"chat/internal/domain/queryFilters"
 	"chat/internal/parser"
 	"context"
 	"database/sql"
@@ -29,7 +29,7 @@ type MessageSaver interface {
 
 type MessageProvider interface {
 	GetMessages(
-		filter queryFilters.MessageFilter) ([]models.Message, error)
+		filter filters.MessageFilter) ([]models.Message, error)
 }
 
 // New returns new instance of chat service

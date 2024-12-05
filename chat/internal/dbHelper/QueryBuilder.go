@@ -1,7 +1,7 @@
-package db
+package dbHelper
 
 import (
-	"chat/internal/domain/queryFilters"
+	"chat/internal/domain/filters"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -25,11 +25,22 @@ func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 
 type UpdateValue struct {
 	FieldName string
-	NewValue  interface{}
+	NewValue  any
+}
+
+type UpdateValues []UpdateValue
+
+func SetUpdate(fieldName string, newValue any) UpdateValues {
+	return []UpdateValue{{fieldName, newValue}}
+}
+
+func (u UpdateValues) AndUpdate(fieldName string, newValue any) UpdateValues {
+	u = append(u, UpdateValue{fieldName, newValue})
+	return u
 }
 
 // TODO Сделать удобнее, или вообще переместить в сущности отдельными методами
-func BuildUpdate(values []UpdateValue, filter any) (string, []interface{}) {
+func BuildUpdate(values UpdateValues, filter any) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
 	updateBuilder.WriteString("update messages")
 	queryValues := make([]interface{}, 0)
@@ -52,7 +63,7 @@ func BuildUpdate(values []UpdateValue, filter any) (string, []interface{}) {
 	return updateBuilder.String(), queryValues
 }
 
-func BuildDelete[T Entity](filter *queryFilters.MessageFilter) (string, []interface{}) {
+func BuildDelete[T Entity](filter *filters.MessageFilter) (string, []interface{}) {
 	deleteBuilder := strings.Builder{}
 	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", (*new(T)).TableName()))
 	whereString, values := buildWhere(filter, 0)
@@ -187,8 +198,12 @@ func buildWhere[TFilter any](filter TFilter, firstParamIndex int) (string, []int
 	whereBuilder.WriteString("\n where 1 == 1")
 
 	values := make([]interface{}, 0)
-	t := reflect.TypeOf(filter)
 	v := reflect.ValueOf(filter)
+	if v.Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
+
+	t := v.Type()
 	if v.Kind() == reflect.Struct {
 		for i := 0; i < v.NumField(); i++ {
 			fieldValue := v.Field(i)

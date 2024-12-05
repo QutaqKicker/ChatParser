@@ -49,7 +49,7 @@ func (s *serverAPI) ParseHtml(ctx context.Context, req *chatv1.ParseHtmlRequest)
 
 func (s *serverAPI) SearchMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
 	if req.MinDate == nil && req.MaxDate == nil && req.UserIds == nil {
-		return nil, status.Error(codes.InvalidArgument, "all queryFilters is empty")
+		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
 	}
 
 	//messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)

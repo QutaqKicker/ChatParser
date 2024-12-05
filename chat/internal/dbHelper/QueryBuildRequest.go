@@ -1,4 +1,4 @@
-package db
+package dbHelper
 
 type QueryBuildRequest struct {
 	Filter        any
