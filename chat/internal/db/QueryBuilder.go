@@ -24,32 +24,29 @@ func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 }
 
 type UpdateValue struct {
-	Field    reflect.StructField
-	NewValue interface{}
+	FieldName string
+	NewValue  interface{}
 }
 
-func BuildUpdate(filter any, values []UpdateValue) (string, []interface{}) {
+// TODO Сделать удобнее, или вообще переместить в сущности отдельными методами
+func BuildUpdate(values []UpdateValue, filter any) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
 	updateBuilder.WriteString("update messages")
 	queryValues := make([]interface{}, 0)
-	paramIndex := 0
-	for i, value := range values {
-		if i > 0 {
-			updateBuilder.WriteString(",")
-		}
-		updateBuilder.WriteString("\n set ")
-		sqlColumn := value.Field.Tag.Get("column")
+	paramIndex := 1
+	updateBuilder.WriteString("\n set ")
+	sets := make([]string, 0)
 
-		if sqlColumn != "" {
-			updateBuilder.WriteString(fmt.Sprintf("%s = $%d", sqlColumn, paramIndex))
-		} else {
-			updateBuilder.WriteString(fmt.Sprintf("%s = $%d", value.Field.Name, paramIndex))
-		}
+	for _, value := range values {
+		sets = append(sets, fmt.Sprintf("%s = $%d", value.FieldName, paramIndex))
+		paramIndex++
 		queryValues = append(queryValues, value.NewValue)
 	}
 
+	updateBuilder.WriteString(strings.Join(sets, ",\n"))
+
 	whereString, whereValues := buildWhere(filter, paramIndex)
-	queryValues = append(queryValues, whereValues)
+	queryValues = append(queryValues, whereValues...)
 	updateBuilder.WriteString(whereString)
 
 	return updateBuilder.String(), queryValues
@@ -195,28 +192,31 @@ func buildWhere[TFilter any](filter TFilter, firstParamIndex int) (string, []int
 	if v.Kind() == reflect.Struct {
 		for i := 0; i < v.NumField(); i++ {
 			fieldValue := v.Field(i)
+			if fieldValue.IsZero() {
+				continue
+			}
 			columnName := t.Field(i).Tag.Get("column")
 
 			relation := t.Field(i).Tag.Get("relation")
 			switch relation {
 			case "=", "<", ">":
-				values = append(values, fieldValue.Interface())
 				whereBuilder.WriteString(fmt.Sprintf("\n  and %s %s $%d", columnName, relation, len(values)+firstParamIndex))
+				values = append(values, fieldValue.Interface())
 			case "like":
-				values = append(values, fieldValue.String())
 				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)+firstParamIndex))
+				values = append(values, fieldValue.String())
 			case "in":
 				inParams := make([]string, 0, fieldValue.Len())
 				switch inSlice := fieldValue.Interface().(type) {
 				case []string:
 					for _, value := range inSlice {
-						values = append(values, value)
 						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
+						values = append(values, value)
 					}
 				case []int:
 					for _, value := range inSlice {
-						values = append(values, value)
 						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
+						values = append(values, value)
 					}
 				default:
 					panic("unknown type")

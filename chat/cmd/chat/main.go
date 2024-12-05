@@ -3,7 +3,6 @@ package main
 import (
 	"chat/internal/config"
 	db2 "chat/internal/db"
-	"chat/internal/domain/models"
 	"chat/internal/domain/queryFilters"
 	"chat/internal/grpc"
 	"database/sql"
@@ -18,15 +17,16 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-
 	updateValues := make([]db2.UpdateValue, 0)
-	updateValues = append(updateValues, db2.UpdateValue{Field: models.Message.})
+	updateValues = append(updateValues, db2.UpdateValue{FieldName: "User_Id", NewValue: "1"})
+	updateValues = append(updateValues, db2.UpdateValue{FieldName: "chat_id", NewValue: "2"})
 
-	fmt.Println(db2.BuildUpdate(queryFilters.MessageFilter{
-		SubText: "test",
-		ChatIds: []int{1, 2, 3},
-		UserIds: []string{"test", "test2"},
-	}))
+	fmt.Println(db2.BuildUpdate(updateValues,
+		queryFilters.MessageFilter{
+			SubText: "test",
+			ChatIds: []int{1, 2, 3},
+			UserIds: []string{"test", "test2"},
+		}))
 
 	db, err := connectDb(cfg.Db)
 

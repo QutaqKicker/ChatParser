@@ -3,7 +3,6 @@ package caches
 import (
 	"chat/internal/db"
 	"chat/internal/domain/models"
-	"chat/internal/domain/queryFilters"
 	"sync"
 )
 
@@ -12,7 +11,7 @@ var UsersCache = newUsersCache()
 type usersCache CacheOfNames[string]
 
 func usersCacheInitializer(querier dbOrTx) {
-	rows, err := querier.Query(db.BuildQuery[queryFilters.UserFilter](db.QueryBuildRequest[queryFilters.UserFilter]{}))
+	rows, err := querier.Query(db.BuildQuery[models.User](db.QueryBuildRequest{}))
 	if err != nil {
 		panic(err)
 	}
