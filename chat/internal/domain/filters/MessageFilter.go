@@ -36,11 +36,6 @@ func (f *MessageFilter) WhereSubText(value string) *MessageFilter {
 	return f
 }
 
-func (f *MessageFilter) WhereUserId(value string) *MessageFilter {
-	f.UserId = value
-	return f
-}
-
 func (f *MessageFilter) WhereUserIds(value []string) *MessageFilter {
 	f.UserIds = value
 	return f

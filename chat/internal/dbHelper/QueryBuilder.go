@@ -40,9 +40,9 @@ func (u UpdateValues) AndUpdate(fieldName string, newValue any) UpdateValues {
 }
 
 // TODO Сделать удобнее, или вообще переместить в сущности отдельными методами
-func BuildUpdate(values UpdateValues, filter any) (string, []interface{}) {
+func BuildUpdate[T Entity](values UpdateValues, filter any) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
-	updateBuilder.WriteString("update messages")
+	updateBuilder.WriteString(fmt.Sprintf("update %s", T.TableName(new(T))))
 	queryValues := make([]interface{}, 0)
 	paramIndex := 1
 	updateBuilder.WriteString("\n set ")

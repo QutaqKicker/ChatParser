@@ -19,7 +19,7 @@ type dbOrTx interface {
 	Exec(query string, args ...any) (sql.Result, error)
 }
 
-func (c *CacheOfNames[T]) Get(tx dbOrTx, name string) (key T, ok bool) {
+func (c *CacheOfNames[T]) GetKeyByName(tx dbOrTx, name string) (key T, ok bool) {
 	c.mutex.RLock()
 	c.once.Do(func() { c.initializer(tx) })
 	key, ok = c.elems[name]
@@ -27,7 +27,7 @@ func (c *CacheOfNames[T]) Get(tx dbOrTx, name string) (key T, ok bool) {
 	return
 }
 
-func (c *CacheOfNames[T]) Set(tx dbOrTx, name string, key T) {
+func (c *CacheOfNames[T]) SetNewChat(tx dbOrTx, name string, key T) {
 	c.mutex.Lock()
 	c.once.Do(func() { c.initializer(tx) })
 	if oldKey, ok := c.elems[name]; ok {

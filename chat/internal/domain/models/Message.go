@@ -18,7 +18,7 @@ func (m Message) TableName() string {
 	return "messages"
 }
 
-// FieldValuesAsArray / Get fields values as any array. Needs for safe inserting
+// FieldValuesAsArray / GetKeyByName fields values as any array. Needs for safe inserting
 func (m Message) FieldValuesAsArray() []any {
 	return []any{m.Id, m.ChatId, m.UserId, m.ReplyToMessageId, m.Text, m.Created}
 }
