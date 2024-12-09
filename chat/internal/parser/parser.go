@@ -145,7 +145,7 @@ func ProcessRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-cha
 				if chatId, ok := caches.ChatsCache.GetKeyByName(tx, rawMessage.ChatName); ok {
 					rawMessage.ChatId = chatId
 				} else {
-
+					caches.ChatsCache.SetNewChat(tx)
 				}
 
 			} else { //На случай, если пришли четко определенные

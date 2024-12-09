@@ -3,7 +3,7 @@ package filters
 import "time"
 
 type ChatFilter struct {
-	Id             int       `column:"id" relation:"="`
+	Id             int32     `column:"id" relation:"="`
 	MinCreatedDate time.Time `column:"created" relation:"<"`
 	MaxCreatedDate time.Time `column:"created" relation:">"`
 	Name           string    `column:"text" relation:"="`
@@ -13,7 +13,7 @@ func NewChatFilter() *ChatFilter {
 	return &ChatFilter{}
 }
 
-func (f *ChatFilter) WhereId(value int) *ChatFilter {
+func (f *ChatFilter) WhereId(value int32) *ChatFilter {
 	f.Id = value
 	return f
 }

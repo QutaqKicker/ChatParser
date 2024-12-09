@@ -3,20 +3,20 @@ package filters
 import "time"
 
 type MessageFilter struct {
-	Id             int       `column:"id" relation:"="`
+	Id             int32     `column:"id" relation:"="`
 	MinCreatedDate time.Time `column:"created" relation:"<"`
 	MaxCreatedDate time.Time `column:"created" relation:">"`
 	SubText        string    `column:"text" relation:"like"`
 	UserId         string    `column:"user_id" relation:"="`
 	UserIds        []string  `column:"user_id" relation:"in"`
-	ChatIds        []int     `column:"chat_id" relation:"in"`
+	ChatIds        []int32   `column:"chat_id" relation:"in"`
 }
 
 func NewMessageFilter() *MessageFilter {
 	return &MessageFilter{}
 }
 
-func (f *MessageFilter) WhereId(value int) *MessageFilter {
+func (f *MessageFilter) WhereId(value int32) *MessageFilter {
 	f.Id = value
 	return f
 }
@@ -41,7 +41,7 @@ func (f *MessageFilter) WhereUserIds(value []string) *MessageFilter {
 	return f
 }
 
-func (f *MessageFilter) WhereChatIds(value []int) *MessageFilter {
+func (f *MessageFilter) WhereChatIds(value []int32) *MessageFilter {
 	f.ChatIds = value
 	return f
 }

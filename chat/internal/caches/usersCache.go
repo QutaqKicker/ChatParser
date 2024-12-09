@@ -54,8 +54,17 @@ func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
 	tx.Exec(updateMessagesQuery, messageParams...)
 }
 
-func usersCacheDbInserter(tx dbOrTx, name string, key string) {
-	newUser := models.User{Id: key, Name: name, Created: time.Now()}
-	insertQuery := dbHelper.BuildInsert[models.User](false)
-	tx.Exec(insertQuery, newUser.FieldValuesAsArray())
+func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
+	if key == "" {
+		newUser := models.User{Name: name, Created: time.Now()}
+		insertQuery := dbHelper.BuildInsert[models.User](false, true)
+		rows, _ := tx.Query(insertQuery, newUser.Name, newUser.Created)
+		rows.Scan(&key)
+		return key
+	} else {
+		newUser := models.User{Id: key, Name: name, Created: time.Now()}
+		insertQuery := dbHelper.BuildInsert[models.User](true, false)
+		tx.Exec(insertQuery, newUser.FieldValuesAsArray())
+		return key
+	}
 }

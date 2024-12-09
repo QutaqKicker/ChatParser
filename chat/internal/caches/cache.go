@@ -11,7 +11,7 @@ type CacheOfNames[T comparable] struct {
 	once        sync.Once
 	initializer func(dbOrTx)
 	dbUpdater   func(tx dbOrTx, oldKey T, newKey T)
-	dbInserter  func(tx dbOrTx, name string, key T)
+	dbInserter  func(tx dbOrTx, name string, key T) T
 }
 
 type dbOrTx interface {
@@ -35,7 +35,7 @@ func (c *CacheOfNames[T]) SetNewChat(tx dbOrTx, name string, key T) {
 			c.dbUpdater(tx, oldKey, key)
 		}
 	} else {
-		c.dbInserter(tx, name, key)
+		key = c.dbInserter(tx, name, key)
 	}
 	c.elems[name] = key
 	c.mutex.Unlock()
