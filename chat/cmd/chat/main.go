@@ -2,8 +2,6 @@ package main
 
 import (
 	"chat/internal/config"
-	"chat/internal/dbHelper"
-	"chat/internal/domain/filters"
 	"chat/internal/grpc"
 	"database/sql"
 	"fmt"
@@ -12,14 +10,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 func main() {
 	cfg := config.MustLoad()
-
-	fmt.Println(dbHelper.BuildUpdate(dbHelper.SetUpdate("user_id", 1).AndUpdate("chat_id", "3").AndUpdate("test", "wow"),
-		filters.NewMessageFilter().WhereId(123).WhereSubText("test").WhereMaxCreatedDate(time.Now())))
 
 	db, err := connectDb(cfg.Db)
 

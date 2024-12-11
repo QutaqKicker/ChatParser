@@ -13,13 +13,10 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
-type DumpReader interface {
-	ReadMessages(ctx context.Context, fileDir string, outChan <-chan models.Message, wg *sync.WaitGroup)
-	ReaderType() models.DumpType
-}
-
+// Parser осуществляет чтение дампа сообщений, их дозаполнение, подсчет и отправку в микросервис Users и сохранение данных в БД
 type Parser struct {
 	logger *slog.Logger
 	db     *sql.DB
@@ -32,39 +29,39 @@ func New(logger *slog.Logger, db *sql.DB) *Parser {
 	}
 }
 
+// Reader интерфейс для читателей файлов дампа
 type Reader interface {
 	ReaderType() models.DumpType
 	ReadMessages(ctx context.Context, fileName string)
 }
 
+// ParseFromDir парсит все файлы в директории. Выбирает формат дампа на основании формата первого подходящего для парса файлов.
+// Файлы, соответствующие выбранному формату игнорируются в данном парсе. Наверное, стоит это поправить в дальнейшем
 func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
-	var reader Reader
 	rawMessagesChan := make(chan models.Message, 30)
 	messagesChan := make(chan models.Message, 30)
 	errorsChan := make(chan error, 30)
-	readersWg := &sync.WaitGroup{}
-	dumpType, err := GetDumpType(dumpDir)
+
+	dumpType, err := getDumpType(dumpDir)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	var reader Reader
 	switch dumpType {
 	case models.Html:
 		reader = readers.NewHtmlReader(rawMessagesChan, errorsChan)
 	case models.Json:
 		reader = readers.NewJsonReader(rawMessagesChan, errorsChan)
-	}
+	} //TODO остальные форматы сюда бахнуть
 
 	files, err := os.ReadDir(dumpDir)
-
 	if err != nil {
 		return err
 	}
 
-	tx, err := p.db.BeginTx(ctx, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	readersWg := &sync.WaitGroup{}
+	//Запускаем чтение сообщений из файлов в директориях
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -79,42 +76,104 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 		}
 	}
 
-	insertsWg := &sync.WaitGroup{}
-	insertsWg.Add(1)
+	tx, err := p.db.BeginTx(ctx, nil)
+
+	writersWg := &sync.WaitGroup{}
+	writersWg.Add(1)
+	//Заполняем сырые сообщения. У них могут быть не заполнены айдишники чата и юзера
 	go func() {
-		ProcessRawMessages(ctx, tx, rawMessagesChan, messagesChan)
-		insertsWg.Done()
+		processRawMessages(ctx, tx, rawMessagesChan, messagesChan)
+		writersWg.Done()
 	}()
 
-	insertsWg.Add(1)
+	writersWg.Add(1)
+	//Заполненные сообщения инсертим в БД
 	go func() {
-		InsertMessages(ctx, tx, messagesChan)
-		insertsWg.Done()
+		insertMessages(ctx, tx, messagesChan)
+		writersWg.Done()
 	}()
 
-	errorsWg := &sync.WaitGroup{}
-	errorsWg.Add(1)
+	writersWg.Add(1)
+	//Некритичные ошибки в ходе парса отдаем в логгер
 	go func() {
-		ProcessErrors(p.logger, errorsChan)
-		errorsWg.Done()
+		processErrors(p.logger, errorsChan)
+		writersWg.Done()
 	}()
 
 	readersWg.Wait()
 	close(rawMessagesChan)
 	close(errorsChan)
-	insertsWg.Wait()
-	errorsWg.Wait()
+	writersWg.Wait()
 
 	err = tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
 }
 
-func InsertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](false))
+// UsersWithMessagesCount Сущность для отправки информации по количеству сообщений в микросервис Users
+type UsersWithMessagesCount struct {
+	UserName      string
+	MessagesCount uint64
+}
+
+// processRawMessages заполняет айди чата и юзера в незаполненных сообщениях и ведет подсчет для отправки в микросервис Users
+func processRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-chan models.Message, outMessagesChan chan<- models.Message) {
+	messagesCountPerUser := make(map[string]*atomic.Uint64)
+chanLoop:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case rawMessage, ok := <-inRawMessagesChan:
+			if !ok {
+				break chanLoop
+			}
+
+			if rawMessage.ChatId == 0 {
+				if chatId, ok := caches.ChatsCache.Get(tx, rawMessage.ChatName); ok {
+					rawMessage.ChatId = chatId
+				} else {
+					caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
+				}
+			} else {
+				//Если такого чата в кэше нет или айди этого чата не совпадает с тем, что был в сообщении, апсертим этот чат
+				if chatId, ok := caches.ChatsCache.Get(tx, rawMessage.ChatName); !ok || rawMessage.ChatId != chatId {
+					caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
+				}
+			}
+
+			if rawMessage.UserId == "" {
+				if userId, ok := caches.UsersCache.Get(tx, rawMessage.UserName); ok {
+					rawMessage.UserId = userId
+				} else {
+					caches.UsersCache.Set(tx, rawMessage.ChatName, rawMessage.UserId)
+				}
+			} else {
+				//Если такого юзера в кэше нет или айди этого юзера не совпадает с тем, что был в сообщении, апсертим этого юзера
+				if userId, ok := caches.UsersCache.Get(tx, rawMessage.UserName); !ok || rawMessage.UserId != userId {
+					caches.UsersCache.Set(tx, rawMessage.UserName, rawMessage.UserId)
+				}
+			}
+
+			outMessagesChan <- rawMessage
+
+			messagesCountPerUser[rawMessage.UserName].Add(1)
+		}
+	}
+	close(outMessagesChan)
+
+	for key, value := range messagesCountPerUser {
+		_ = UsersWithMessagesCount{key, value.Load()}
+		//TODO Организовать отправку этого добра в сервис Users и вынести в основной метод. Если этот метод будет у нескольких горутин, данные отправим несколько раз вместо одного
+	}
+}
+
+// insertMessages Инсертит в БД прочитанные заполненные сообщения
+func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
+	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](true, false))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,47 +187,13 @@ func InsertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.
 	}
 }
 
-type cacheForParse[T comparable] struct {
-	ma map[string]T
-}
-
-var seenUsers = make(map[string]string)
-var seenChats = make(map[string]string)
-
-func ProcessRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-chan models.Message, outMessagesChan chan<- models.Message) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case rawMessage := <-inRawMessagesChan:
-			if rawMessage.ChatId == 0 {
-				if chatId, ok := caches.ChatsCache.GetKeyByName(tx, rawMessage.ChatName); ok {
-					rawMessage.ChatId = chatId
-				} else {
-					caches.ChatsCache.SetNewChat(tx)
-				}
-
-			} else { //На случай, если пришли четко определенные
-
-			}
-
-			if rawMessage.UserId == "" {
-
-			}
-
-			outMessagesChan <- rawMessage
-		}
-	}
-	close(outMessagesChan)
-}
-
-func ProcessErrors(log *slog.Logger, errorsChan <-chan error) {
+func processErrors(log *slog.Logger, errorsChan <-chan error) {
 	for err := range errorsChan {
 		log.Error(err.Error())
 	}
 }
 
-func GetDumpType(dumpDir string) (models.DumpType, error) {
+func getDumpType(dumpDir string) (models.DumpType, error) {
 	files, err := os.ReadDir(dumpDir)
 	if err != nil {
 		return models.Html, err

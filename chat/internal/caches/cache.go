@@ -5,13 +5,19 @@ import (
 	"sync"
 )
 
+// CacheOfNames Кэш, для поиска ключей по имени сущностей. Необходим, т.к. в html формате не хранятся id пользователей
+// и чатов, а в других форматах хранятся. Когда появляется конкретный id чата или пользователя, его нужно актуализировать
+// в базе и в уже импортированных сообщениях с этим юзером
 type CacheOfNames[T comparable] struct {
-	elems       map[string]T
-	mutex       sync.RWMutex
-	once        sync.Once
-	initializer func(dbOrTx)
-	dbUpdater   func(tx dbOrTx, oldKey T, newKey T)
-	dbInserter  func(tx dbOrTx, name string, key T) T
+	elems map[string]T
+	mutex sync.RWMutex
+	once  sync.Once
+	// initializer единожды запускается при взятии или внесении. Он загружает в кэш все имеющиеся сущности из БД
+	initializer func(tx dbOrTx, elems *map[string]T) //TODO Не уверен что будет пахать. Надо проверить
+	// dbUpdater обновляет в БД старый ключ на новый, если в выгрузке пришел конкретный айди сущности
+	dbUpdater func(tx dbOrTx, oldKey T, newKey T)
+	// dbInserter вставляет в БД новый ключ и название сущности, раз сущности с таким названием в БД не существует
+	dbInserter func(tx dbOrTx, name string, key T) T
 }
 
 type dbOrTx interface {
@@ -19,17 +25,19 @@ type dbOrTx interface {
 	Exec(query string, args ...any) (sql.Result, error)
 }
 
-func (c *CacheOfNames[T]) GetKeyByName(tx dbOrTx, name string) (key T, ok bool) {
+// Get Получить ключ сущности по его имени
+func (c *CacheOfNames[T]) Get(tx dbOrTx, name string) (key T, ok bool) {
 	c.mutex.RLock()
-	c.once.Do(func() { c.initializer(tx) })
+	c.once.Do(func() { c.initializer(tx, &c.elems) })
 	key, ok = c.elems[name]
 	c.mutex.RUnlock()
 	return
 }
 
-func (c *CacheOfNames[T]) SetNewChat(tx dbOrTx, name string, key T) {
+// Set Внести в кэш указанное имя и айди сущности и апсертнуть эту сущность в базе
+func (c *CacheOfNames[T]) Set(tx dbOrTx, name string, key T) {
 	c.mutex.Lock()
-	c.once.Do(func() { c.initializer(tx) })
+	c.once.Do(func() { c.initializer(tx, &c.elems) })
 	if oldKey, ok := c.elems[name]; ok {
 		if oldKey != key {
 			c.dbUpdater(tx, oldKey, key)

@@ -12,6 +12,7 @@ type Entity interface {
 	TableName() string
 }
 
+// BuildQuery Построить селект для типа из дженерика согласно настройкам запроса в QueryBuildRequest
 func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 	queryBuilder := strings.Builder{}
 
@@ -42,7 +43,8 @@ func (u UpdateValues) AndUpdate(fieldName string, newValue any) UpdateValues {
 // TODO Сделать удобнее, или вообще переместить в сущности отдельными методами
 func BuildUpdate[T Entity](values UpdateValues, filter any) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
-	updateBuilder.WriteString(fmt.Sprintf("update %s", T.TableName(new(T))))
+	t := *new(T)
+	updateBuilder.WriteString(fmt.Sprintf("update %s", T.TableName(t)))
 	queryValues := make([]interface{}, 0)
 	paramIndex := 1
 	updateBuilder.WriteString("\n set ")

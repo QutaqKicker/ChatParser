@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// UsersCache Кэш юзеров. Ключ - имя юзера, значение - ключ юзера
 var UsersCache = newUsersCache()
 
 type usersCache struct {
@@ -26,7 +27,7 @@ func newUsersCache() *usersCache {
 	}
 }
 
-func usersCacheInitializer(querier dbOrTx) {
+func usersCacheInitializer(querier dbOrTx, elems *map[string]string) {
 	rows, err := querier.Query(dbHelper.BuildQuery[models.User](dbHelper.QueryBuildRequest{}))
 	if err != nil {
 		panic(err)
@@ -37,10 +38,11 @@ func usersCacheInitializer(querier dbOrTx) {
 		panic(err)
 	}
 
-	UsersCache.elems = make(map[string]string, len(users))
+	alreadyExistsUsers := make(map[string]string, len(users))
 	for _, user := range users {
-		UsersCache.elems[user.Name] = user.Id
+		alreadyExistsUsers[user.Name] = user.Id
 	}
+	*elems = alreadyExistsUsers
 }
 
 func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {

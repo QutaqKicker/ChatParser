@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// ChatsCache Кэш чатов. Ключ - имя чата, значение - ключ чата
 var ChatsCache = newChatsCache()
 
 type chatsCache struct {
@@ -19,14 +20,14 @@ func newChatsCache() *chatsCache {
 		CacheOfNames[int32]{
 			mutex:       sync.RWMutex{},
 			once:        sync.Once{},
-			initializer: ChatsCacheInitializer,
-			dbUpdater:   ChatsCacheDbUpdater,
-			dbInserter:  ChatsCacheDbInserter,
+			initializer: chatsCacheInitializer,
+			dbUpdater:   chatsCacheDbUpdater,
+			dbInserter:  chatsCacheDbInserter,
 		},
 	}
 }
 
-func ChatsCacheInitializer(querier dbOrTx) {
+func chatsCacheInitializer(querier dbOrTx, elems *map[string]int32) {
 	rows, err := querier.Query(dbHelper.BuildQuery[models.Chat](dbHelper.QueryBuildRequest{}))
 	if err != nil {
 		panic(err)
@@ -37,13 +38,14 @@ func ChatsCacheInitializer(querier dbOrTx) {
 		panic(err)
 	}
 
-	ChatsCache.elems = make(map[string]int32, len(chats))
+	alreadyExistsChats := make(map[string]int32, len(chats))
 	for _, user := range chats {
-		ChatsCache.elems[user.Name] = user.Id
+		alreadyExistsChats[user.Name] = user.Id
 	}
+	*elems = alreadyExistsChats
 }
 
-func ChatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
+func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
 	updateUserQuery, userParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("id", newKey),
 		filters.NewChatFilter().WhereId(oldKey))
 	tx.Exec(updateUserQuery, userParams...)
@@ -54,7 +56,7 @@ func ChatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
 	tx.Exec(updateMessagesQuery, messageParams...)
 }
 
-func ChatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
+func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 	if key == 0 {
 		newChat := models.Chat{Name: name, Created: time.Now()}
 		insertQuery := dbHelper.BuildInsert[models.User](false, true)
