@@ -67,7 +67,8 @@ func BuildUpdate[T Entity](values UpdateValues, filter any) (string, []interface
 
 func BuildDelete[T Entity](filter *filters.MessageFilter) (string, []interface{}) {
 	deleteBuilder := strings.Builder{}
-	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", (*new(T)).TableName()))
+	t := *new(T)
+	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", T.TableName(t)))
 	whereString, values := buildWhere(filter, 0)
 	deleteBuilder.WriteString(whereString)
 	return deleteBuilder.String(), values

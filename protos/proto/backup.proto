@@ -1,6 +1,8 @@
 
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package backup;
 
 option go_package = "chatParser.backup.v1;backupv1";
@@ -10,12 +12,23 @@ service Backup {
 }
 
 message ExportToFileRequest {
-  ExportType type = 1;
-  string exportDir = 2;
+  string ExportDir = 1;
+  ExportType Type = 2;
+  MessagesFilter MessageFilter = 3;
+}
+
+message MessagesFilter{
+  int32 Id = 1;
+  google.protobuf.Timestamp MinCreatedDate  = 2;
+  google.protobuf.Timestamp MaxCreatedDate  = 3;
+  string SubText = 4;
+  string UserId = 5;
+  repeated string UserIds = 6;
+  repeated int32 ChatIds = 7;
 }
 
 message ExportToFileResponse {
-  bool isSuccess = 1;
+  bool Ok = 1;
 }
 
 enum ExportType{

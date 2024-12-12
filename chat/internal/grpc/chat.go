@@ -14,15 +14,34 @@ import (
 	"time"
 )
 
-type Chat interface {
-	ParseHtml(ctx context.Context,
-		diPath string) (bool, error)
+type ChatService interface {
+	ParseFromDir(ctx context.Context,
+		diPath string) error
 	SearchMessages(ctx context.Context,
 		min time.Time,
 		max time.Time,
 		userIds []string) ([]*chatv1.ChatMessage, error)
 	GetStatistics(ctx context.Context,
 		userIds []string) (bool, error)
+}
+
+type App struct {
+	log        *slog.Logger
+	gRPCServer *grpc.Server
+	db         *sql.DB
+	port       int
+}
+
+func New(log *slog.Logger, db *sql.DB, port int) *App {
+	grpcServer := grpc.NewServer()
+	Register(grpcServer, log, db)
+
+	return &App{
+		log:        log,
+		gRPCServer: grpcServer,
+		db:         db,
+		port:       port,
+	}
 }
 
 type serverAPI struct {
@@ -59,25 +78,6 @@ func (s *serverAPI) SearchMessages(ctx context.Context, req *chatv1.SearchMessag
 func (s *serverAPI) GetStatistics(ctx context.Context, req *chatv1.GetStatisticsRequest) (*chatv1.GetStatisticsResponse, error) {
 	isSuccess, err := s.chat.GetStatistics(ctx, req.UserIds)
 	return &chatv1.GetStatisticsResponse{IsSuccess: isSuccess}, err
-}
-
-type App struct {
-	log        *slog.Logger
-	gRPCServer *grpc.Server
-	db         *sql.DB
-	port       int
-}
-
-func New(log *slog.Logger, db *sql.DB, port int) *App {
-	grpcServer := grpc.NewServer()
-	Register(grpcServer, log, db)
-
-	return &App{
-		log:        log,
-		gRPCServer: grpcServer,
-		db:         db,
-		port:       port,
-	}
 }
 
 func (a *App) Run() error {

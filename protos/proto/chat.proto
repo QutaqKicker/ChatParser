@@ -8,35 +8,49 @@ package chat;
 option go_package = "chatParser.chat.v1;chatv1";
 
 service Chat {
-  rpc ParseHtml (ParseHtmlRequest) returns (ParseHtmlResponse);
+  rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
   rpc SearchMessages (SearchMessagesRequest) returns (SearchMessagesResponse);
 }
 
-message ParseHtmlRequest {
-  string dirPath = 1;
+message ParseFromDirRequest {
+  string DirPath = 1;
 }
 
-message ParseHtmlResponse {
-  bool isSuccess = 1;
+message ParseFromDirResponse {
+  bool Ok = 1;
 }
 
 message SearchMessagesRequest {
-  SearchAction action = 1;
-  google.protobuf.Timestamp minDate = 2;
-  google.protobuf.Timestamp maxDate = 3;
-  repeated string userIds = 4;
-  repeated string sorts = 5;
+  SearchAction Action = 1;
+  MessagesFilter Filter = 2;
+  int32 Take = 3;
+  int32 Skip = 4;
+  repeated string Sorts = 5;
+}
+
+message MessagesFilter{
+  int32 Id = 1;
+  google.protobuf.Timestamp MinCreatedDate  = 2;
+  google.protobuf.Timestamp MaxCreatedDate  = 3;
+  string SubText = 4;
+  string UserId = 5;
+  repeated string UserIds = 6;
+  repeated int32 ChatIds = 7;
 }
 
 message SearchMessagesResponse {
-  repeated ChatMessage messages = 1;
+  repeated ChatMessage Messages = 1;
 }
 
 message ChatMessage {
-  string chatId = 1;
-  string userId = 2;
-  string text = 3;
-  google.protobuf.Timestamp createDate = 4;
+  int32 Id = 1;
+  int32 ChatId = 2;
+  string ChatName = 3;
+  string UserId = 4;
+  string UserName = 5;
+  int32 ReplyToMessageId = 6;
+  string Text = 7;
+  google.protobuf.Timestamp Created = 8;
 }
 
 enum SearchAction{

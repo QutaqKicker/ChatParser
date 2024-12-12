@@ -6,38 +6,17 @@ package user;
 option go_package = "chatParser.user.v1;userv1";
 
 service User {
-  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse);
-  rpc SearchUser (SearchUserRequest) returns (SearchUserResponse);
-  rpc EditUser (UpdateUserRequest) returns (UpdateUserResponse);
-  rpc GetStatistics (GetStatisticsRequest) returns (GetStatisticsResponse);
+  rpc GetUsersMessagesCount (GetUsersRequest) returns (GetUsersResponse);
 }
 
 message GetUsersRequest {}
+
 message GetUsersResponse {
   repeated UserInfo users = 1;
 }
-message SearchUserRequest {
-  string userId = 1;
-}
-message SearchUserResponse {
-  string name = 1;
-  int64 messagesCount = 2;
-}
-message UpdateUserRequest {
-  string id = 1;
-  string newName = 2;
-}
-message UpdateUserResponse {
-  bool isSuccess = 1;
-}
-message GetStatisticsRequest {
-  repeated string userIds = 1;
-}
-message GetStatisticsResponse {
-  bool isSuccess = 1;
-}
 
 message UserInfo {
-  string id = 1;
-  string name = 2;
+  string Id = 1;
+  string Name = 2;
+  int32 MessagesCount = 3;
 }
