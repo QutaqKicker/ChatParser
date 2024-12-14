@@ -20,7 +20,14 @@ func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 
 	whereString, values := buildWhere(request.Filter, 0)
 	queryBuilder.WriteString(whereString)
-	queryBuilder.WriteString(buildSorter(request.Sorter))
+	queryBuilder.WriteString(buildSorter(request.SortColumnIndexes))
+	if request.Take != 0 {
+		queryBuilder.WriteString(fmt.Sprintf("\n LIMIT %d", request.Take))
+	}
+	if request.Skip != 0 {
+		queryBuilder.WriteString(fmt.Sprintf("\n OFFSET %d", request.Skip))
+	}
+	queryBuilder.WriteString()
 	return queryBuilder.String(), values
 }
 
