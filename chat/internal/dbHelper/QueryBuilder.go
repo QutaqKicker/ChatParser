@@ -20,14 +20,14 @@ func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
 
 	whereString, values := buildWhere(request.Filter, 0)
 	queryBuilder.WriteString(whereString)
-	queryBuilder.WriteString(buildSorter(request.SortColumnIndexes))
+	//queryBuilder.WriteString(buildSorter(request.SortColumnIndexes))//TODO
 	if request.Take != 0 {
 		queryBuilder.WriteString(fmt.Sprintf("\n LIMIT %d", request.Take))
 	}
 	if request.Skip != 0 {
 		queryBuilder.WriteString(fmt.Sprintf("\n OFFSET %d", request.Skip))
 	}
-	queryBuilder.WriteString()
+	//queryBuilder.WriteString()
 	return queryBuilder.String(), values
 }
 
@@ -207,7 +207,10 @@ func columnNamesWithAliases[T Entity]() string {
 	return strings.Join(sqlColumns, ", ")
 }
 
-func buildWhere[TFilter any](filter TFilter, firstParamIndex int) (string, []interface{}) {
+func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
+	if filter == nil {
+		return "", nil
+	}
 	whereBuilder := strings.Builder{}
 	whereBuilder.WriteString("\n where 1 == 1")
 

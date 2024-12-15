@@ -28,7 +28,8 @@ func newChatsCache() *chatsCache {
 }
 
 func chatsCacheInitializer(querier dbOrTx, elems *map[string]int32) {
-	rows, err := querier.Query(dbHelper.BuildQuery[models.Chat](dbHelper.QueryBuildRequest{}))
+	query, _ := dbHelper.BuildQuery[models.Chat](dbHelper.QueryBuildRequest{})
+	rows, err := querier.Query(query)
 	if err != nil {
 		panic(err)
 	}

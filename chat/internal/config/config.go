@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Env  string     `yaml:"env" env-default:"local"`
 	Grpc GrpcConfig `yaml:"grpc"`
-	Db   DbConfig   `yaml:"dbHelper"`
+	Db   DbConfig   `yaml:"db"`
 }
 
 type GrpcConfig struct {
