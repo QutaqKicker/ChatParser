@@ -9,7 +9,8 @@ option go_package = "chatParser.chat.v1;chatv1";
 
 service Chat {
   rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
-  rpc SearchMessages (SearchMessagesRequest) returns (SearchMessagesResponse);
+  rpc GetMessages (SearchMessagesRequest) returns (GetMessagesResponse);
+  rpc DeleteMessages (SearchMessagesRequest) returns (DeleteMessageResponse);
 }
 
 message ParseFromDirRequest {
@@ -38,7 +39,7 @@ message MessagesFilter{
   repeated int32 ChatIds = 7;
 }
 
-message SearchMessagesResponse {
+message GetMessagesResponse {
   repeated ChatMessage Messages = 1;
 }
 
@@ -58,4 +59,8 @@ enum SearchAction{
   Select = 1;
   Delete = 2;
   Backup = 3;
+}
+
+message DeleteMessageResponse {
+  bool Ok = 1;
 }
