@@ -62,7 +62,9 @@ func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 		newChat := models.Chat{Name: name, Created: time.Now()}
 		insertQuery := dbHelper.BuildInsert[models.User](false, true)
 		rows, _ := tx.Query(insertQuery, newChat.Name, newChat.Created)
-		rows.Scan(&key)
+		for rows.Next() {
+			rows.Scan(&key)
+		}
 		return key
 	} else {
 		newChat := models.Chat{Id: key, Name: name, Created: time.Now()}

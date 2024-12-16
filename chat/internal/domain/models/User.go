@@ -3,7 +3,7 @@ package models
 import "time"
 
 type User struct {
-	Id      string
+	Id      string `auto-generated:"true"`
 	Name    string
 	Created time.Time
 }

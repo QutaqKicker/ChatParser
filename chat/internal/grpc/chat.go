@@ -53,31 +53,35 @@ func Register(gRPC *grpc.Server, log *slog.Logger, db *sql.DB) {
 	chatv1.RegisterChatServer(gRPC, &serverAPI{chat: services.NewChatService(log, db)})
 }
 
-func (s *serverAPI) ParseHtml(ctx context.Context, req *chatv1.ParseHtmlRequest) (*chatv1.ParseHtmlResponse, error) {
+func (s *serverAPI) ParseFromDir(ctx context.Context, req *chatv1.ParseFromDirRequest) (*chatv1.ParseFromDirResponse, error) {
 	if req.DirPath == "" {
 		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
 	}
 
 	err := s.chat.Parse(ctx, req.DirPath)
-	isSuccess := true
+	ok := true
 	if err != nil {
-		isSuccess = false
+		ok = false
 	}
-	return &chatv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
+	return &chatv1.ParseFromDirResponse{Ok: ok}, err
 }
 
-func (s *serverAPI) SearchMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
-	if req.MinDate == nil && req.MaxDate == nil && req.UserIds == nil {
+func (s *serverAPI) GetMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.GetMessagesResponse, error) {
+	if req.Filter == nil {
 		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
 	}
 
 	//messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
-	return &chatv1.SearchMessagesResponse{Messages: nil}, nil
+	return &chatv1.GetMessagesResponse{}, nil
 }
 
-func (s *serverAPI) GetStatistics(ctx context.Context, req *chatv1.GetStatisticsRequest) (*chatv1.GetStatisticsResponse, error) {
-	isSuccess, err := s.chat.GetStatistics(ctx, req.UserIds)
-	return &chatv1.GetStatisticsResponse{IsSuccess: isSuccess}, err
+func (s *serverAPI) DeleteMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.DeleteMessageResponse, error) {
+	if req.Filter == nil {
+		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
+	}
+
+	//messages, err := s.chat.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
+	return &chatv1.DeleteMessageResponse{}, nil
 }
 
 func (a *App) Run() error {
