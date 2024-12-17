@@ -35,7 +35,7 @@ func (c *CacheOfNames[T]) Get(tx dbOrTx, name string) (key T, ok bool) {
 }
 
 // Set Внести в кэш указанное имя и айди сущности и апсертнуть эту сущность в базе
-func (c *CacheOfNames[T]) Set(tx dbOrTx, name string, key T) {
+func (c *CacheOfNames[T]) Set(tx dbOrTx, name string, key T) T {
 	c.mutex.Lock()
 	c.once.Do(func() { c.initializer(tx, &c.elems) })
 	if oldKey, ok := c.elems[name]; ok {
@@ -47,4 +47,6 @@ func (c *CacheOfNames[T]) Set(tx dbOrTx, name string, key T) {
 	}
 	c.elems[name] = key
 	c.mutex.Unlock()
+
+	return key
 }

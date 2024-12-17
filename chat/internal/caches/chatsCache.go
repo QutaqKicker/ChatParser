@@ -4,6 +4,7 @@ import (
 	"chat/internal/dbHelper"
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"log"
 	"sync"
 	"time"
 )
@@ -60,18 +61,21 @@ func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
 func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 	if key == 0 {
 		newChat := models.Chat{Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.Chat](false, false)
+		insertQuery := dbHelper.BuildInsert[models.Chat](true)
 		rows, err := tx.Query(insertQuery, newChat.Name, newChat.Created)
 		if err != nil {
 			panic(err)
 		}
 		for rows.Next() {
-			rows.Scan(&key)
+			err = rows.Scan(&key)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		return key
 	} else {
 		newChat := models.Chat{Id: key, Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.Chat](true, false)
+		insertQuery := dbHelper.BuildInsert[models.Chat](false)
 		tx.Exec(insertQuery, newChat.FieldValuesAsArray())
 		return key
 	}

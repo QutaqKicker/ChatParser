@@ -60,7 +60,7 @@ func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
 func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 	if key == "" {
 		newUser := models.User{Id: name, Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.User](true, false)
+		insertQuery := dbHelper.BuildInsert[models.User](false)
 		_, err := tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		if err != nil {
 			panic(err)
@@ -69,7 +69,7 @@ func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 		return newUser.Id
 	} else {
 		newUser := models.User{Id: key, Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.User](true, false)
+		insertQuery := dbHelper.BuildInsert[models.User](false)
 		tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		return key
 	}

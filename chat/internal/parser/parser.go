@@ -136,7 +136,7 @@ chanLoop:
 				if chatId, ok := caches.ChatsCache.Get(tx, rawMessage.ChatName); ok {
 					rawMessage.ChatId = chatId
 				} else {
-					caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
+					rawMessage.ChatId = caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
 				}
 			} else {
 				//Если такого чата в кэше нет или айди этого чата не совпадает с тем, что был в сообщении, апсертим этот чат
@@ -149,7 +149,7 @@ chanLoop:
 				if userId, ok := caches.UsersCache.Get(tx, rawMessage.UserName); ok {
 					rawMessage.UserId = userId
 				} else {
-					caches.UsersCache.Set(tx, rawMessage.ChatName, rawMessage.UserId)
+					rawMessage.UserId = caches.UsersCache.Set(tx, rawMessage.UserName, rawMessage.UserId)
 				}
 			} else {
 				//Если такого юзера в кэше нет или айди этого юзера не совпадает с тем, что был в сообщении, апсертим этого юзера
@@ -177,7 +177,7 @@ chanLoop:
 
 // insertMessages Инсертит в БД прочитанные заполненные сообщения
 func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](true, false))
+	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](false))
 	if err != nil {
 		log.Fatal(err)
 	}
