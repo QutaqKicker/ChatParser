@@ -160,7 +160,11 @@ chanLoop:
 
 			outMessagesChan <- rawMessage
 
-			messagesCountPerUser[rawMessage.UserName].Add(1)
+			if counter, ok := messagesCountPerUser[rawMessage.UserName]; !ok {
+				messagesCountPerUser[rawMessage.UserName] = &atomic.Uint64{}
+			} else {
+				counter.Add(1)
+			}
 		}
 	}
 	close(outMessagesChan)

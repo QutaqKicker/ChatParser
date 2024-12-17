@@ -28,7 +28,8 @@ func newUsersCache() *usersCache {
 }
 
 func usersCacheInitializer(querier dbOrTx, elems *map[string]string) {
-	rows, err := querier.Query(dbHelper.BuildQuery[models.User](dbHelper.QueryBuildRequest{}))
+	query, _ := dbHelper.BuildQuery[models.User](dbHelper.QueryBuildRequest{})
+	rows, err := querier.Query(query)
 	if err != nil {
 		panic(err)
 	}
@@ -58,15 +59,18 @@ func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
 
 func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 	if key == "" {
-		newUser := models.User{Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.User](false, true)
-		rows, _ := tx.Query(insertQuery, newUser.Name, newUser.Created)
-		rows.Scan(&key)
-		return key
+		newUser := models.User{Id: name, Name: name, Created: time.Now()}
+		insertQuery := dbHelper.BuildInsert[models.User](true, false)
+		_, err := tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
+		if err != nil {
+			panic(err)
+		}
+
+		return newUser.Id
 	} else {
 		newUser := models.User{Id: key, Name: name, Created: time.Now()}
 		insertQuery := dbHelper.BuildInsert[models.User](true, false)
-		tx.Exec(insertQuery, newUser.FieldValuesAsArray())
+		tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		return key
 	}
 }

@@ -60,15 +60,18 @@ func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
 func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 	if key == 0 {
 		newChat := models.Chat{Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.User](false, true)
-		rows, _ := tx.Query(insertQuery, newChat.Name, newChat.Created)
+		insertQuery := dbHelper.BuildInsert[models.Chat](false, false)
+		rows, err := tx.Query(insertQuery, newChat.Name, newChat.Created)
+		if err != nil {
+			panic(err)
+		}
 		for rows.Next() {
 			rows.Scan(&key)
 		}
 		return key
 	} else {
 		newChat := models.Chat{Id: key, Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.User](true, false)
+		insertQuery := dbHelper.BuildInsert[models.Chat](true, false)
 		tx.Exec(insertQuery, newChat.FieldValuesAsArray())
 		return key
 	}
