@@ -4,6 +4,8 @@ github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1 h1:y
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1/go.mod h1:RrjfDjr1fA/br7C7cgbC4LwRERU5VGkCn+KzAw5C5tY=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6 h1:zF8oc9KqG9m9S3Bw1AH3P8uLhpZS1EG7rb84i8NAMj8=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6/go.mod h1:+5KMlAhAzGJjgwbo/6PObXE4rlhR+D9BXZMC4bbm4Ts=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241222123238-71c48fe03809 h1:s9l/s23p9lre4Np3wTK6WTF4jbwyJp9+et8kfrK77cw=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241222123238-71c48fe03809/go.mod h1:+5KMlAhAzGJjgwbo/6PObXE4rlhR+D9BXZMC4bbm4Ts=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/ilyakaznacheev/cleanenv v1.5.0 h1:0VNZXggJE2OYdXE87bfSSwGxeiGt9moSR2lOrsHHvr4=
