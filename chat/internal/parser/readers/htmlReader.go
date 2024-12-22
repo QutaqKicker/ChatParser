@@ -62,7 +62,7 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 	}
 
 	messageNodeProcessor := func() func(*html.Node) {
-		var lastSenderId string
+		var lastSenderName string
 
 		return func(node *html.Node) {
 			message, err := parseMessageNode(node)
@@ -74,10 +74,10 @@ func (r *HtmlReader) ReadMessages(ctx context.Context, fileName string) {
 				}
 			} else if message != nil {
 				message.ChatName = chatName
-				if message.UserId != "" {
-					lastSenderId = message.UserId
+				if message.UserName != "" {
+					lastSenderName = message.UserName
 				} else {
-					message.UserId = lastSenderId
+					message.UserName = lastSenderName
 				}
 
 				r.outMessagesChan <- *message
