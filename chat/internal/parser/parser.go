@@ -2,9 +2,9 @@ package parser
 
 import (
 	"chat/internal/caches"
-	"chat/internal/dbHelper"
 	"chat/internal/domain/models"
 	"chat/internal/parser/readers"
+	"chat/internal/queryBuilder"
 	"context"
 	"database/sql"
 	"errors"
@@ -170,14 +170,15 @@ chanLoop:
 	close(outMessagesChan)
 
 	for key, value := range messagesCountPerUser {
-		_ = UsersWithMessagesCount{key, value.Load()}
+		user := UsersWithMessagesCount{key, value.Load()}
+		log.Println(user)
 		//TODO Организовать отправку этого добра в сервис Users и вынести в основной метод. Если этот метод будет у нескольких горутин, данные отправим несколько раз вместо одного
 	}
 }
 
 // insertMessages Инсертит в БД прочитанные заполненные сообщения
 func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](false))
+	insertQuery, err := tx.Prepare(queryBuilder.BuildInsert[models.Message](false))
 	if err != nil {
 		log.Fatal(err)
 	}

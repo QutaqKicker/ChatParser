@@ -1,7 +1,7 @@
-package dbHelper
+package queryBuilder
 
-// QueryBuildRequest запрос на создание select sql запроса
-type QueryBuildRequest struct {
+// SelectBuildRequest запрос на создание select sql запроса
+type SelectBuildRequest struct {
 	// Filter фильтр запроса.
 	Filter any
 	// SortColumnIndexes индексы колонок, по которым нужно отсортировать запрос. Если число отрицательное, desc, иначе asc
@@ -15,32 +15,32 @@ type QueryBuildRequest struct {
 	Skip int
 }
 
-func NewRequest() *QueryBuildRequest {
-	return &QueryBuildRequest{}
+func NewRequest() *SelectBuildRequest {
+	return &SelectBuildRequest{}
 }
 
-func (r *QueryBuildRequest) WithFilter(filter any) *QueryBuildRequest {
+func (r *SelectBuildRequest) WithFilter(filter any) *SelectBuildRequest {
 	r.Filter = filter
 	return r
 }
 
-func (r *QueryBuildRequest) WithSorts(sortColumnIndexes []int) *QueryBuildRequest {
+func (r *SelectBuildRequest) WithSorts(sortColumnIndexes []int) *SelectBuildRequest {
 	r.SortColumnIndexes = sortColumnIndexes
 	return r
 }
 
-func (r *QueryBuildRequest) SetSelectType(selectType SelectType, specialSelect string) *QueryBuildRequest {
+func (r *SelectBuildRequest) SetSelectType(selectType SelectType, specialSelect string) *SelectBuildRequest {
 	r.SelectType = selectType
 	r.SpecialSelect = specialSelect
 	return r
 }
 
-func (r *QueryBuildRequest) NeedTake(take int) *QueryBuildRequest {
+func (r *SelectBuildRequest) NeedTake(take int) *SelectBuildRequest {
 	r.Take = take
 	return r
 }
 
-func (r *QueryBuildRequest) NeedSkip(skip int) *QueryBuildRequest {
+func (r *SelectBuildRequest) NeedSkip(skip int) *SelectBuildRequest {
 	r.Skip = skip
 	return r
 }

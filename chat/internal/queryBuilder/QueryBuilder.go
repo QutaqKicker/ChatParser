@@ -1,4 +1,4 @@
-package dbHelper
+package queryBuilder
 
 import (
 	"chat/internal/domain/filters"
@@ -12,8 +12,8 @@ type Entity interface {
 	TableName() string
 }
 
-// BuildQuery Построить селект для типа из дженерика согласно настройкам запроса в QueryBuildRequest
-func BuildQuery[T Entity](request QueryBuildRequest) (string, []interface{}) {
+// BuildQuery Построить селект для типа из дженерика согласно настройкам запроса в SelectBuildRequest
+func BuildQuery[T Entity](request SelectBuildRequest) (string, []interface{}) {
 	queryBuilder := strings.Builder{}
 
 	queryBuilder.WriteString(buildSelect[T](request.SelectType, request.SpecialSelect))

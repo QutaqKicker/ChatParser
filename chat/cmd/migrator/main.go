@@ -12,7 +12,7 @@ import (
 func main() {
 	var storagePath, migrationPath, migrationsTable string
 
-	flag.StringVar(&storagePath, "storage-path", "", "path of dbHelper storage")
+	flag.StringVar(&storagePath, "storage-path", "", "path of queryBuilder storage")
 	flag.StringVar(&migrationPath, "migrations-path", "", "path of migrations")
 	flag.StringVar(&migrationsTable, "migrations-table", "", "path of migrations table")
 	flag.Parse()

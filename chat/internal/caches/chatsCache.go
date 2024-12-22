@@ -1,9 +1,9 @@
 package caches
 
 import (
-	"chat/internal/dbHelper"
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"chat/internal/queryBuilder"
 	"log"
 	"sync"
 	"time"
@@ -29,13 +29,13 @@ func newChatsCache() *chatsCache {
 }
 
 func chatsCacheInitializer(querier dbOrTx, elems *map[string]int32) {
-	query, _ := dbHelper.BuildQuery[models.Chat](dbHelper.QueryBuildRequest{})
+	query, _ := queryBuilder.BuildQuery[models.Chat](queryBuilder.SelectBuildRequest{})
 	rows, err := querier.Query(query)
 	if err != nil {
 		panic(err)
 	}
 
-	chats, err := dbHelper.RowsToEntities[models.Chat](rows)
+	chats, err := queryBuilder.RowsToEntities[models.Chat](rows)
 	if err != nil {
 		panic(err)
 	}
@@ -48,11 +48,11 @@ func chatsCacheInitializer(querier dbOrTx, elems *map[string]int32) {
 }
 
 func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
-	updateUserQuery, userParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("id", newKey),
+	updateUserQuery, userParams := queryBuilder.BuildUpdate[models.Chat](queryBuilder.SetUpdate("id", newKey),
 		filters.NewChatFilter().WhereId(oldKey))
 	tx.Exec(updateUserQuery, userParams...)
 
-	updateMessagesQuery, messageParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("user_id", newKey),
+	updateMessagesQuery, messageParams := queryBuilder.BuildUpdate[models.Chat](queryBuilder.SetUpdate("user_id", newKey),
 		filters.NewMessageFilter().WhereChatIds([]int32{oldKey}))
 
 	tx.Exec(updateMessagesQuery, messageParams...)
@@ -61,7 +61,7 @@ func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
 func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 	if key == 0 {
 		newChat := models.Chat{Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.Chat](true)
+		insertQuery := queryBuilder.BuildInsert[models.Chat](true)
 		rows, err := tx.Query(insertQuery, newChat.Name, newChat.Created)
 		if err != nil {
 			panic(err)
@@ -75,7 +75,7 @@ func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 		return key
 	} else {
 		newChat := models.Chat{Id: key, Name: name, Created: time.Now()}
-		insertQuery := dbHelper.BuildInsert[models.Chat](false)
+		insertQuery := queryBuilder.BuildInsert[models.Chat](false)
 		tx.Exec(insertQuery, newChat.FieldValuesAsArray())
 		return key
 	}
