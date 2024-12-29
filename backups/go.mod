@@ -3,7 +3,7 @@ module backups
 go 1.21
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241222123238-71c48fe03809
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241222162228-59c072788225
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.65.0
 )

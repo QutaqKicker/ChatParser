@@ -12,11 +12,9 @@ import (
 )
 
 type Backup interface {
-	ExportToFile(ctx context.Context,
+	ExportToDir(ctx context.Context,
 		exportType backupv1.ExportType,
-		exportDir string) (bool, error)
-	ImportFromFile(ctx context.Context,
-		exportDir string) (bool, error)
+		exportDir string) error
 }
 
 type serverAPI struct {
@@ -28,20 +26,12 @@ func Register(gRPC *grpc.Server) {
 	backupv1.RegisterBackupServer(gRPC, &serverAPI{})
 }
 
-func (s *serverAPI) ExportToFile(ctx context.Context, req *backupv1.ExportToFileRequest) (*backupv1.ExportToFileResponse, error) {
+func (s *serverAPI) ExportToDir(ctx context.Context, req *backupv1.ExportToFileRequest) (*backupv1.ExportToFileResponse, error) {
 	if req.ExportDir == "" {
 		return nil, status.Error(codes.InvalidArgument, "exportDir is empty")
 	}
-	isSuccess, err := s.backup.ExportToFile(ctx, req.Type, req.ExportDir)
-	return &backupv1.ExportToFileResponse{IsSuccess: isSuccess}, err
-}
-
-func (s *serverAPI) ImportFromFile(ctx context.Context, req *backupv1.ImportFromFileRequest) (*backupv1.ImportFromFileResponse, error) {
-	if req.ExportDir == "" { //TODO Поменять на нормальное название
-		return nil, status.Error(codes.InvalidArgument, "exportDir is empty")
-	}
-	isSuccess, err := s.backup.ImportFromFile(ctx, req.ExportDir)
-	return &backupv1.ImportFromFileResponse{IsSuccess: isSuccess}, err
+	err := s.backup.ExportToDir(ctx, req.Type, req.ExportDir)
+	return &backupv1.ExportToFileResponse{Ok: err == nil}, err
 }
 
 type App struct {

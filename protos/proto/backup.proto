@@ -8,10 +8,10 @@ package backup;
 option go_package = "chatParser.backup.v1;backupv1";
 
 service Backup {
-  rpc ExportToFile (ExportToFileRequest) returns (ExportToFileResponse);
+  rpc ExportToDir (ExportToDirRequest) returns (ExportToDirResponse);
 }
 
-message ExportToFileRequest {
+message ExportToDirRequest {
   string ExportDir = 1;
   ExportType Type = 2;
   MessagesFilter MessageFilter = 3;
@@ -27,7 +27,7 @@ message MessagesFilter{
   repeated int32 ChatIds = 7;
 }
 
-message ExportToFileResponse {
+message ExportToDirResponse {
   bool Ok = 1;
 }
 
