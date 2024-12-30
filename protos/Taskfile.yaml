@@ -25,11 +25,18 @@ tasks:
     desc: "Generate code for audit service from protofiles"
     cmds:
       - protoc -I proto proto/audit.proto --go_out=./gen/go/audit --go_opt=paths=source_relative --go-grpc_out=./gen/go/audit --go-grpc_opt=paths=source_relative
+  generateCommon:
+    aliases:
+      - genCommon
+    desc: "Generate code for common protofile"
+    cmds:
+      - protoc -I proto proto/common.proto --go_out=./gen/go/common --go_opt=paths=source_relative --go-grpc_out=./gen/go/common --go-grpc_opt=paths=source_relative
   generateAll:
     aliases:
       - genAll
     desc: "Generate code for all services from protofiles"
     cmds:
+      - task genCommon
       - task genChat
       - task genUser
       - task genBackup
