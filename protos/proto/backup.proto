@@ -1,7 +1,7 @@
 
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 package backup;
 
@@ -14,17 +14,7 @@ service Backup {
 message ExportToDirRequest {
   string ExportDir = 1;
   ExportType Type = 2;
-  MessagesFilter MessageFilter = 3;
-}
-
-message MessagesFilter{
-  int32 Id = 1;
-  google.protobuf.Timestamp MinCreatedDate  = 2;
-  google.protobuf.Timestamp MaxCreatedDate  = 3;
-  string SubText = 4;
-  string UserId = 5;
-  repeated string UserIds = 6;
-  repeated int32 ChatIds = 7;
+  common.MessagesFilter MessageFilter = 3;
 }
 
 message ExportToDirResponse {

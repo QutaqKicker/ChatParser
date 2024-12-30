@@ -2,6 +2,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 package chat;
 
@@ -23,20 +24,10 @@ message ParseFromDirResponse {
 
 message SearchMessagesRequest {
   SearchAction Action = 1;
-  MessagesFilter Filter = 2;
+  common.MessagesFilter Filter = 2;
   int32 Take = 3;
   int32 Skip = 4;
   repeated string Sorts = 5;
-}
-
-message MessagesFilter{
-  int32 Id = 1;
-  google.protobuf.Timestamp MinCreatedDate  = 2;
-  google.protobuf.Timestamp MaxCreatedDate  = 3;
-  string SubText = 4;
-  string UserId = 5;
-  repeated string UserIds = 6;
-  repeated int32 ChatIds = 7;
 }
 
 message GetMessagesResponse {
