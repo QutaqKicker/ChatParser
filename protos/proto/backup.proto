@@ -12,7 +12,6 @@ service Backup {
 }
 
 message ExportToDirRequest {
-  string ExportDir = 1;
   ExportType Type = 2;
   common.MessagesFilter MessageFilter = 3;
 }
