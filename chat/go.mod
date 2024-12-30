@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241230165619-909bae5d01bf
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx v3.6.2+incompatible

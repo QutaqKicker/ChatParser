@@ -8,6 +8,10 @@ github.com/QutaqKicker/ChatParser/protos v0.0.0-20241215204622-fc3a1b1fd7d1 h1:b
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241215204622-fc3a1b1fd7d1/go.mod h1:RrjfDjr1fA/br7C7cgbC4LwRERU5VGkCn+KzAw5C5tY=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6 h1:zF8oc9KqG9m9S3Bw1AH3P8uLhpZS1EG7rb84i8NAMj8=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6/go.mod h1:+5KMlAhAzGJjgwbo/6PObXE4rlhR+D9BXZMC4bbm4Ts=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241229212212-6b5dc7a8091a h1:/o7NcaSsgeCysZ1srNoW3CW32gAmhmHc7Ypfhik1LQo=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241229212212-6b5dc7a8091a/go.mod h1:+5KMlAhAzGJjgwbo/6PObXE4rlhR+D9BXZMC4bbm4Ts=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241230165619-909bae5d01bf h1:9Ed/lLRxlNWPZ+WzSDFtuLvinlbOVjL4lmhBW3kOl+s=
+github.com/QutaqKicker/ChatParser/protos v0.0.0-20241230165619-909bae5d01bf/go.mod h1:+5KMlAhAzGJjgwbo/6PObXE4rlhR+D9BXZMC4bbm4Ts=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang-migrate/migrate/v4 v4.16.2 h1:8coYbMKUyInrFk1lfGfRovTLAW7PhWp8qQDT2iKfuoA=
