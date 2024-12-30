@@ -5,16 +5,13 @@ import (
 	"fmt"
 	backupv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/backup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
 )
 
 type Backup interface {
 	ExportToDir(ctx context.Context,
-		exportType backupv1.ExportType,
-		exportDir string) error
+		exportType backupv1.ExportType) error
 }
 
 type serverAPI struct {
@@ -26,12 +23,9 @@ func Register(gRPC *grpc.Server) {
 	backupv1.RegisterBackupServer(gRPC, &serverAPI{})
 }
 
-func (s *serverAPI) ExportToDir(ctx context.Context, req *backupv1.ExportToFileRequest) (*backupv1.ExportToFileResponse, error) {
-	if req.ExportDir == "" {
-		return nil, status.Error(codes.InvalidArgument, "exportDir is empty")
-	}
-	err := s.backup.ExportToDir(ctx, req.Type, req.ExportDir)
-	return &backupv1.ExportToFileResponse{Ok: err == nil}, err
+func (s *serverAPI) ExportToDir(ctx context.Context, req *backupv1.ExportToDirRequest) (*backupv1.ExportToDirResponse, error) {
+	err := s.backup.ExportToDir(ctx, req.Type)
+	return &backupv1.ExportToDirResponse{Ok: err == nil}, err
 }
 
 type App struct {

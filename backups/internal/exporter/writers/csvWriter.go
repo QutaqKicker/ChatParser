@@ -20,7 +20,7 @@ var csvHeaderColumns = []string{"Id",
 
 type CsvWriter struct{}
 
-func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []chatv1.ChatMessage) error {
+func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []*chatv1.ChatMessage) error {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -47,7 +47,7 @@ func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []chat
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			err = csvWriter.Write(FieldValuesAsArray(&messages[i]))
+			err = csvWriter.Write(FieldValuesAsArray(messages[i]))
 			if err != nil {
 				return fmt.Errorf("error on writing message with id %d. error: %w", messages[i].Id, err)
 			}

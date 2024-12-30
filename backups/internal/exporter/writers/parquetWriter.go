@@ -21,9 +21,9 @@ type parquetMessageRow struct {
 	Created          time.Time
 }
 
-func (ParquetWriter) WriteFile(ctx context.Context, writeDir string, messages []chatv1.ChatMessage) error {
+func (ParquetWriter) WriteFile(_ context.Context, writeDir string, messages []*chatv1.ChatMessage) error {
 	schema := parquet.SchemaOf(new(parquetMessageRow))
-	fileName := messages[len(messages)-1].Created.String() + ".parquet" //TODO Проверить
+	fileName := messages[0].Created.String() + ".parquet" //TODO Проверить
 	file, err := os.Create(writeDir + "/" + fileName)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (ParquetWriter) WriteFile(ctx context.Context, writeDir string, messages []
 	return nil
 }
 
-func mapChatMessagesToParquetRows(messages []chatv1.ChatMessage) []parquetMessageRow {
+func mapChatMessagesToParquetRows(messages []*chatv1.ChatMessage) []parquetMessageRow {
 	result := make([]parquetMessageRow, len(messages))
 	for i := 0; i < len(messages); i++ {
 		result[i] = parquetMessageRow{

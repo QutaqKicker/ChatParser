@@ -3,6 +3,7 @@ package exporter
 import (
 	"backups/internal/exporter/writers"
 	"context"
+	"errors"
 	backupv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/backup"
 	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
 	commonv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/common"
@@ -12,7 +13,7 @@ import (
 var messagesBatchSize = int32(100000)
 
 type fileWriter interface {
-	WriteFile(ctx context.Context, writeDir string, messages []chatv1.ChatMessage) error
+	WriteFile(ctx context.Context, writeDir string, messages []*chatv1.ChatMessage) error
 }
 
 type Exporter struct {
@@ -32,25 +33,47 @@ func NewExporter(exportType backupv1.ExportType) Exporter {
 	return Exporter{writer: writer}
 }
 
-func (e *Exporter) ExportToDir(ctx context.Context, exportDir string, messageFilter *commonv1.MessagesFilter) error {
+func (e *Exporter) ExportToDir(ctx context.Context, messageFilter *commonv1.MessagesFilter) error {
 	writersWg := sync.WaitGroup{}
 
-	taken := 0
+	//TODO Вынести адрес экспорта в конфиг
+	exportDir := "C:\\Projects\\TestingData\\Export"
+
+	taken := int32(0)
 	for {
-		messages, err := e.chatClient.GetMessages(ctx, &chatv1.SearchMessagesRequest{Filter: messageFilter,
-			Skip: int32(taken),
-			Take: messagesBatchSize})
+		messagesResponse, err := e.chatClient.GetMessages(ctx, &chatv1.SearchMessagesRequest{
+			Filter: messageFilter,
+			Skip:   taken,
+			Take:   messagesBatchSize,
+		})
 
 		if err != nil {
 			return err
 		}
-		if len(messages.Messages) == 0 {
+		if len(messagesResponse.Messages) == 0 {
 			break
 		}
 
-		if
+		writersWg.Add(1)
+		errorMutex := sync.Mutex{}
+		go func() {
+			writeErr := e.writer.WriteFile(ctx, exportDir, messagesResponse.Messages)
+			if writeErr != nil {
 
+				errorMutex.Lock()
+				if err != nil {
+					err = writeErr
+				} else {
+					err = errors.Join(err, writeErr)
+				}
+				errorMutex.Unlock()
 
+			}
+			writersWg.Done()
+		}()
+		taken += messagesBatchSize
 	}
 
+	writersWg.Wait()
+	return nil
 }

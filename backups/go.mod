@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241230165619-909bae5d01bf
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241230173947-d28999522e82
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.65.0
 )
