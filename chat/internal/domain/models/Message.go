@@ -26,10 +26,18 @@ func (m Message) FieldValuesAsArray() []any {
 	return []any{m.Id, m.ChatId, m.UserId, m.ReplyToMessageId, m.Text, m.Created}
 }
 
-type MessageSorter struct{}
+type MessageSorter []queryBuilder.SortField
 
-func (m Message) Sorter() MessageSorter {
-	return MessageSorter{}
+func (m Message) Sorter() *MessageSorter {
+	return &MessageSorter{}
 }
 
-func (s MessageSorter) ByCreated(direction queryBuilder.SortDirection)
+func (s *MessageSorter) ByCreated(direction queryBuilder.SortDirection) *MessageSorter {
+	*s = append(*s, queryBuilder.SortField{FieldName: "created", Direction: direction})
+	return s
+}
+
+func (s *MessageSorter) ByUser(direction queryBuilder.SortDirection) *MessageSorter {
+	*s = append(*s, queryBuilder.SortField{FieldName: "user_id", Direction: direction})
+	return s
+}

@@ -54,11 +54,11 @@ const (
 	Special
 )
 
-type SortDirection int8
+type SortDirection string
 
 const (
-	Asc SortDirection = iota
-	Desc
+	Asc  SortDirection = "asc"
+	Desc               = "desc"
 )
 
 type SortField struct {

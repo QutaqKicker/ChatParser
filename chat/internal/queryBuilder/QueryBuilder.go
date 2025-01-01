@@ -273,20 +273,21 @@ func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
 }
 
 func buildSorter(sortFields []SortField) string {
-	sorter := strings.Builder{}
+	sorterBuilder := strings.Builder{}
 
-	sorter.WriteString("\n order by ")
+	sorterBuilder.WriteString("\n order by ")
 
 	if len(sortFields) == 0 {
-		sorter.WriteString("created desc")
-		return sorter.String()
+		sorterBuilder.WriteString("created desc")
+		return sorterBuilder.String()
 	}
 
+	sortParts := make([]string, 0, len(sortFields))
 	for _, sortField := range sortFields {
-		sorter.WriteString(fmt.Sprintf())
+		sortParts = append(sortParts, fmt.Sprintf("%s %s", sortField.FieldName, sortField.Direction))
 	}
-	if sortFields != nil {
-		return fmt.Sprintf("\n order by %s", strings.Join(sortFields, ", "))
-	}
-	return "\n order by created desc"
+
+	sorterBuilder.WriteString(strings.Join(sortParts, ", "))
+
+	return sorterBuilder.String()
 }
