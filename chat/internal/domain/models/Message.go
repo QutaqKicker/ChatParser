@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"chat/internal/queryBuilder"
+	"time"
+)
 
 type Message struct {
 	Id               int32
@@ -22,3 +25,11 @@ func (m Message) TableName() string {
 func (m Message) FieldValuesAsArray() []any {
 	return []any{m.Id, m.ChatId, m.UserId, m.ReplyToMessageId, m.Text, m.Created}
 }
+
+type MessageSorter struct{}
+
+func (m Message) Sorter() MessageSorter {
+	return MessageSorter{}
+}
+
+func (s MessageSorter) ByCreated(direction queryBuilder.SortDirection)

@@ -23,7 +23,7 @@ func BuildQuery[T Entity](request SelectBuildRequest) (string, []interface{}) {
 
 	whereString, values := buildWhere(request.Filter, 0)
 	queryBuilder.WriteString(whereString)
-	//queryBuilder.WriteString(buildSorter(request.SortColumnIndexes))//TODO
+	queryBuilder.WriteString(buildSorter(request.Sorts)) //TODO
 	if request.Take != 0 {
 		queryBuilder.WriteString(fmt.Sprintf("\n LIMIT %d", request.Take))
 	}
@@ -272,9 +272,21 @@ func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
 	return whereBuilder.String(), values
 }
 
-func buildSorter(sorter []string) string {
-	if sorter != nil {
-		return fmt.Sprintf("\n order by %s", strings.Join(sorter, ", "))
+func buildSorter(sortFields []SortField) string {
+	sorter := strings.Builder{}
+
+	sorter.WriteString("\n order by ")
+
+	if len(sortFields) == 0 {
+		sorter.WriteString("created desc")
+		return sorter.String()
+	}
+
+	for _, sortField := range sortFields {
+		sorter.WriteString(fmt.Sprintf())
+	}
+	if sortFields != nil {
+		return fmt.Sprintf("\n order by %s", strings.Join(sortFields, ", "))
 	}
 	return "\n order by created desc"
 }

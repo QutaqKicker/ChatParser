@@ -4,8 +4,8 @@ package queryBuilder
 type SelectBuildRequest struct {
 	// Filter фильтр запроса.
 	Filter any
-	// SortColumnIndexes индексы колонок, по которым нужно отсортировать запрос. Если число отрицательное, desc, иначе asc
-	SortColumnIndexes []int
+	// Sorts Названия колонок, которые нужно отсортировать и порядок сортировки
+	Sorts []SortField
 	// SelectType Тип селекта. Если выбран Special, его нужно задать вручную в SpecialSelect, иначе его можно оставить пустым. По умолчанию выбран All
 	SelectType    SelectType
 	SpecialSelect string
@@ -24,8 +24,8 @@ func (r *SelectBuildRequest) WithFilter(filter any) *SelectBuildRequest {
 	return r
 }
 
-func (r *SelectBuildRequest) WithSorts(sortColumnIndexes []int) *SelectBuildRequest {
-	r.SortColumnIndexes = sortColumnIndexes
+func (r *SelectBuildRequest) WithSorts(sorts []SortField) *SelectBuildRequest {
+	r.Sorts = sorts
 	return r
 }
 
@@ -53,3 +53,15 @@ const (
 	Sum
 	Special
 )
+
+type SortDirection int8
+
+const (
+	Asc SortDirection = iota
+	Desc
+)
+
+type SortField struct {
+	FieldName string
+	Direction SortDirection
+}
