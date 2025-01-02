@@ -4,10 +4,10 @@ import (
 	"chat/internal/caches"
 	"chat/internal/domain/models"
 	"chat/internal/parser/readers"
-	"chat/internal/queryBuilder"
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/QutaqKicker/ChatParser/common/dbHelper"
 	"log"
 	"log/slog"
 	"os"
@@ -53,7 +53,11 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 		reader = readers.NewHtmlReader(rawMessagesChan, errorsChan)
 	case models.Json:
 		reader = readers.NewJsonReader(rawMessagesChan, errorsChan)
-	} //TODO остальные форматы сюда бахнуть
+	case models.Parquet:
+		reader = readers.NewParquetReader(rawMessagesChan, errorsChan)
+	case models.Csv:
+		reader = readers.NewCsvReader(rawMessagesChan, errorsChan)
+	}
 
 	files, err := os.ReadDir(dumpDir)
 	if err != nil {
@@ -178,7 +182,7 @@ chanLoop:
 
 // insertMessages Инсертит в БД прочитанные заполненные сообщения
 func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.Message) {
-	insertQuery, err := tx.Prepare(queryBuilder.BuildInsert[models.Message](false))
+	insertQuery, err := tx.Prepare(dbHelper.BuildInsert[models.Message](false))
 	if err != nil {
 		log.Fatal(err)
 	}

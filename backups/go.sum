@@ -1,5 +1,7 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/QutaqKicker/ChatParser/common v0.0.0-20250102102212-1a3050004c1f h1:Yxkrc1T6v2G0Eh2TZUx1ilThbCEPPNv49OKcjupoHzw=
+github.com/QutaqKicker/ChatParser/common v0.0.0-20250102102212-1a3050004c1f/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1 h1:yjbEhvZA8/NoynYsqm9S/uBWAoFpneVPTL2xpMRk2yM=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1/go.mod h1:RrjfDjr1fA/br7C7cgbC4LwRERU5VGkCn+KzAw5C5tY=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6 h1:zF8oc9KqG9m9S3Bw1AH3P8uLhpZS1EG7rb84i8NAMj8=

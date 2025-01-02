@@ -1,7 +1,7 @@
 package models
 
 import (
-	"chat/internal/queryBuilder"
+	"github.com/QutaqKicker/ChatParser/common/dbHelper"
 	"time"
 )
 
@@ -26,18 +26,18 @@ func (m Message) FieldValuesAsArray() []any {
 	return []any{m.Id, m.ChatId, m.UserId, m.ReplyToMessageId, m.Text, m.Created}
 }
 
-type MessageSorter []queryBuilder.SortField
+type MessageSorter []dbHelper.SortField
 
 func (m Message) Sorter() *MessageSorter {
 	return &MessageSorter{}
 }
 
-func (s *MessageSorter) ByCreated(direction queryBuilder.SortDirection) *MessageSorter {
-	*s = append(*s, queryBuilder.SortField{FieldName: "created", Direction: direction})
+func (s *MessageSorter) ByCreated(direction dbHelper.SortDirection) *MessageSorter {
+	*s = append(*s, dbHelper.SortField{FieldName: "created", Direction: direction})
 	return s
 }
 
-func (s *MessageSorter) ByUser(direction queryBuilder.SortDirection) *MessageSorter {
-	*s = append(*s, queryBuilder.SortField{FieldName: "user_id", Direction: direction})
+func (s *MessageSorter) ByUser(direction dbHelper.SortDirection) *MessageSorter {
+	*s = append(*s, dbHelper.SortField{FieldName: "user_id", Direction: direction})
 	return s
 }

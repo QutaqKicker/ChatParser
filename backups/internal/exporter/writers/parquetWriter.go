@@ -2,27 +2,16 @@ package writers
 
 import (
 	"context"
+	"github.com/QutaqKicker/ChatParser/common/contracts"
 	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
 	"github.com/parquet-go/parquet-go"
 	"os"
-	"time"
 )
 
 type ParquetWriter struct{}
 
-type parquetMessageRow struct {
-	Id               int32
-	ChatId           int32
-	ChatName         string
-	UserId           string
-	UserName         string
-	ReplyToMessageId int32
-	Text             string
-	Created          time.Time
-}
-
 func (ParquetWriter) WriteFile(_ context.Context, writeDir string, messages []*chatv1.ChatMessage) error {
-	schema := parquet.SchemaOf(new(parquetMessageRow))
+	schema := parquet.SchemaOf(new(contracts.ParquetMessageRow))
 	fileName := messages[0].Created.String() + ".parquet" //TODO Проверить
 	file, err := os.Create(writeDir + "/" + fileName)
 	if err != nil {
@@ -30,7 +19,7 @@ func (ParquetWriter) WriteFile(_ context.Context, writeDir string, messages []*c
 	}
 	defer file.Close()
 
-	writer := parquet.NewGenericWriter[parquetMessageRow](file, schema)
+	writer := parquet.NewGenericWriter[contracts.ParquetMessageRow](file, schema)
 	defer writer.Close()
 
 	rows := mapChatMessagesToParquetRows(messages)
@@ -43,18 +32,18 @@ func (ParquetWriter) WriteFile(_ context.Context, writeDir string, messages []*c
 	return nil
 }
 
-func mapChatMessagesToParquetRows(messages []*chatv1.ChatMessage) []parquetMessageRow {
-	result := make([]parquetMessageRow, len(messages))
+func mapChatMessagesToParquetRows(messages []*chatv1.ChatMessage) []contracts.ParquetMessageRow {
+	result := make([]contracts.ParquetMessageRow, len(messages))
 	for i := 0; i < len(messages); i++ {
-		result[i] = parquetMessageRow{
-			messages[i].Id,
-			messages[i].ChatId,
-			messages[i].ChatName,
-			messages[i].UserId,
-			messages[i].UserName,
-			messages[i].ReplyToMessageId,
-			messages[i].Text,
-			messages[i].Created.AsTime(),
+		result[i] = contracts.ParquetMessageRow{
+			Id:               messages[i].Id,
+			ChatId:           messages[i].ChatId,
+			ChatName:         messages[i].ChatName,
+			UserId:           messages[i].UserId,
+			UserName:         messages[i].UserName,
+			ReplyToMessageId: messages[i].ReplyToMessageId,
+			Text:             messages[i].Text,
+			Created:          messages[i].Created.AsTime(),
 		}
 	}
 
