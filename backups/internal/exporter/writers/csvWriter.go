@@ -4,23 +4,15 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"github.com/QutaqKicker/ChatParser/common/contracts"
 	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
 	"os"
 	"strconv"
 )
 
-var csvHeaderColumns = []string{"Id",
-	"ChatId",
-	"ChatName",
-	"UserId",
-	"UserName",
-	"ReplyToMessageId",
-	"Text",
-	"Created"}
-
 type CsvWriter struct{}
 
-func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []*chatv1.ChatMessage) error {
+func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []*chatv1.ChatMessage) (err error) {
 	if len(messages) == 0 {
 		return nil
 	}
@@ -30,14 +22,16 @@ func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []*cha
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		err = file.Close()
+	}()
 
 	csvWriter := csv.NewWriter(file)
 	csvWriter.Comma = ';'
 	csvWriter.UseCRLF = true
 	defer csvWriter.Flush()
 
-	err = csvWriter.Write(csvHeaderColumns)
+	err = csvWriter.Write(contracts.CsvHeaderColumns)
 	if err != nil {
 		return err
 	}

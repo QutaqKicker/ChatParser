@@ -12,7 +12,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102102212-1a3050004c1f // indirect
+	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102194232-5ce59d06a435 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

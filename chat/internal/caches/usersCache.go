@@ -3,7 +3,7 @@ package caches
 import (
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
-	"github.com/QutaqKicker/ChatParser/dbHelper/pkg"
+	"github.com/QutaqKicker/ChatParser/common/dbHelper"
 	"sync"
 	"time"
 )
@@ -28,13 +28,13 @@ func newUsersCache() *usersCache {
 }
 
 func usersCacheInitializer(querier dbOrTx, elems *map[string]string) {
-	query, _ := pkg.BuildQuery[models.User](pkg.SelectBuildRequest{})
+	query, _ := dbHelper.BuildQuery[models.User](dbHelper.SelectBuildRequest{})
 	rows, err := querier.Query(query)
 	if err != nil {
 		panic(err)
 	}
 
-	users, err := pkg.RowsToEntities[models.User](rows)
+	users, err := dbHelper.RowsToEntities[models.User](rows)
 	if err != nil {
 		panic(err)
 	}
@@ -47,11 +47,11 @@ func usersCacheInitializer(querier dbOrTx, elems *map[string]string) {
 }
 
 func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
-	updateUserQuery, userParams := pkg.BuildUpdate[models.User](pkg.SetUpdate("id", newKey),
+	updateUserQuery, userParams := dbHelper.BuildUpdate[models.User](dbHelper.SetUpdate("id", newKey),
 		filters.NewUserFilter().WhereId(oldKey))
 	tx.Exec(updateUserQuery, userParams...)
 
-	updateMessagesQuery, messageParams := pkg.BuildUpdate[models.User](pkg.SetUpdate("user_id", newKey),
+	updateMessagesQuery, messageParams := dbHelper.BuildUpdate[models.User](dbHelper.SetUpdate("user_id", newKey),
 		filters.NewMessageFilter().WhereUserIds([]string{oldKey}))
 
 	tx.Exec(updateMessagesQuery, messageParams...)
@@ -60,7 +60,7 @@ func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
 func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 	if key == "" {
 		newUser := models.User{Id: name, Name: name, Created: time.Now()}
-		insertQuery := pkg.BuildInsert[models.User](false)
+		insertQuery := dbHelper.BuildInsert[models.User](false)
 		_, err := tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		if err != nil {
 			panic(err)
@@ -69,7 +69,7 @@ func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 		return newUser.Id
 	} else {
 		newUser := models.User{Id: key, Name: name, Created: time.Now()}
-		insertQuery := pkg.BuildInsert[models.User](false)
+		insertQuery := dbHelper.BuildInsert[models.User](false)
 		tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		return key
 	}

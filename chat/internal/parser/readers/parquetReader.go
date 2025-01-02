@@ -43,6 +43,8 @@ func (r *ParquetReader) ReadMessages(ctx context.Context, fileName string) {
 				Text:             row.Text,
 				Created:          row.Created,
 			}
+
+			r.outMessagesChan <- message
 		}
 	}
 }
