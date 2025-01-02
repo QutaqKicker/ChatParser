@@ -1,4 +1,4 @@
-package queryBuilder
+package dbHelper
 
 // SelectBuildRequest запрос на создание select sql запроса
 type SelectBuildRequest struct {

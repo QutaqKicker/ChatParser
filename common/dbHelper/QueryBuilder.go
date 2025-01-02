@@ -1,7 +1,6 @@
-package queryBuilder
+package dbHelper
 
 import (
-	"chat/internal/domain/filters"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -50,7 +49,6 @@ func (u UpdateValues) AndUpdate(fieldName string, newValue any) UpdateValues {
 	return u
 }
 
-// TODO Сделать удобнее, или вообще переместить в сущности отдельными методами
 func BuildUpdate[T Entity](values UpdateValues, filter any) (string, []interface{}) {
 	updateBuilder := strings.Builder{}
 	t := *new(T)
@@ -75,7 +73,7 @@ func BuildUpdate[T Entity](values UpdateValues, filter any) (string, []interface
 	return updateBuilder.String(), queryValues
 }
 
-func BuildDelete[T Entity](filter *filters.MessageFilter) (string, []interface{}) {
+func BuildDelete[T Entity](filter any) (string, []interface{}) {
 	deleteBuilder := strings.Builder{}
 	t := *new(T)
 	deleteBuilder.WriteString(fmt.Sprintf("delete from %s", T.TableName(t)))
