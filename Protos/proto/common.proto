@@ -5,7 +5,7 @@ import "google/protobuf/timestamp.proto";
 
 package common;
 
-option go_package = "chatParser.Common.v1;commonv1";
+option go_package = "chatParser.common.v1;commonv1";
 
 message MessagesFilter{
   int32 Id = 1;

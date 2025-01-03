@@ -22,7 +22,7 @@ const (
 	User_GetUsersMessagesCount_FullMethodName = "/user.User/GetUsersMessagesCount"
 )
 
-// UserClient is the Client API for User service.
+// UserClient is the client API for User service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {

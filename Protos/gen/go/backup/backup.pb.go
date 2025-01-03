@@ -7,7 +7,7 @@
 package backupv1
 
 import (
-	chatParser_common_v1 "chatParser.Common.v1"
+	chatParser_common_v1 "chatParser.common.v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -211,11 +211,11 @@ var file_backup_proto_goTypes = []any{
 	(ExportType)(0),                             // 0: backup.ExportType
 	(*ExportToDirRequest)(nil),                  // 1: backup.ExportToDirRequest
 	(*ExportToDirResponse)(nil),                 // 2: backup.ExportToDirResponse
-	(*chatParser_common_v1.MessagesFilter)(nil), // 3: Common.MessagesFilter
+	(*chatParser_common_v1.MessagesFilter)(nil), // 3: common.MessagesFilter
 }
 var file_backup_proto_depIdxs = []int32{
 	0, // 0: backup.ExportToDirRequest.Type:type_name -> backup.ExportType
-	3, // 1: backup.ExportToDirRequest.MessageFilter:type_name -> Common.MessagesFilter
+	3, // 1: backup.ExportToDirRequest.MessageFilter:type_name -> common.MessagesFilter
 	1, // 2: backup.Backup.ExportToDir:input_type -> backup.ExportToDirRequest
 	2, // 3: backup.Backup.ExportToDir:output_type -> backup.ExportToDirResponse
 	3, // [3:4] is the sub-list for method output_type

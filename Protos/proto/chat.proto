@@ -4,11 +4,11 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "common.proto";
 
-package chats;
+package chat;
 
-option go_package = "chatParser.chat.v1;chatsv1";
+option go_package = "chatParser.chat.v1;chatv1";
 
-service Chats {
+service Chat {
   rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
   rpc GetMessages (SearchMessagesRequest) returns (GetMessagesResponse);
   rpc DeleteMessages (SearchMessagesRequest) returns (DeleteMessageResponse);

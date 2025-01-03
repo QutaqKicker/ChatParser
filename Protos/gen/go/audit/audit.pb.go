@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.35.2
 // 	protoc        v5.29.1
-// source: AuditService.proto
+// source: audit.proto
 
 package auditv1
 
@@ -75,7 +75,7 @@ type AuditInfoRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	ServiceName string    `protobuf:"bytes,1,opt,name=ServiceName,proto3" json:"ServiceName,omitempty"`
-	Type        AuditType `protobuf:"varint,2,opt,name=Type,proto3,enum=AuditService.AuditType" json:"Type,omitempty"`
+	Type        AuditType `protobuf:"varint,2,opt,name=Type,proto3,enum=audit.AuditType" json:"Type,omitempty"`
 	Message     string    `protobuf:"bytes,3,opt,name=Message,proto3" json:"Message,omitempty"`
 }
 
@@ -216,14 +216,14 @@ func file_audit_proto_rawDescGZIP() []byte {
 var file_audit_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_audit_proto_goTypes = []any{
-	(AuditType)(0),            // 0: AuditService.AuditType
-	(*AuditInfoRequest)(nil),  // 1: AuditService.AuditInfoRequest
-	(*AuditInfoResponse)(nil), // 2: AuditService.AuditInfoResponse
+	(AuditType)(0),            // 0: audit.AuditType
+	(*AuditInfoRequest)(nil),  // 1: audit.AuditInfoRequest
+	(*AuditInfoResponse)(nil), // 2: audit.AuditInfoResponse
 }
 var file_audit_proto_depIdxs = []int32{
-	0, // 0: AuditService.AuditInfoRequest.Type:type_name -> AuditService.AuditType
-	1, // 1: AuditService.Audit.AuditInfo:input_type -> AuditService.AuditInfoRequest
-	2, // 2: AuditService.Audit.AuditInfo:output_type -> AuditService.AuditInfoResponse
+	0, // 0: audit.AuditInfoRequest.Type:type_name -> audit.AuditType
+	1, // 1: audit.Audit.AuditInfo:input_type -> audit.AuditInfoRequest
+	2, // 2: audit.Audit.AuditInfo:output_type -> audit.AuditInfoResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

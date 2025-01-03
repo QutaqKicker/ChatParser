@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.35.2
 // 	protoc        v5.29.1
-// source: Common.proto
+// source: common.proto
 
 package commonv1
 
@@ -157,12 +157,12 @@ func file_common_proto_rawDescGZIP() []byte {
 
 var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_common_proto_goTypes = []any{
-	(*MessagesFilter)(nil),        // 0: Common.MessagesFilter
+	(*MessagesFilter)(nil),        // 0: common.MessagesFilter
 	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
 }
 var file_common_proto_depIdxs = []int32{
-	1, // 0: Common.MessagesFilter.MinCreatedDate:type_name -> google.protobuf.Timestamp
-	1, // 1: Common.MessagesFilter.MaxCreatedDate:type_name -> google.protobuf.Timestamp
+	1, // 0: common.MessagesFilter.MinCreatedDate:type_name -> google.protobuf.Timestamp
+	1, // 1: common.MessagesFilter.MaxCreatedDate:type_name -> google.protobuf.Timestamp
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

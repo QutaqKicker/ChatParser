@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.1
-// source: AuditService.proto
+// source: audit.proto
 
 package auditv1
 
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Audit_AuditInfo_FullMethodName = "/AuditService.Audit/AuditInfo"
+	Audit_AuditInfo_FullMethodName = "/audit.Audit/AuditInfo"
 )
 
-// AuditClient is the Client API for Audit service.
+// AuditClient is the client API for Audit service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuditClient interface {
@@ -108,7 +108,7 @@ func _Audit_AuditInfo_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Audit_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "AuditService.Audit",
+	ServiceName: "audit.Audit",
 	HandlerType: (*AuditServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -117,5 +117,5 @@ var Audit_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "AuditService.proto",
+	Metadata: "audit.proto",
 }

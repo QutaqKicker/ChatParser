@@ -61,7 +61,7 @@ type GetUsersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Users []*UserInfo `protobuf:"bytes,1,rep,name=UserService,proto3" json:"UserService,omitempty"`
+	Users []*UserInfo `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
 }
 
 func (x *GetUsersResponse) Reset() {
@@ -205,7 +205,7 @@ var file_user_proto_goTypes = []any{
 	(*UserInfo)(nil),         // 2: user.UserInfo
 }
 var file_user_proto_depIdxs = []int32{
-	2, // 0: user.GetUsersResponse.UserService:type_name -> user.UserInfo
+	2, // 0: user.GetUsersResponse.users:type_name -> user.UserInfo
 	0, // 1: user.User.GetUsersMessagesCount:input_type -> user.GetUsersRequest
 	1, // 2: user.User.GetUsersMessagesCount:output_type -> user.GetUsersResponse
 	2, // [2:3] is the sub-list for method output_type
