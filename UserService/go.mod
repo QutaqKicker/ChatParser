@@ -3,13 +3,14 @@ module users
 go 1.21
 
 require (
-	github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6
+	github.com/QutaqKicker/ChatParser/protos v0.0.0-20250102205628-28c8a7045ae3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.65.0
 )
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect

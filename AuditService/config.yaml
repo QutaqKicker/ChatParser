@@ -1,4 +1,0 @@
-env: "dev"
-grpc:
-  port: 8085
-  timeout: 60s

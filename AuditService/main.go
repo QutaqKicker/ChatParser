@@ -1,7 +1,6 @@
 package main
 
 import (
-	config "audit/internal"
 	"audit/internal/grpc"
 	"log/slog"
 	"os"
@@ -10,12 +9,11 @@ import (
 )
 
 func main() {
-	cfg := config.MustLoad()
+	logger := setupLogger("dev")
 
-	logger := setupLogger(cfg.Env)
+	logger.Info("started application")
 
-	logger.Info("started application", slog.Any("config", cfg))
-
+	port :=
 	application := grpc.New(logger, cfg.Grpc.Port)
 
 	go application.Run()
