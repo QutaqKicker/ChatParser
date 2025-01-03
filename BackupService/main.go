@@ -3,9 +3,11 @@ package main
 import (
 	config "backups/internal"
 	"backups/internal/grpc"
+	"github.com/QutaqKicker/ChatParser/common/constants"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
@@ -16,8 +18,9 @@ func main() {
 
 	logger.Info("started application", slog.Any("config", cfg))
 
-	port :=
-	application := grpc.New(logger, cfg.Grpc.Port)
+	port, _ := strconv.Atoi(os.Getenv(constants.BackupPortEnvName))
+	chatServicePort, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
+	application := grpc.New(logger, cfg.ExportDir, port, chatServicePort)
 
 	go application.Run()
 

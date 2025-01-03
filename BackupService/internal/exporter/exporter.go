@@ -17,11 +17,15 @@ type fileWriter interface {
 }
 
 type Exporter struct {
-	writer     fileWriter
 	chatClient chatv1.ChatClient
+	exportDir  string
 }
 
-func NewExporter(exportType backupv1.ExportType) Exporter {
+func NewExporter(chatClient chatv1.ChatClient, exportDir string) Exporter {
+	return Exporter{chatClient: chatClient, exportDir: exportDir}
+}
+
+func (e Exporter) ExportToDir(ctx context.Context, exportType backupv1.ExportType, messageFilter *commonv1.MessagesFilter) error {
 	var writer fileWriter
 	switch exportType {
 	case backupv1.ExportType_CSV:
@@ -30,14 +34,7 @@ func NewExporter(exportType backupv1.ExportType) Exporter {
 		writer = writers.ParquetWriter{}
 	}
 
-	return Exporter{writer: writer}
-}
-
-func (e *Exporter) ExportToDir(ctx context.Context, messageFilter *commonv1.MessagesFilter) error {
 	writersWg := sync.WaitGroup{}
-
-	//TODO Вынести адрес экспорта в конфиг
-	exportDir := "C:\\Projects\\TestingData\\Export"
 
 	taken := int32(0)
 	for {
@@ -57,7 +54,7 @@ func (e *Exporter) ExportToDir(ctx context.Context, messageFilter *commonv1.Mess
 		writersWg.Add(1)
 		errorMutex := sync.Mutex{}
 		go func() {
-			writeErr := e.writer.WriteFile(ctx, exportDir, messagesResponse.Messages)
+			writeErr := writer.WriteFile(ctx, e.exportDir, messagesResponse.Messages)
 			if writeErr != nil {
 
 				errorMutex.Lock()

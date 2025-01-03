@@ -6,6 +6,8 @@ github.com/QutaqKicker/ChatParser/common v0.0.0-20250102145430-2725beb707d0 h1:Y
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102145430-2725beb707d0/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102194232-5ce59d06a435 h1:Z45jFkjHYBtDRposEtmeCCR7h0IwJIA+xRx2YwQAl54=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102194232-5ce59d06a435/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
+github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 h1:76WL/9FFItf0DtLEdICuHZ0nSTL/q+J+UFvXK7uzroU=
+github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1 h1:yjbEhvZA8/NoynYsqm9S/uBWAoFpneVPTL2xpMRk2yM=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20240721112138-9dd739e2eba1/go.mod h1:RrjfDjr1fA/br7C7cgbC4LwRERU5VGkCn+KzAw5C5tY=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20241216172447-80f1def34ac6 h1:zF8oc9KqG9m9S3Bw1AH3P8uLhpZS1EG7rb84i8NAMj8=
