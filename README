@@ -5,3 +5,9 @@ docker run --name ChatParser -p 5432:5432 -e POSTGRES_PASSWORD=ChatParser -d pos
        psql -U postgres -w -c "create database chat;"
 
 go run ./cmd/migrator --storage-path=./storage/sso.db --migrations-path=.//////
+
+SET ChatParser_Audit_Port=8085
+SET ChatParser_Backup_Port=8084
+SET ChatParser_Chat_Port=8082
+SET ChatParser_User_Port=8083
+SET ChatParser_Router_Port=8081

@@ -1,0 +1,3 @@
+env: "dev"
+exportDir: "C:\ChatParserExport"
+timeout: 60s

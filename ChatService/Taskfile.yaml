@@ -1,0 +1,9 @@
+version: "3"
+
+tasks:
+  runMigrations:
+    aliases:
+      - runMigrations
+    desc: "run all migrations"
+    cmds:
+      - go run ./cmd/migrator --storage-path=postgresql://postgres:ChatParser@localhost:5432/ChatService?sslmode=disable --migrations-path=./migrations

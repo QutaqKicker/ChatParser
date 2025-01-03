@@ -1,0 +1,57 @@
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+package chats;
+
+option go_package = "chatParser.chat.v1;chatsv1";
+
+service Chats {
+  rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
+  rpc GetMessages (SearchMessagesRequest) returns (GetMessagesResponse);
+  rpc DeleteMessages (SearchMessagesRequest) returns (DeleteMessageResponse);
+}
+
+message ParseFromDirRequest {
+  string DirPath = 1;
+}
+
+message ParseFromDirResponse {
+  bool Ok = 1;
+}
+
+message SearchMessagesRequest {
+  SearchAction Action = 1;
+  common.MessagesFilter Filter = 2;
+  int32 Take = 3;
+  int32 Skip = 4;
+  repeated string Sorts = 5;
+}
+
+message GetMessagesResponse {
+  repeated ChatMessage Messages = 1;
+}
+
+message ChatMessage {
+  int32 Id = 1;
+  int32 ChatId = 2;
+  string ChatName = 3;
+  string UserId = 4;
+  string UserName = 5;
+  int32 ReplyToMessageId = 6;
+  string Text = 7;
+  google.protobuf.Timestamp Created = 8;
+}
+
+enum SearchAction{
+  None = 0;
+  Select = 1;
+  Delete = 2;
+  Backup = 3;
+}
+
+message DeleteMessageResponse {
+  bool Ok = 1;
+}
