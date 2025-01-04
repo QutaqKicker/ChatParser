@@ -10,7 +10,7 @@ type Log struct {
 	ServiceName string    `column:"service_name"`
 	Type        int
 	Message     string
-	Created     time.Time
+	Created     time.Time `auto-generated:"true"`
 }
 
 func (u Log) TableName() string {
