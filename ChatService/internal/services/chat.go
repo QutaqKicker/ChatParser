@@ -6,8 +6,8 @@ import (
 	"chat/internal/parser"
 	"context"
 	"database/sql"
+	"github.com/QutaqKicker/ChatParser/common/dbHelper"
 	"log/slog"
-	"time"
 )
 
 type ChatService struct {
@@ -32,7 +32,6 @@ type MessageProvider interface {
 		filter filters.MessageFilter) ([]models.Message, error)
 }
 
-// New returns new instance of ChatService service
 func NewChatService(
 	log *slog.Logger,
 	db *sql.DB) *ChatService {
@@ -60,14 +59,18 @@ func (s *ChatService) Parse(ctx context.Context,
 	return nil
 }
 
-func (s *ChatService) SearchMessages(ctx context.Context,
-	min time.Time,
-	max time.Time,
-	userIds []string) ([]*models.Message, error) {
-	panic("not implemented")
+func (s *ChatService) SearchMessages(ctx context.Context, request *dbHelper.SelectBuildRequest) ([]models.Message, error) {
+	selectQuery, selectParams := dbHelper.BuildQuery[models.Message](*request)
+	rows, err := s.db.QueryContext(ctx, selectQuery, selectParams...)
+	if err != nil {
+		return nil, err
+	}
+
+	return dbHelper.RowsToEntities[models.Message](rows)
 }
 
-func (s *ChatService) GetStatistics(ctx context.Context,
-	userIds []string) (bool, error) {
-	panic("not implemented")
+func (s *ChatService) DeleteMessages(ctx context.Context, request *dbHelper.SelectBuildRequest) error {
+	deleteQuery, deleteParams := dbHelper.BuildDelete[models.Message](*request)
+	_, err := s.db.ExecContext(ctx, deleteQuery, deleteParams...)
+	return err
 }

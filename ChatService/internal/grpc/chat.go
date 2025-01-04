@@ -1,14 +1,17 @@
 package grpc
 
 import (
+	"chat/internal/domain/filters"
 	"chat/internal/services"
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/QutaqKicker/ChatParser/common/dbHelper"
 	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log/slog"
 	"net"
 	"time"
@@ -66,22 +69,48 @@ func (s *serverAPI) ParseFromDir(ctx context.Context, req *chatv1.ParseFromDirRe
 	return &chatv1.ParseFromDirResponse{Ok: ok}, err
 }
 
-func (s *serverAPI) GetMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.GetMessagesResponse, error) {
-	if req.Filter == nil {
-		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
+func (s *serverAPI) GetMessages(ctx context.Context, request *chatv1.SearchMessagesRequest) (*chatv1.GetMessagesResponse, error) {
+	messages, err := s.chat.SearchMessages(ctx, searchMessagesRequestConvertGrpcToDbHelper(request))
+	if err != nil {
+		return nil, err
 	}
 
-	//messages, err := s.ChatService.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
-	return &chatv1.GetMessagesResponse{}, nil
+	response := &chatv1.GetMessagesResponse{Messages: make([]*chatv1.ChatMessage, len(messages))}
+	for i := 0; i < len(messages); i++ {
+		response.Messages[i] = &chatv1.ChatMessage{
+			Id:               messages[i].Id,
+			ChatId:           messages[i].ChatId,
+			ChatName:         messages[i].ChatName,
+			UserId:           messages[i].UserId,
+			UserName:         messages[i].UserName,
+			ReplyToMessageId: messages[i].ReplyToMessageId,
+			Text:             messages[i].Text,
+			Created:          &timestamppb.Timestamp{Seconds: int64(messages[i].Created.Second())},
+		}
+	}
+	return response, err
 }
 
-func (s *serverAPI) DeleteMessages(ctx context.Context, req *chatv1.SearchMessagesRequest) (*chatv1.DeleteMessageResponse, error) {
-	if req.Filter == nil {
-		return nil, status.Error(codes.InvalidArgument, "all filters is empty")
-	}
+func (s *serverAPI) DeleteMessages(ctx context.Context, request *chatv1.SearchMessagesRequest) (*chatv1.DeleteMessageResponse, error) {
+	err := s.chat.DeleteMessages(ctx, searchMessagesRequestConvertGrpcToDbHelper(request))
+	return &chatv1.DeleteMessageResponse{Ok: err == nil}, err
+}
 
-	//messages, err := s.ChatService.SearchMessages(ctx, req.MinDate.AsTime(), req.MaxDate.AsTime(), req.UserIds)
-	return &chatv1.DeleteMessageResponse{}, nil
+func searchMessagesRequestConvertGrpcToDbHelper(req *chatv1.SearchMessagesRequest) *dbHelper.SelectBuildRequest {
+	return &dbHelper.SelectBuildRequest{
+		Filter: filters.MessageFilter{
+			Id:             req.Filter.Id,
+			MinCreatedDate: req.Filter.MinCreatedDate,
+			MaxCreatedDate: req.Filter.MaxCreatedDate,
+			SubText:        req.Filter.SubText,
+			UserId:         req.Filter.UserId,
+			UserIds:        req.Filter.UserIds,
+			ChatIds:        req.Filter.ChatIds,
+		},
+		//Sorts: req.Sorts TODO надо что-то придумать
+		Take: int(req.Take),
+		Skip: int(req.Skip),
+	}
 }
 
 func (a *App) Run() error {

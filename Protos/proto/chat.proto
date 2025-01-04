@@ -23,7 +23,6 @@ message ParseFromDirResponse {
 }
 
 message SearchMessagesRequest {
-  SearchAction Action = 1;
   common.MessagesFilter Filter = 2;
   int32 Take = 3;
   int32 Skip = 4;
@@ -43,13 +42,6 @@ message ChatMessage {
   int32 ReplyToMessageId = 6;
   string Text = 7;
   google.protobuf.Timestamp Created = 8;
-}
-
-enum SearchAction{
-  None = 0;
-  Select = 1;
-  Delete = 2;
-  Backup = 3;
 }
 
 message DeleteMessageResponse {
