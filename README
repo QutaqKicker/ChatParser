@@ -1,5 +1,6 @@
 
 docker run --name ChatParser -p 5432:5432 -e POSTGRES_PASSWORD=ChatParser -d postgres:16.4
+docker run -it -p 8080:8080 -e DYNAMIC_CONFIG_ENABLED=true provectuslabs/kafka-ui
 
       - docker exec -it ChatParser bash
        psql -U postgres -w -c "create database chat;"

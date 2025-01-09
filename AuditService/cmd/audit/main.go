@@ -2,8 +2,10 @@ package main
 
 import (
 	"audit/internal/config"
+	"audit/internal/domain/services"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -18,6 +20,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	_ = services.NewLogSaver(logger, db)
 
 	logger.Info("started application")
 
