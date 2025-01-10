@@ -12,3 +12,4 @@ SET ChatParser_Backup_Port=8084
 SET ChatParser_Chat_Port=8082
 SET ChatParser_User_Port=8083
 SET ChatParser_Router_Port=8081
+SET ChatParser_Kafka_1_Url=localhost:9092
