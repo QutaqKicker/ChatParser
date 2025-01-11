@@ -1,27 +1,69 @@
 package kafka
 
 import (
+	"context"
 	"github.com/QutaqKicker/ChatParser/common/constants"
+	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"os"
 )
 
-func newAuditProducer() *kafka.Writer {
+type AuditProducer struct {
+	kafka.Writer
+}
+
+func newAuditProducer() *AuditProducer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
-	return &kafka.Writer{
-		Addr:     kafka.TCP(brokerUrl),
-		Topic:    constants.KafkaAuditCreateLogTopicName,
-		Balancer: &kafka.LeastBytes{},
+	return &AuditProducer{
+		kafka.Writer{
+			Addr:     kafka.TCP(brokerUrl),
+			Topic:    constants.KafkaAuditCreateLogTopicName,
+			Balancer: &kafka.LeastBytes{}},
 	}
 }
 
-func newUserMessageCounterProducer() *kafka.Writer {
+func (p *AuditProducer) Send(ctx context.Context, message CreateLogRequest) error {
+	key := []byte(uuid.New().String())
+	value, err := kafka.Marshal(message)
+	if err != nil {
+		return err
+	}
+
+	err = p.WriteMessages(ctx, kafka.Message{
+		Key:   key,
+		Value: value,
+	})
+
+	return err
+}
+
+type UserMessageCounterProducer struct {
+	kafka.Writer
+}
+
+func newUserMessageCounterProducer() *AuditProducer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
-	return &kafka.Writer{
-		Addr:     kafka.TCP(brokerUrl),
-		Topic:    constants.KafkaUserMessageCounterTopicName,
-		Balancer: &kafka.LeastBytes{},
+	return &AuditProducer{
+		kafka.Writer{
+			Addr:     kafka.TCP(brokerUrl),
+			Topic:    constants.KafkaUserMessageCounterTopicName,
+			Balancer: &kafka.LeastBytes{},
+		}}
+}
+
+func (p *UserMessageCounterProducer) Send(ctx context.Context, message UserMessageCountRequest) error {
+	key := []byte(uuid.New().String())
+	value, err := kafka.Marshal(message)
+	if err != nil {
+		return err
 	}
+
+	err = p.WriteMessages(ctx, kafka.Message{
+		Key:   key,
+		Value: value,
+	})
+
+	return err
 }
