@@ -7,7 +7,7 @@
 package chatv1
 
 import (
-	commonv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/common"
+	commonv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
