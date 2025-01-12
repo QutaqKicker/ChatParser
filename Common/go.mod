@@ -1,4 +1,4 @@
-module github.com/QutaqKicker/ChatParser/common
+module github.com/QutaqKicker/ChatParser/Common
 
 go 1.21
 
