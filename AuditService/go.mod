@@ -5,7 +5,6 @@ go 1.22.0
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3
 	github.com/QutaqKicker/ChatParser/protos v0.0.0-20250102205628-28c8a7045ae3
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/google/uuid v1.6.0
@@ -14,6 +13,9 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/QutaqKicker/ChatParser v0.1.0 // indirect
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155 // indirect
+	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

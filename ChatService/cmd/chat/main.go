@@ -3,13 +3,18 @@ package main
 import (
 	"chat/internal/config"
 	"chat/internal/grpc"
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/QutaqKicker/ChatParser/Common/constants"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -23,11 +28,17 @@ func main() {
 
 	defer db.Close()
 
-	logger := setupLogger(cfg.Env)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	producer := myKafka.NewAuditProducer()
+	defer producer.Close()
+
+	logger := setupLogger(ctx, producer)
 
 	logger.Info("started application", slog.Any("config", cfg))
 
-	application := grpc.New(logger, db, cfg.Grpc.Port)
+	port, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
+	application := grpc.New(logger, db, port)
 
 	go application.Run()
 
@@ -55,13 +66,34 @@ func connectDb(cfg config.DbConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-	switch env {
-	case "dev":
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	}
+func setupLogger(ctx context.Context, producer *myKafka.AuditProducer) *slog.Logger {
+	log := slog.New(&AuditLogHandler{producer: producer})
 	return log
+}
+
+type AuditLogHandler struct {
+	producer *myKafka.AuditProducer
+}
+
+func (h *AuditLogHandler) Handle(ctx context.Context, record slog.Record) error {
+	fmt.Println(record.Message)
+
+	err := h.producer.Send(ctx, myKafka.CreateLogRequest{
+		ServiceName: "ChatService",
+		Type:        int(record.Level),
+		Message:     record.Message,
+		Created:     time.Now(),
+	})
+	return err
+}
+
+func (h *AuditLogHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return true
+}
+func (h *AuditLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return h
+}
+
+func (h *AuditLogHandler) WithGroup(name string) slog.Handler {
+	return h
 }

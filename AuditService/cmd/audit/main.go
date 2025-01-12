@@ -3,8 +3,10 @@ package main
 import (
 	"audit/internal/config"
 	"audit/internal/domain/services"
+	"context"
 	"database/sql"
 	"fmt"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
@@ -21,7 +23,37 @@ func main() {
 		panic(err)
 	}
 
-	_ = services.NewLogSaver(logger, db)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logSaver := services.NewLogSaver(logger, db)
+	consumer := myKafka.NewAuditConsumer()
+	defer func(consumer *myKafka.AuditConsumer) {
+		err := consumer.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(consumer)
+
+	requestsChan := consumer.ListenRequests(ctx)
+
+	go func() {
+	mainLoop:
+		for {
+			select {
+			case <-ctx.Done():
+				break mainLoop
+			case r, ok := <-requestsChan:
+				if !ok {
+					break mainLoop
+				}
+
+				logSaver.SaveLog(r.ServiceName, r.Type, r.Message)
+			}
+
+		}
+		<-requestsChan
+	}()
 
 	logger.Info("started application")
 
@@ -29,7 +61,6 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
 	<-stop
-
 }
 
 func connectDb(cfg config.DbConfig) (*sql.DB, error) {

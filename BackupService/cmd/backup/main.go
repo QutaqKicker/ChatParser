@@ -3,7 +3,7 @@ package main
 import (
 	config "backups/internal"
 	"backups/internal/grpc"
-	"github.com/QutaqKicker/ChatParser/common/constants"
+	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"log/slog"
 	"os"
 	"os/signal"

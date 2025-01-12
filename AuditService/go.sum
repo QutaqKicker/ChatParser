@@ -4,6 +4,10 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
+github.com/QutaqKicker/ChatParser v0.1.0 h1:YBmTHNs+olv2O0Eltx2hqp8C3urSv+F/xtUhL5FiOsc=
+github.com/QutaqKicker/ChatParser v0.1.0/go.mod h1:58zbGPmnU6Znn45seo/tmIUWyw5ClimAqG/UHiqteE0=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155 h1:WBCEHMZMwNSFiDY3+EBooBPNp0mUED6nlhteVmahapM=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 h1:76WL/9FFItf0DtLEdICuHZ0nSTL/q+J+UFvXK7uzroU=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
 github.com/QutaqKicker/ChatParser/protos v0.0.0-20250102205628-28c8a7045ae3 h1:DZl9pEJ2hhFzRE2E/IqPQIXU29+KSrzfm1s/4ZXr6+I=

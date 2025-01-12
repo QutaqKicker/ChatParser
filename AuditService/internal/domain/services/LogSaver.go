@@ -4,7 +4,6 @@ import (
 	"audit/internal/domain/models"
 	"database/sql"
 	"github.com/QutaqKicker/ChatParser/common/dbHelper"
-	auditv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/audit"
 	"log"
 	"log/slog"
 	"time"
@@ -21,7 +20,7 @@ func NewLogSaver(log *slog.Logger, db *sql.DB) *LogSaver {
 
 var insertStatement *sql.Stmt
 
-func (s *LogSaver) SaveLog(serviceName string, auditType auditv1.AuditType, message string) {
+func (s *LogSaver) SaveLog(serviceName string, auditType int, message string) {
 	if insertStatement == nil {
 		var err error
 		insertStatement, err = s.db.Prepare(dbHelper.BuildInsert[models.Log](true))
