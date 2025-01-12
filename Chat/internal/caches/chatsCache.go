@@ -3,7 +3,7 @@ package caches
 import (
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log"
 	"sync"
 	"time"

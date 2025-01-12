@@ -6,8 +6,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
-	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
+	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -100,8 +100,8 @@ func searchMessagesRequestConvertGrpcToDbHelper(req *chatv1.SearchMessagesReques
 	return &dbHelper.SelectBuildRequest{
 		Filter: filters.MessageFilter{
 			Id:             req.Filter.Id,
-			MinCreatedDate: req.Filter.MinCreatedDate,
-			MaxCreatedDate: req.Filter.MaxCreatedDate,
+			MinCreatedDate: req.Filter.MinCreatedDate.AsTime(),
+			MaxCreatedDate: req.Filter.MaxCreatedDate.AsTime(),
 			SubText:        req.Filter.SubText,
 			UserId:         req.Filter.UserId,
 			UserIds:        req.Filter.UserIds,

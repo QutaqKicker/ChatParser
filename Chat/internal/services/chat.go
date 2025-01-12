@@ -6,7 +6,7 @@ import (
 	"chat/internal/parser"
 	"context"
 	"database/sql"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log/slog"
 )
 

@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log"
 	"time"
 	"users/internal/domain/filters"

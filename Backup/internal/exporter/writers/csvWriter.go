@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"github.com/QutaqKicker/ChatParser/common/contracts"
-	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
+	"github.com/QutaqKicker/ChatParser/Common/contracts"
+	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"os"
 	"strconv"
 )

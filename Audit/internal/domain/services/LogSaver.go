@@ -3,7 +3,7 @@ package services
 import (
 	"audit/internal/domain/models"
 	"database/sql"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log"
 	"log/slog"
 	"time"

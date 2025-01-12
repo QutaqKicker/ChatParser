@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
-	userv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/user"
+	userv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/user"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

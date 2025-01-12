@@ -6,7 +6,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/QutaqKicker/ChatParser/common/contracts"
+	"github.com/QutaqKicker/ChatParser/Common/contracts"
 	"io"
 	"os"
 	"strconv"

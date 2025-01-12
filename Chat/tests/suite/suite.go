@@ -3,7 +3,7 @@ package suite
 import (
 	"chat/internal/config"
 	"context"
-	chatv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/chat"
+	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"testing"
 )
 

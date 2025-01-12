@@ -3,7 +3,7 @@ package readers
 import (
 	"chat/internal/domain/models"
 	"context"
-	"github.com/QutaqKicker/ChatParser/common/contracts"
+	"github.com/QutaqKicker/ChatParser/Common/contracts"
 	"github.com/parquet-go/parquet-go"
 )
 

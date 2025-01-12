@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155 h1:WBCEHMZMwNSFiDY3+EBooBPNp0mUED6nlhteVmahapM=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112163217-a979a355bae7 h1:XyRl+tPzUcGf2sNLzDvo9Z3sYhyf5FXB3B70oYprMFc=
+github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112163217-a979a355bae7/go.mod h1:tEvRbdnHpMUuJbHyy64ILUmWtLF9odI/CBonhEkdax4=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102102212-1a3050004c1f h1:Yxkrc1T6v2G0Eh2TZUx1ilThbCEPPNv49OKcjupoHzw=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102102212-1a3050004c1f/go.mod h1:R+5lBPlKPg34nECpDTjIOs56OwUCOOrtyE2ALoV/wQ0=
 github.com/QutaqKicker/ChatParser/common v0.0.0-20250102145430-2725beb707d0 h1:YTqD3QckBMgUwRxXRwzw3ImUvXh2liXUYYAbaNlzrUY=

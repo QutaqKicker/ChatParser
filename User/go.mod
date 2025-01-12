@@ -10,6 +10,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112163217-a979a355bae7 // indirect
 	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	golang.org/x/net v0.25.0 // indirect

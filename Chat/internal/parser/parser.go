@@ -7,7 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/QutaqKicker/ChatParser/common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log"
 	"log/slog"
 	"os"
