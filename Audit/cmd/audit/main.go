@@ -48,7 +48,7 @@ func main() {
 					break mainLoop
 				}
 
-				logSaver.SaveLog(r.ServiceName, r.Type, r.Message)
+				logSaver.SaveLog(r.ServiceName, int(r.Type), r.Message)
 			}
 
 		}

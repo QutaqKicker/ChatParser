@@ -14,12 +14,15 @@ require (
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/QutaqKicker/ChatParser v0.1.0 // indirect
-	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112145021-5c8d13237155 // indirect
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112181227-a15b4023badb // indirect
 	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/lib/pq v1.10.9 // indirect
+	github.com/pierrec/lz4/v4 v4.1.16 // indirect
+	github.com/segmentio/kafka-go v0.4.47 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
