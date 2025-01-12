@@ -9,6 +9,8 @@ github.com/QutaqKicker/ChatParser v1.0.21 h1:6CE6hAAYa/dKxztcAxqrE6+milNfMlhd/DC
 github.com/QutaqKicker/ChatParser v1.0.21/go.mod h1:58zbGPmnU6Znn45seo/tmIUWyw5ClimAqG/UHiqteE0=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112163217-a979a355bae7 h1:7f0VTHrZm3Jz6aK4AxMGam2ZJbg9JWacaV4Qfudvilc=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112163217-a979a355bae7/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112170330-318742127b58 h1:Ecvwp47b2klzZLBSdVw8cYKtD8nIr+xw6H7LK1hggKU=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250112170330-318742127b58/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112163217-a979a355bae7 h1:XyRl+tPzUcGf2sNLzDvo9Z3sYhyf5FXB3B70oYprMFc=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112163217-a979a355bae7/go.mod h1:tEvRbdnHpMUuJbHyy64ILUmWtLF9odI/CBonhEkdax4=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112165620-28cbc8640c0f h1:GYbf209cqemsDTOB+PYKNoujSFF+o3O5hkpFzsaikdg=

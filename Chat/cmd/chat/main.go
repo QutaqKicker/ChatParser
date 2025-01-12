@@ -80,7 +80,7 @@ func (h *AuditLogHandler) Handle(ctx context.Context, record slog.Record) error 
 
 	err := h.producer.Send(ctx, myKafka.CreateLogRequest{
 		ServiceName: "ChatService",
-		Type:        int(record.Level),
+		Type:        int32(record.Level),
 		Message:     record.Message,
 		Created:     time.Now(),
 	})
