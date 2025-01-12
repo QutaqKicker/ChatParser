@@ -24,21 +24,8 @@ func NewAuditConsumer() *AuditConsumer {
 		})}
 }
 
-func (c *AuditConsumer) ListenRequest(ctx context.Context) (CreateLogRequest, error) {
-	message, err := c.ReadMessage(ctx)
-	if err != nil {
-		return CreateLogRequest{}, err
-	}
-
-	request := CreateLogRequest{}
-	err = kafka.Unmarshal(message.Value, &request)
-
-	if err != nil {
-		return request, err
-	}
-
-	fmt.Printf("message at offset %d: %s = %s\n", message.Offset, message.Key, message.Value)
-	return request, nil
+func (c *AuditConsumer) ListenRequests(ctx context.Context) <-chan CreateLogRequest {
+	return listenRequests[*AuditConsumer, CreateLogRequest](c, ctx)
 }
 
 type UserMessageCounterConsumer struct {
@@ -57,19 +44,44 @@ func NewUserMessageCounterConsumer() *UserMessageCounterConsumer {
 		})}
 }
 
-func (c *UserMessageCounterConsumer) ListenRequest(ctx context.Context) (UserMessageCountRequest, error) {
-	message, err := c.ReadMessage(ctx)
-	if err != nil {
-		return UserMessageCountRequest{}, err
-	}
+func (c *UserMessageCounterConsumer) ListenRequests(ctx context.Context) <-chan UserMessageCountRequest {
+	return listenRequests[*UserMessageCounterConsumer, UserMessageCountRequest](c, ctx)
+}
 
-	request := UserMessageCountRequest{}
-	err = kafka.Unmarshal(message.Value, &request)
+type kafkaReader interface {
+	ReadMessage(ctx context.Context) (kafka.Message, error)
+}
 
-	if err != nil {
-		return request, err
-	}
+func listenRequests[R kafkaReader, T any](reader R, ctx context.Context) <-chan T {
+	outChan := make(chan T, 10)
 
-	fmt.Printf("message at offset %d: %s = %s\n", message.Offset, message.Key, message.Value)
-	return request, nil
+	go func() {
+	mainLoop:
+		for {
+			select {
+			case <-ctx.Done():
+				break mainLoop
+			default:
+				message, err := reader.ReadMessage(ctx)
+				if err != nil {
+					fmt.Println(err)
+					break mainLoop
+				}
+
+				request := new(T)
+				err = kafka.Unmarshal(message.Value, request)
+				if err != nil {
+					fmt.Println(err)
+					break mainLoop
+				}
+
+				fmt.Printf("message at offset %d: %s = %s\n", message.Offset, message.Key, message.Value)
+
+				outChan <- *request
+			}
+		}
+
+		close(outChan)
+	}()
+	return outChan
 }
