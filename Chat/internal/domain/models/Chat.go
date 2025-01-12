@@ -9,7 +9,7 @@ type Chat struct {
 }
 
 func (c Chat) TableName() string {
-	return "ChatService"
+	return "chats"
 }
 
 // FieldValuesAsArray / GetKeyByName fields values as any array. Needs for safe inserting
