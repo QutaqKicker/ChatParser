@@ -5,7 +5,7 @@ import "common.proto";
 
 package backup;
 
-option go_package = "chatParser.backup.v1;backupv1";
+option go_package = "chatparser.backup.v1;backupv1";
 
 service Backup {
   rpc ExportToDir (ExportToDirRequest) returns (ExportToDirResponse);

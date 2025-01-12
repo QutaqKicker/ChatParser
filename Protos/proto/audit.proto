@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package audit;
 
-option go_package = "chatParser.audit.v1;auditv1";
+option go_package = "chatparser.audit.v1;auditv1";
 
 service Audit {
   rpc AuditInfo (AuditInfoRequest) returns (AuditInfoResponse);

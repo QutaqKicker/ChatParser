@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "chatParser.user.v1;userv1";
+option go_package = "chatparser.user.v1;userv1";
 
 service User {
   rpc GetUsersMessagesCount (GetUsersRequest) returns (GetUsersResponse);

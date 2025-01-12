@@ -7,7 +7,7 @@
 package backupv1
 
 import (
-	chatParser_common_v1 "chatParser.common.v1"
+	commonv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -72,8 +72,8 @@ type ExportToDirRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Type          ExportType                           `protobuf:"varint,2,opt,name=Type,proto3,enum=backup.ExportType" json:"Type,omitempty"`
-	MessageFilter *chatParser_common_v1.MessagesFilter `protobuf:"bytes,3,opt,name=MessageFilter,proto3" json:"MessageFilter,omitempty"`
+	Type          ExportType               `protobuf:"varint,2,opt,name=Type,proto3,enum=backup.ExportType" json:"Type,omitempty"`
+	MessageFilter *commonv1.MessagesFilter `protobuf:"bytes,3,opt,name=MessageFilter,proto3" json:"MessageFilter,omitempty"`
 }
 
 func (x *ExportToDirRequest) Reset() {
@@ -115,7 +115,7 @@ func (x *ExportToDirRequest) GetType() ExportType {
 	return ExportType_CSV
 }
 
-func (x *ExportToDirRequest) GetMessageFilter() *chatParser_common_v1.MessagesFilter {
+func (x *ExportToDirRequest) GetMessageFilter() *commonv1.MessagesFilter {
 	if x != nil {
 		return x.MessageFilter
 	}
@@ -192,7 +192,7 @@ var file_backup_proto_rawDesc = []byte{
 	0x70, 0x6f, 0x72, 0x74, 0x54, 0x6f, 0x44, 0x69, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x1a, 0x1b, 0x2e, 0x62, 0x61, 0x63, 0x6b, 0x75, 0x70, 0x2e, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74,
 	0x54, 0x6f, 0x44, 0x69, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1f, 0x5a,
-	0x1d, 0x63, 0x68, 0x61, 0x74, 0x50, 0x61, 0x72, 0x73, 0x65, 0x72, 0x2e, 0x62, 0x61, 0x63, 0x6b,
+	0x1d, 0x63, 0x68, 0x61, 0x74, 0x70, 0x61, 0x72, 0x73, 0x65, 0x72, 0x2e, 0x62, 0x61, 0x63, 0x6b,
 	0x75, 0x70, 0x2e, 0x76, 0x31, 0x3b, 0x62, 0x61, 0x63, 0x6b, 0x75, 0x70, 0x76, 0x31, 0x62, 0x06,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
@@ -212,10 +212,10 @@ func file_backup_proto_rawDescGZIP() []byte {
 var file_backup_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_backup_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_backup_proto_goTypes = []interface{}{
-	(ExportType)(0),                             // 0: backup.ExportType
-	(*ExportToDirRequest)(nil),                  // 1: backup.ExportToDirRequest
-	(*ExportToDirResponse)(nil),                 // 2: backup.ExportToDirResponse
-	(*chatParser_common_v1.MessagesFilter)(nil), // 3: common.MessagesFilter
+	(ExportType)(0),                 // 0: backup.ExportType
+	(*ExportToDirRequest)(nil),      // 1: backup.ExportToDirRequest
+	(*ExportToDirResponse)(nil),     // 2: backup.ExportToDirResponse
+	(*commonv1.MessagesFilter)(nil), // 3: common.MessagesFilter
 }
 var file_backup_proto_depIdxs = []int32{
 	0, // 0: backup.ExportToDirRequest.Type:type_name -> backup.ExportType

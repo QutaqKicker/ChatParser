@@ -7,7 +7,7 @@
 package chatv1
 
 import (
-	chatParser_common_v1 "chatParser.common.v1"
+	commonv1 "github.com/QutaqKicker/ChatParser/protos/gen/go/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -121,10 +121,10 @@ type SearchMessagesRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Filter *chatParser_common_v1.MessagesFilter `protobuf:"bytes,2,opt,name=Filter,proto3" json:"Filter,omitempty"`
-	Take   int32                                `protobuf:"varint,3,opt,name=Take,proto3" json:"Take,omitempty"`
-	Skip   int32                                `protobuf:"varint,4,opt,name=Skip,proto3" json:"Skip,omitempty"`
-	Sorts  []string                             `protobuf:"bytes,5,rep,name=Sorts,proto3" json:"Sorts,omitempty"`
+	Filter *commonv1.MessagesFilter `protobuf:"bytes,2,opt,name=Filter,proto3" json:"Filter,omitempty"`
+	Take   int32                    `protobuf:"varint,3,opt,name=Take,proto3" json:"Take,omitempty"`
+	Skip   int32                    `protobuf:"varint,4,opt,name=Skip,proto3" json:"Skip,omitempty"`
+	Sorts  []string                 `protobuf:"bytes,5,rep,name=Sorts,proto3" json:"Sorts,omitempty"`
 }
 
 func (x *SearchMessagesRequest) Reset() {
@@ -159,7 +159,7 @@ func (*SearchMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SearchMessagesRequest) GetFilter() *chatParser_common_v1.MessagesFilter {
+func (x *SearchMessagesRequest) GetFilter() *commonv1.MessagesFilter {
 	if x != nil {
 		return x.Filter
 	}
@@ -442,7 +442,7 @@ var file_chat_proto_rawDesc = []byte{
 	0x53, 0x65, 0x61, 0x72, 0x63, 0x68, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x44, 0x65, 0x6c,
 	0x65, 0x74, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x42, 0x1b, 0x5a, 0x19, 0x63, 0x68, 0x61, 0x74, 0x50, 0x61, 0x72, 0x73, 0x65, 0x72,
+	0x73, 0x65, 0x42, 0x1b, 0x5a, 0x19, 0x63, 0x68, 0x61, 0x74, 0x70, 0x61, 0x72, 0x73, 0x65, 0x72,
 	0x2e, 0x63, 0x68, 0x61, 0x74, 0x2e, 0x76, 0x31, 0x3b, 0x63, 0x68, 0x61, 0x74, 0x76, 0x31, 0x62,
 	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
@@ -461,14 +461,14 @@ func file_chat_proto_rawDescGZIP() []byte {
 
 var file_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_chat_proto_goTypes = []interface{}{
-	(*ParseFromDirRequest)(nil),                 // 0: chat.ParseFromDirRequest
-	(*ParseFromDirResponse)(nil),                // 1: chat.ParseFromDirResponse
-	(*SearchMessagesRequest)(nil),               // 2: chat.SearchMessagesRequest
-	(*GetMessagesResponse)(nil),                 // 3: chat.GetMessagesResponse
-	(*ChatMessage)(nil),                         // 4: chat.ChatMessage
-	(*DeleteMessageResponse)(nil),               // 5: chat.DeleteMessageResponse
-	(*chatParser_common_v1.MessagesFilter)(nil), // 6: common.MessagesFilter
-	(*timestamppb.Timestamp)(nil),               // 7: google.protobuf.Timestamp
+	(*ParseFromDirRequest)(nil),     // 0: chat.ParseFromDirRequest
+	(*ParseFromDirResponse)(nil),    // 1: chat.ParseFromDirResponse
+	(*SearchMessagesRequest)(nil),   // 2: chat.SearchMessagesRequest
+	(*GetMessagesResponse)(nil),     // 3: chat.GetMessagesResponse
+	(*ChatMessage)(nil),             // 4: chat.ChatMessage
+	(*DeleteMessageResponse)(nil),   // 5: chat.DeleteMessageResponse
+	(*commonv1.MessagesFilter)(nil), // 6: common.MessagesFilter
+	(*timestamppb.Timestamp)(nil),   // 7: google.protobuf.Timestamp
 }
 var file_chat_proto_depIdxs = []int32{
 	6, // 0: chat.SearchMessagesRequest.Filter:type_name -> common.MessagesFilter
