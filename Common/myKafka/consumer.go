@@ -1,4 +1,4 @@
-package kafka
+package myKafka
 
 import (
 	"context"
