@@ -12,7 +12,7 @@ type AuditProducer struct {
 	kafka.Writer
 }
 
-func newAuditProducer() *AuditProducer {
+func NewAuditProducer() *AuditProducer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &AuditProducer{
@@ -42,7 +42,7 @@ type UserMessageCounterProducer struct {
 	kafka.Writer
 }
 
-func newUserMessageCounterProducer() *AuditProducer {
+func NewUserMessageCounterProducer() *AuditProducer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &AuditProducer{

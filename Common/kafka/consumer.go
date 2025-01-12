@@ -12,7 +12,7 @@ type AuditConsumer struct {
 	*kafka.Reader
 }
 
-func newAuditConsumer() *AuditConsumer {
+func NewAuditConsumer() *AuditConsumer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &AuditConsumer{
@@ -45,7 +45,7 @@ type UserMessageCounterConsumer struct {
 	*kafka.Reader
 }
 
-func newUserMessageCounterConsumer() *UserMessageCounterConsumer {
+func NewUserMessageCounterConsumer() *UserMessageCounterConsumer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &UserMessageCounterConsumer{
