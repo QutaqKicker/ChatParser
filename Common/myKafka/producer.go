@@ -2,7 +2,7 @@ package myKafka
 
 import (
 	"context"
-	"github.com/QutaqKicker/ChatParser/common/pkg/constants"
+	"github.com/QutaqKicker/ChatParser/common/constants"
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"os"
