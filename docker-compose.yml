@@ -1,5 +1,18 @@
 version: '3'
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ChatParser
+      POSTGRES_DB: ChatParser
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-init-script:/docker-entrypoint-initdb.d
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     ports:
