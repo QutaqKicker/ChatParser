@@ -38,7 +38,6 @@ type App struct {
 }
 
 func New(log *slog.Logger, exportDir string, port int, chatServicePort int) *App {
-	// Создаем клиент для ChatService
 	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", chatServicePort))
 	if err != nil {
 		log.Error("grpc server connection failed: %v", err)

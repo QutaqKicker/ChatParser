@@ -84,6 +84,10 @@ func (h *AuditLogHandler) Handle(ctx context.Context, record slog.Record) error 
 		Message:     record.Message,
 		Created:     time.Now(),
 	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
 	return err
 }
 
