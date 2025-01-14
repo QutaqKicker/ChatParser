@@ -9,7 +9,7 @@ const (
 )
 
 const (
-	KafkaBroker1UrlEnvName           = "ChatParser_Kafka_1_Url"
+	KafkaBroker1PortEnvName          = "ChatParser_Kafka_1_Port"
 	KafkaAuditCreateLogTopicName     = "audit-create-log"
 	KafkaUserMessageCounterTopicName = "user-message-counter"
 )
