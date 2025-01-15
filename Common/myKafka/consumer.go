@@ -51,7 +51,7 @@ func NewUserMessageCounterConsumer() *UserMessageCounterConsumer {
 
 	return &UserMessageCounterConsumer{
 		kafka.NewReader(kafka.ReaderConfig{
-			Brokers:  []string{brokerPort},
+			Brokers:  []string{fmt.Sprintf("kafka:%s", brokerPort)},
 			GroupID:  "user-message-counter-consumer-group",
 			Topic:    constants.KafkaUserMessageCounterTopicName,
 			MaxBytes: 10e6, // 10MB
