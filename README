@@ -6,9 +6,9 @@ docker run --name ChatParser -p 5432:5432 -e POSTGRES_PASSWORD=ChatParser -d pos
 
 go run ./cmd/migrator --storage-path=./storage/sso.db --migrations-path=.//////
 
-SET ChatParser_Audit_Port=8085
-SET ChatParser_Backup_Port=8084
-SET ChatParser_Chat_Port=8082
-SET ChatParser_User_Port=8083
-SET ChatParser_Router_Port=8081
-SET ChatParser_Kafka_1_Port=9092
+SETX ChatParser_Audit_Port 8085
+SETX ChatParser_Backup_Port 8084
+SETX ChatParser_Chat_Port 8082
+SETX ChatParser_User_Port 8083
+SETX ChatParser_Router_Port 8081
+SETX ChatParser_Kafka_1_Url localhost:9095

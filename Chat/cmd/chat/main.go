@@ -9,6 +9,7 @@ import (
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	_ "github.com/lib/pq"
+	"github.com/segmentio/kafka-go"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -30,7 +31,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	producer := myKafka.NewAuditProducer()
+	producer := NewAuditProducer()
 	defer producer.Close()
 
 	logger := setupLogger(ctx, producer)
@@ -47,6 +48,17 @@ func main() {
 
 	<-stop
 	application.Stop()
+}
+
+func NewAuditProducer() *myKafka.AuditProducer {
+	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
+
+	return &myKafka.AuditProducer{
+		kafka.Writer{
+			Addr:     kafka.TCP(fmt.Sprintf("localhost:%s", brokerPort)),
+			Topic:    constants.KafkaAuditCreateLogTopicName,
+			Balancer: &kafka.LeastBytes{}},
+	}
 }
 
 func connectDb(cfg config.DbConfig) (*sql.DB, error) {

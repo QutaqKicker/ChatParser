@@ -2,7 +2,6 @@ package myKafka
 
 import (
 	"context"
-	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
@@ -14,11 +13,11 @@ type AuditProducer struct {
 }
 
 func NewAuditProducer() *AuditProducer {
-	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
+	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &AuditProducer{
 		kafka.Writer{
-			Addr:     kafka.TCP(fmt.Sprintf("kafka:%s", brokerPort)),
+			Addr:     kafka.TCP(brokerUrl),
 			Topic:    constants.KafkaAuditCreateLogTopicName,
 			Balancer: &kafka.LeastBytes{}},
 	}
@@ -44,11 +43,11 @@ type UserMessageCounterProducer struct {
 }
 
 func NewUserMessageCounterProducer() *AuditProducer {
-	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
+	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	return &AuditProducer{
 		kafka.Writer{
-			Addr:     kafka.TCP(fmt.Sprintf("kafka:%s", brokerPort)),
+			Addr:     kafka.TCP(brokerUrl),
 			Topic:    constants.KafkaUserMessageCounterTopicName,
 			Balancer: &kafka.LeastBytes{},
 		}}

@@ -13,18 +13,17 @@ type AuditConsumer struct {
 }
 
 func NewAuditConsumer() *AuditConsumer {
-	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
+	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	//Just for topics autocreating
-	conn, err := kafka.DialLeader(context.Background(), "tcp", fmt.Sprintf("localhost:%s", brokerPort), constants.KafkaAuditCreateLogTopicName, 3)
-	if err != nil {
-		panic(err)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaAuditCreateLogTopicName, 3)
+	if conn != nil {
+		conn.Close()
 	}
-	conn.Close()
 
 	return &AuditConsumer{
 		kafka.NewReader(kafka.ReaderConfig{
-			Brokers:  []string{fmt.Sprintf("kafka:%s", brokerPort)},
+			Brokers:  []string{brokerUrl},
 			GroupID:  "audit-consumer-group",
 			Topic:    constants.KafkaAuditCreateLogTopicName,
 			MaxBytes: 10e6, // 10MB
@@ -40,18 +39,17 @@ type UserMessageCounterConsumer struct {
 }
 
 func NewUserMessageCounterConsumer() *UserMessageCounterConsumer {
-	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
+	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	//Just for topics autocreating
-	conn, err := kafka.DialLeader(context.Background(), "tcp", fmt.Sprintf("localhost:%s", brokerPort), constants.KafkaUserMessageCounterTopicName, 3)
-	if err != nil {
-		panic(err)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaUserMessageCounterTopicName, 3)
+	if conn != nil {
+		conn.Close()
 	}
-	conn.Close()
 
 	return &UserMessageCounterConsumer{
 		kafka.NewReader(kafka.ReaderConfig{
-			Brokers:  []string{fmt.Sprintf("kafka:%s", brokerPort)},
+			Brokers:  []string{brokerUrl},
 			GroupID:  "user-message-counter-consumer-group",
 			Topic:    constants.KafkaUserMessageCounterTopicName,
 			MaxBytes: 10e6, // 10MB
