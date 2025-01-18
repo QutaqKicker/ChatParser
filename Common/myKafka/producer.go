@@ -42,10 +42,10 @@ type UserMessageCounterProducer struct {
 	kafka.Writer
 }
 
-func NewUserMessageCounterProducer() *AuditProducer {
+func NewUserMessageCounterProducer() *UserMessageCounterProducer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
-	return &AuditProducer{
+	return &UserMessageCounterProducer{
 		kafka.Writer{
 			Addr:     kafka.TCP(brokerUrl),
 			Topic:    constants.KafkaUserMessageCounterTopicName,
