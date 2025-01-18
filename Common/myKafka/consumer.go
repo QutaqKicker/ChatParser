@@ -16,7 +16,7 @@ func NewAuditConsumer() *AuditConsumer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	//Just for topics autocreating
-	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaAuditCreateLogTopicName, 3)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaAuditCreateLogTopicName, 0)
 	if conn != nil {
 		conn.Close()
 	}
@@ -42,7 +42,7 @@ func NewUserMessageCounterConsumer() *UserMessageCounterConsumer {
 	brokerUrl := os.Getenv(constants.KafkaBroker1UrlEnvName)
 
 	//Just for topics autocreating
-	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaUserMessageCounterTopicName, 3)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", brokerUrl, constants.KafkaUserMessageCounterTopicName, 0)
 	if conn != nil {
 		conn.Close()
 	}
