@@ -128,13 +128,12 @@ func RowsToEntities[T Entity](rows *sql.Rows) ([]T, error) {
 	}
 
 	for rows.Next() {
-		entity := new(T)
-		entityValue := reflect.ValueOf(*entity)
+		entity := reflect.New(entityType).Interface().(*T)
+		entityValue := reflect.ValueOf(entity).Elem()
 
-		columns := make([]interface{}, 0, len(mappedFieldsIndexes))
-		for _, index := range mappedFieldsIndexes {
-			field := entityValue.Field(index)
-			columns = append(columns, field)
+		columns := make([]interface{}, len(mappedFieldsIndexes))
+		for i, index := range mappedFieldsIndexes {
+			columns[i] = entityValue.Field(index).Addr().Interface()
 		}
 
 		err := rows.Scan(columns...)
