@@ -4,25 +4,25 @@ import (
 	"context"
 	"database/sql"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
-	"log"
+	"log/slog"
 	"time"
 	"users/internal/domain/filters"
 	"users/internal/domain/models"
 )
 
 type UserMessageCounter struct {
-	log *log.Logger
+	log *slog.Logger
 	db  *sql.DB
 }
 
-func NewUserMessageCounter(log *log.Logger, db *sql.DB) *UserMessageCounter {
+func NewUserMessageCounter(log *slog.Logger, db *sql.DB) *UserMessageCounter {
 	return &UserMessageCounter{log: log, db: db}
 }
 
 func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userName string, count int) {
 	tx, err := c.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
-		c.log.Fatal(err)
+		c.log.Error(err.Error())
 		return
 	}
 
@@ -36,7 +36,7 @@ func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userNa
 
 	rows, err := tx.QueryContext(ctx, selectQuery, selectParams)
 	if err != nil {
-		c.log.Fatal(err)
+		c.log.Error(err.Error())
 		return
 	}
 
@@ -45,14 +45,14 @@ func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userNa
 		newUser := &models.User{Name: userName, MessagesCount: count, Created: time.Now()}
 		_, err := tx.ExecContext(ctx, insertQuery, newUser.FieldValuesAsArray())
 		if err != nil {
-			c.log.Fatal(err)
+			c.log.Error(err.Error())
 		}
 		return
 	}
 
 	users, err := dbHelper.RowsToEntities[models.User](rows)
 	if err != nil {
-		c.log.Fatal(err)
+		c.log.Error(err.Error())
 		return
 	}
 
@@ -65,6 +65,6 @@ func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userNa
 
 	_, err = c.db.ExecContext(ctx, updateUserQuery, updateUserParams)
 	if err != nil {
-		c.log.Fatal(err)
+		c.log.Error(err.Error())
 	}
 }

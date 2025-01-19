@@ -9,7 +9,7 @@ type User struct {
 }
 
 func (u User) TableName() string {
-	return "User"
+	return "users"
 }
 
 // FieldValuesAsArray / GetKeyByName fields values as any array. Needs for safe inserting

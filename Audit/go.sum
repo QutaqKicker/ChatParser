@@ -14,6 +14,12 @@ github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115190417-ed43718c303f h1:J
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115190417-ed43718c303f/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115200620-6d51dff25afb h1:SP9d477xhE/uJwHQyBPIMQfkXPgZR2jHgUF5jGOw1Vo=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115200620-6d51dff25afb/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118211433-a5d341466aaf h1:yOHe/WDBuHyNfhVn3MAKLTf53ybTBVnfZuq+sZv//nM=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118211433-a5d341466aaf/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118213709-5e4ade5ce105 h1:YXZNz4vx3JBC7TCP24anEpC6pntrLQPBDldNhjzFI9I=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118213709-5e4ade5ce105/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119152516-e4e3f30d5bfb h1:0qDvFzqmuTHw7ryx7NXQJC1FStM/yW17e7P1pTx4R0g=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119152516-e4e3f30d5bfb/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

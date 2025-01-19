@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -35,9 +36,9 @@ type App struct {
 	port       int
 }
 
-func New(log *slog.Logger, db *sql.DB, port int) *App {
+func New(log *slog.Logger, db *sql.DB, port int, userMessageCounterProducer *myKafka.UserMessageCounterProducer) *App {
 	grpcServer := grpc.NewServer()
-	Register(grpcServer, log, db)
+	Register(grpcServer, log, db, userMessageCounterProducer)
 
 	return &App{
 		log:        log,
@@ -52,8 +53,8 @@ type serverAPI struct {
 	chat *services.ChatService
 }
 
-func Register(gRPC *grpc.Server, log *slog.Logger, db *sql.DB) {
-	chatv1.RegisterChatServer(gRPC, &serverAPI{chat: services.NewChatService(log, db)})
+func Register(gRPC *grpc.Server, log *slog.Logger, db *sql.DB, userMessageCounterProducer *myKafka.UserMessageCounterProducer) {
+	chatv1.RegisterChatServer(gRPC, &serverAPI{chat: services.NewChatService(log, db, userMessageCounterProducer)})
 }
 
 func (s *serverAPI) ParseFromDir(ctx context.Context, req *chatv1.ParseFromDirRequest) (*chatv1.ParseFromDirResponse, error) {

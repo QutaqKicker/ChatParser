@@ -5,8 +5,6 @@ import (
 	"fmt"
 	userv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/user"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"net"
 )
@@ -32,22 +30,6 @@ func Register(gRPC *grpc.Server) {
 func (s *serverAPI) GetUsers(ctx context.Context, req *userv1.GetUsersRequest) (*userv1.GetUsersResponse, error) {
 	users, err := s.user.GetUsers(ctx)
 	return &userv1.GetUsersResponse{Users: users}, err
-}
-
-func (s *serverAPI) SearchUser(ctx context.Context, req *userv1.SearchUserRequest) (*userv1.SearchUserResponse, error) {
-	if req.UserId == "" {
-		return nil, status.Error(codes.InvalidArgument, "userId is empty")
-	}
-	name, messagesCount, err := s.user.SearchUser(ctx, req.UserId)
-	return &userv1.SearchUserResponse{Name: name, MessagesCount: messagesCount}, err
-}
-
-func (s *serverAPI) EditUser(ctx context.Context, req *userv1.UpdateUserRequest) (*userv1.UpdateUserResponse, error) { //TODO Сопоставить названия
-	if req.Id == "" {
-		return nil, status.Error(codes.InvalidArgument, "userId is empty")
-	}
-	isSuccess, err := s.user.EditUser(ctx, req.Id, req.NewName)
-	return &userv1.UpdateUserResponse{IsSuccess: isSuccess}, err
 }
 
 type App struct {

@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	"log/slog"
 )
 
@@ -15,6 +16,7 @@ type ChatService struct {
 	db  *sql.DB
 	MessageSaver
 	MessageProvider
+	userMessageCounterProducer *myKafka.UserMessageCounterProducer
 }
 
 type HtmlParser interface {
@@ -34,10 +36,12 @@ type MessageProvider interface {
 
 func NewChatService(
 	log *slog.Logger,
-	db *sql.DB) *ChatService {
+	db *sql.DB,
+	userMessageCounterProducer *myKafka.UserMessageCounterProducer) *ChatService {
 	return &ChatService{
-		log: log,
-		db:  db,
+		log:                        log,
+		db:                         db,
+		userMessageCounterProducer: userMessageCounterProducer,
 	}
 }
 
@@ -50,7 +54,7 @@ func (s *ChatService) Parse(ctx context.Context,
 
 	log.Info("parsing " + dirPath)
 
-	parser1 := parser.New(s.log, s.db)
+	parser1 := parser.New(s.log, s.db, s.userMessageCounterProducer)
 	err := parser1.ParseFromDir(ctx, dirPath)
 	if err != nil {
 		return err

@@ -7,7 +7,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	"log"
 	"log/slog"
 	"os"
@@ -18,14 +20,16 @@ import (
 
 // Parser осуществляет чтение дампа сообщений, их дозаполнение, подсчет и отправку в микросервис Users и сохранение данных в БД
 type Parser struct {
-	logger *slog.Logger
-	db     *sql.DB
+	logger                     *slog.Logger
+	db                         *sql.DB
+	userMessageCounterProducer *myKafka.UserMessageCounterProducer
 }
 
-func New(logger *slog.Logger, db *sql.DB) *Parser {
+func New(logger *slog.Logger, db *sql.DB, userMessageCounterProducer *myKafka.UserMessageCounterProducer) *Parser {
 	return &Parser{
 		logger,
 		db,
+		userMessageCounterProducer,
 	}
 }
 
@@ -86,7 +90,7 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	writersWg.Add(1)
 	//Заполняем сырые сообщения. У них могут быть не заполнены айдишники чата и юзера
 	go func() {
-		processRawMessages(ctx, tx, rawMessagesChan, messagesChan)
+		processRawMessages(ctx, tx, rawMessagesChan, messagesChan, p.userMessageCounterProducer)
 		writersWg.Done()
 	}()
 
@@ -117,14 +121,8 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	return nil
 }
 
-// UsersWithMessagesCount Сущность для отправки информации по количеству сообщений в микросервис Users
-type UsersWithMessagesCount struct {
-	UserName      string
-	MessagesCount uint64
-}
-
 // processRawMessages заполняет айди чата и юзера в незаполненных сообщениях и ведет подсчет для отправки в микросервис Users
-func processRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-chan models.Message, outMessagesChan chan<- models.Message) {
+func processRawMessages(ctx context.Context, tx *sql.Tx, inRawMessagesChan <-chan models.Message, outMessagesChan chan<- models.Message, userMessageCounterProducer *myKafka.UserMessageCounterProducer) {
 	messagesCountPerUser := make(map[string]*atomic.Uint64)
 chanLoop:
 	for {
@@ -174,9 +172,13 @@ chanLoop:
 	close(outMessagesChan)
 
 	for key, value := range messagesCountPerUser {
-		user := UsersWithMessagesCount{key, value.Load()}
-		log.Println(user)
-		//TODO Организовать отправку этого добра в сервис Users и вынести в основной метод. Если этот метод будет у нескольких горутин, данные отправим несколько раз вместо одного
+		err := userMessageCounterProducer.Send(myKafka.UserMessageCountRequest{
+			UserName:     key,
+			MessageCount: int32(value.Load()),
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 

@@ -7,6 +7,14 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115190417-ed43718c303f h1:JV1URygZ1qtjOt081a5eI/43nvXrmT+sYr6BoKBRvE0=
 github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115190417-ed43718c303f/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115200620-6d51dff25afb h1:SP9d477xhE/uJwHQyBPIMQfkXPgZR2jHgUF5jGOw1Vo=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250115200620-6d51dff25afb/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118213709-5e4ade5ce105 h1:YXZNz4vx3JBC7TCP24anEpC6pntrLQPBDldNhjzFI9I=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250118213709-5e4ade5ce105/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119152516-e4e3f30d5bfb h1:0qDvFzqmuTHw7ryx7NXQJC1FStM/yW17e7P1pTx4R0g=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119152516-e4e3f30d5bfb/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119163013-cf7b29955c5b h1:F/+EsEG941LBBI/JxaqwFnNeoItNNd6NKEBtYX5rjSk=
+github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119163013-cf7b29955c5b/go.mod h1:Yy10S9KM7mycQ91C0/s8yoclKeNtJHq6bQiiZsyXSts=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112165620-28cbc8640c0f h1:GYbf209cqemsDTOB+PYKNoujSFF+o3O5hkpFzsaikdg=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250112165620-28cbc8640c0f/go.mod h1:tEvRbdnHpMUuJbHyy64ILUmWtLF9odI/CBonhEkdax4=
 github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250115190417-ed43718c303f h1:kaEqq+YSQ8U9OVE7/muXq9xqxy1yLOld21sKLYQK5mE=

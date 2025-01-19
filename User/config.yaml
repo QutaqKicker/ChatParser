@@ -1,6 +1,6 @@
-env: "dev"
-grpc:
-  port: 8083
-  chatPort: 8082
-  backupPort: 8084
-  timeout: 60s
+db:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "ChatParser"
+  dbName: "user"

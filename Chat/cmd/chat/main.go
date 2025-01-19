@@ -9,7 +9,6 @@ import (
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	_ "github.com/lib/pq"
-	"github.com/segmentio/kafka-go"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -29,17 +28,18 @@ func main() {
 
 	defer db.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	producer := NewAuditProducer()
-	defer producer.Close()
+	auditProducer := myKafka.NewAuditProducer()
+	defer auditProducer.Close()
 
-	logger := setupLogger(ctx, producer)
+	userMessageCounterProducer := myKafka.NewUserMessageCounterProducer()
+	defer userMessageCounterProducer.Close()
+
+	logger := setupLogger(auditProducer)
 
 	logger.Info("started application", slog.Any("config", cfg))
 
 	port, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
-	application := grpc.New(logger, db, port)
+	application := grpc.New(logger, db, port, userMessageCounterProducer)
 
 	go application.Run()
 
@@ -48,17 +48,6 @@ func main() {
 
 	<-stop
 	application.Stop()
-}
-
-func NewAuditProducer() *myKafka.AuditProducer {
-	brokerPort := os.Getenv(constants.KafkaBroker1PortEnvName)
-
-	return &myKafka.AuditProducer{
-		kafka.Writer{
-			Addr:     kafka.TCP(fmt.Sprintf("localhost:%s", brokerPort)),
-			Topic:    constants.KafkaAuditCreateLogTopicName,
-			Balancer: &kafka.LeastBytes{}},
-	}
 }
 
 func connectDb(cfg config.DbConfig) (*sql.DB, error) {
@@ -78,7 +67,7 @@ func connectDb(cfg config.DbConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func setupLogger(ctx context.Context, producer *myKafka.AuditProducer) *slog.Logger {
+func setupLogger(producer *myKafka.AuditProducer) *slog.Logger {
 	log := slog.New(&AuditLogHandler{producer: producer})
 	return log
 }
@@ -90,7 +79,7 @@ type AuditLogHandler struct {
 func (h *AuditLogHandler) Handle(ctx context.Context, record slog.Record) error {
 	fmt.Println(record.Message)
 
-	err := h.producer.Send(ctx, myKafka.CreateLogRequest{
+	err := h.producer.Send(myKafka.CreateLogRequest{
 		ServiceName: "ChatService",
 		Type:        int32(record.Level),
 		Message:     record.Message,

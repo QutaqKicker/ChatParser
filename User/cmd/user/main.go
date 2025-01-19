@@ -1,22 +1,66 @@
 package main
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
+	"github.com/QutaqKicker/ChatParser/Common/constants"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
-	config "users/internal"
+	"time"
+	"users/internal/config"
 	"users/internal/grpc"
+	"users/internal/services"
 )
 
 func main() {
 	cfg := config.MustLoad()
 
-	logger := setupLogger(cfg.Env)
+	db, err := connectDb(cfg.Db)
+	if err != nil {
+		panic(err)
+	}
+
+	auditProducer := myKafka.NewAuditProducer()
+	defer auditProducer.Close()
+
+	userMessageCounterConsumer := myKafka.NewUserMessageCounterConsumer()
+	defer userMessageCounterConsumer.Close()
+
+	logger := setupLogger(auditProducer)
 
 	logger.Info("started application", slog.Any("config", cfg))
 
-	application := grpc.New(logger, cfg.Grpc.Port)
+	port, _ := strconv.Atoi(os.Getenv(constants.UserPortEnvName))
+	application := grpc.New(logger, port)
+
+	userMessageCounter := services.NewUserMessageCounter(logger, db)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	requestsChan := userMessageCounterConsumer.ListenRequests(ctx)
+
+	go func() {
+	mainLoop:
+		for {
+			select {
+			case <-ctx.Done():
+				break mainLoop
+			case r, ok := <-requestsChan:
+				if !ok {
+					break mainLoop
+				}
+
+				userMessageCounter.UpdateUserMessagesCount(ctx, r.UserName, int(r.MessageCount))
+			}
+
+		}
+		<-requestsChan
+	}()
 
 	go application.Run()
 
@@ -27,13 +71,55 @@ func main() {
 	application.Stop()
 }
 
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-	switch env {
-	case "dev":
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
+func connectDb(cfg config.DbConfig) (*sql.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DbName)
+	db, err := sql.Open("postgres", psqlInfo)
+
+	if err != nil {
+		return nil, err
 	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func setupLogger(producer *myKafka.AuditProducer) *slog.Logger {
+	log := slog.New(&AuditLogHandler{producer: producer})
 	return log
+}
+
+type AuditLogHandler struct {
+	producer *myKafka.AuditProducer
+}
+
+func (h *AuditLogHandler) Handle(ctx context.Context, record slog.Record) error {
+	fmt.Println(record.Message)
+
+	err := h.producer.Send(myKafka.CreateLogRequest{
+		ServiceName: "ChatService",
+		Type:        int32(record.Level),
+		Message:     record.Message,
+		Created:     time.Now(),
+	})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func (h *AuditLogHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return true
+}
+func (h *AuditLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return h
+}
+
+func (h *AuditLogHandler) WithGroup(name string) slog.Handler {
+	return h
 }
