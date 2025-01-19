@@ -20,7 +20,7 @@ func BuildQuery[T Entity](request SelectBuildRequest) (string, []interface{}) {
 	t := *new(T)
 	queryBuilder.WriteString(fmt.Sprintf("\nfrom %s", T.TableName(t)))
 
-	whereString, values := buildWhere(request.Filter, 0)
+	whereString, values := buildWhere(request.Filter, 1)
 	queryBuilder.WriteString(whereString)
 	queryBuilder.WriteString(buildSorter(request.Sorts)) //TODO
 	if request.Take != 0 {
