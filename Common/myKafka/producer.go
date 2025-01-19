@@ -104,7 +104,7 @@ func NewUserMessageCounterProducer() *UserMessageCounterProducer {
 		messagesChan: make(chan kafka.Message, 100),
 	}
 
-	producer.startSendingProcess()
+	go producer.startSendingProcess()
 
 	return producer
 }
