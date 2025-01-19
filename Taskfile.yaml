@@ -1,0 +1,35 @@
+version: "3"
+
+includes:
+  audit:
+    taskfile: ./Audit/Taskfile.yaml
+    dir: ./Audit
+  user:
+    taskfile: ./User/Taskfile.yaml
+    dir: ./User
+  chat:
+    taskfile: ./Chat/Taskfile.yaml
+    dir: ./Chat
+tasks:
+  setEnviromentVariables:
+    aliases:
+      - setEnvVariables
+    desc: "Set enviroment variables from envVariables.bat"
+    cmds:
+      - envVariables.bat
+  runContainers:
+    desc: "Run kafka & db containers"
+    cmds:
+      - docker-compose up -d
+  runAllMigrations:
+    desc: "run all migrations from all services with db"
+    cmds:
+      - task: chat:runMigrations
+      - task: user:runMigrations
+      - task: audit:runMigrations
+  runAll:
+    desc: "Set enviroment variables, run kafka & db, run all migrations"
+    cmds:
+      - task runContainers
+      - task setEnviromentVariables
+      - task runAllMigrations

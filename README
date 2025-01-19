@@ -1,14 +1,8 @@
+Это кластер микросервисов, у которого есть лишь одно полезное применение: Перевести html\json дамп сообщений из какой-нибудь беседы в телеграме в локальную базу данных.
+Далее эти сообщения можно будет бэкапнуть в выгрузку в формате csv\parquet, и при желании снова отправить их в БД(хотя БД их выплюнет из за коллизии ключей).
+Такой несложный функционал я обернул в несколько микросервисов, жонглирующих кафкой. Все это только ради практики.
 
-docker run --name ChatParser -p 5432:5432 -e POSTGRES_PASSWORD=ChatParser -d postgres:16.4
+Этот проект еще далек до завершения, нужно много чего отрефакторить, покрыть тестами и комментами, чем и занимаюсь в свободное время.
+Предлагаю не судить автора исключительно по ошибкам в этом сыром проекте.
 
-      - docker exec -it ChatParser bash
-       psql -U postgres -w -c "create database chat;"
 
-go run ./cmd/migrator --storage-path=./storage/sso.db --migrations-path=.//////
-
-SETX ChatParser_Audit_Port 8085
-SETX ChatParser_Backup_Port 8084
-SETX ChatParser_Chat_Port 8082
-SETX ChatParser_User_Port 8083
-SETX ChatParser_Router_Port 8081
-SETX ChatParser_Kafka_1_Url localhost:9095

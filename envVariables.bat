@@ -1,0 +1,7 @@
+
+SETX ChatParser_Audit_Port 8085
+SETX ChatParser_Backup_Port 8084
+SETX ChatParser_Chat_Port 8082
+SETX ChatParser_User_Port 8083
+SETX ChatParser_Router_Port 8081
+SETX ChatParser_Kafka_1_Url localhost:9095
