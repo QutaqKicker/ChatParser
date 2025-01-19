@@ -220,7 +220,7 @@ func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
 		return "", nil
 	}
 	whereBuilder := strings.Builder{}
-	whereBuilder.WriteString("\n where 1 == 1")
+	whereBuilder.WriteString("\n where 1 = 1")
 
 	values := make([]interface{}, 0)
 	v := reflect.ValueOf(filter)
