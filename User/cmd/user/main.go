@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
+	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"os/signal"

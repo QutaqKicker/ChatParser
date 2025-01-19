@@ -34,19 +34,9 @@ func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userNa
 		SpecialSelect: "messages_count",
 	})
 
-	rows, err := tx.QueryContext(ctx, selectQuery, selectParams)
+	rows, err := tx.QueryContext(ctx, selectQuery, selectParams...)
 	if err != nil {
 		c.log.Error(err.Error())
-		return
-	}
-
-	if rows == nil {
-		insertQuery := dbHelper.BuildInsert[models.User](false)
-		newUser := &models.User{Name: userName, MessagesCount: count, Created: time.Now()}
-		_, err := tx.ExecContext(ctx, insertQuery, newUser.FieldValuesAsArray())
-		if err != nil {
-			c.log.Error(err.Error())
-		}
 		return
 	}
 
@@ -56,15 +46,25 @@ func (c *UserMessageCounter) UpdateUserMessagesCount(ctx context.Context, userNa
 		return
 	}
 
-	currentMessageCount := users[0].MessagesCount
+	if len(users) == 0 {
+		insertQuery := dbHelper.BuildInsert[models.User](false)
+		newUser := &models.User{Name: userName, MessagesCount: count, Created: time.Now()}
+		_, err := tx.ExecContext(ctx, insertQuery, newUser.FieldValuesAsArray()...)
+		if err != nil {
+			c.log.Error(err.Error())
+		}
+	} else {
+		currentMessageCount := users[0].MessagesCount
 
-	//TODO Надо бы перепилить апдейтер dbHelper чтобы можно было апдейтить поля на основании имеющегося значения, потом можно будет избавиться от транзакции
-	updateUserQuery, updateUserParams := dbHelper.BuildUpdate[models.User](
-		dbHelper.SetUpdate("messages_count", currentMessageCount+count),
-		userFilter)
+		//TODO Надо бы перепилить апдейтер dbHelper чтобы можно было апдейтить поля на основании имеющегося значения, потом можно будет избавиться от транзакции
+		updateUserQuery, updateUserParams := dbHelper.BuildUpdate[models.User](
+			dbHelper.SetUpdate("messages_count", currentMessageCount+count),
+			userFilter)
 
-	_, err = c.db.ExecContext(ctx, updateUserQuery, updateUserParams)
-	if err != nil {
-		c.log.Error(err.Error())
+		_, err = c.db.ExecContext(ctx, updateUserQuery, updateUserParams...)
+		if err != nil {
+			c.log.Error(err.Error())
+		}
 	}
+	tx.Commit()
 }
