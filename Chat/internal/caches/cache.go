@@ -25,11 +25,26 @@ type dbOrTx interface {
 	Exec(query string, args ...any) (sql.Result, error)
 }
 
-// Get Получить ключ сущности по его имени
-func (c *CacheOfNames[T]) Get(tx dbOrTx, name string) (key T, ok bool) {
+// GetByName Получить ключ сущности по его имени
+func (c *CacheOfNames[T]) GetByName(tx dbOrTx, name string) (key T, ok bool) {
 	c.mutex.RLock()
 	c.once.Do(func() { c.initializer(tx, &c.elems) })
 	key, ok = c.elems[name]
+	c.mutex.RUnlock()
+	return
+}
+
+// GetByKey Получить имя сущности по его ключу
+func (c *CacheOfNames[T]) GetByKey(tx dbOrTx, key T) (name string, ok bool) {
+	c.mutex.RLock()
+	c.once.Do(func() { c.initializer(tx, &c.elems) })
+	for i, value := range c.elems {
+		if value == key {
+			name = i
+		}
+	}
+	ok = name != ""
+
 	c.mutex.RUnlock()
 	return
 }

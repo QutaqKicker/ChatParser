@@ -123,12 +123,12 @@ func parseMessageNode(node *html.Node) (*models.Message, error) {
 		message.UserName, err = getMessageUserId(&messageBodyChild, &nextClassName)
 		if err != nil {
 			//Ничего не делаем, идем дальше. Id автора пуст если это не первое сообщение в серии сообщений от одного пользователя.
-			//Возьмем автора с первого сообщения серии
+			//Возьмем автора из первого сообщения серии
 		}
 
 		err = skipUnusedMessageBodyTags(&messageBodyChild, &nextClassName)
 		if err != nil {
-			return &message, err
+			return &message, nil
 		}
 
 		message.ReplyToMessageId, err = getReplyToMessageId(&messageBodyChild, &nextClassName)
@@ -219,7 +219,7 @@ func getMessageText(node *html.Node, className string) (string, error) {
 		return strings.TrimSpace(text.String()), nil
 	}
 
-	return "", errors.New("message text does not exists")
+	return "just photo or voice", nil
 }
 
 func getAttributeValueByName(node *html.Node, attrName string) (string, error) {

@@ -3,6 +3,7 @@ package caches
 import (
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"sync"
 	"time"
@@ -49,12 +50,10 @@ func usersCacheInitializer(querier dbOrTx, elems *map[string]string) {
 func usersCacheDbUpdater(tx dbOrTx, oldKey string, newKey string) {
 	updateUserQuery, userParams := dbHelper.BuildUpdate[models.User](dbHelper.SetUpdate("id", newKey),
 		filters.NewUserFilter().WhereId(oldKey))
-	tx.Exec(updateUserQuery, userParams...)
-
-	updateMessagesQuery, messageParams := dbHelper.BuildUpdate[models.User](dbHelper.SetUpdate("user_id", newKey),
-		filters.NewMessageFilter().WhereUserIds([]string{oldKey}))
-
-	tx.Exec(updateMessagesQuery, messageParams...)
+	_, err := tx.Exec(updateUserQuery, userParams...)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
@@ -63,14 +62,18 @@ func usersCacheDbInserter(tx dbOrTx, name string, key string) string {
 		insertQuery := dbHelper.BuildInsert[models.User](false)
 		_, err := tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 
 		return newUser.Id
 	} else {
 		newUser := models.User{Id: key, Name: name, Created: time.Now()}
 		insertQuery := dbHelper.BuildInsert[models.User](false)
-		tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
+		_, err := tx.Exec(insertQuery, newUser.FieldValuesAsArray()...)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		return key
 	}
 }

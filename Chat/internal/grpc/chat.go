@@ -86,7 +86,7 @@ func (s *serverAPI) GetMessages(ctx context.Context, request *chatv1.SearchMessa
 			UserName:         messages[i].UserName,
 			ReplyToMessageId: messages[i].ReplyToMessageId,
 			Text:             messages[i].Text,
-			Created:          &timestamppb.Timestamp{Seconds: int64(messages[i].Created.Second())},
+			Created:          timestamppb.New(messages[i].Created),
 		}
 	}
 	return response, err
@@ -98,19 +98,28 @@ func (s *serverAPI) DeleteMessages(ctx context.Context, request *chatv1.SearchMe
 }
 
 func searchMessagesRequestConvertGrpcToDbHelper(req *chatv1.SearchMessagesRequest) *dbHelper.SelectBuildRequest {
+	var minCreatedDate, maxCreatedDate time.Time
+	if req.Filter.MinCreatedDate != nil {
+		minCreatedDate = req.Filter.MinCreatedDate.AsTime()
+	}
+
+	if req.Filter.MinCreatedDate != nil {
+		maxCreatedDate = req.Filter.MaxCreatedDate.AsTime()
+	}
+
 	return &dbHelper.SelectBuildRequest{
 		Filter: filters.MessageFilter{
 			Id:             req.Filter.Id,
-			MinCreatedDate: req.Filter.MinCreatedDate.AsTime(),
-			MaxCreatedDate: req.Filter.MaxCreatedDate.AsTime(),
+			MinCreatedDate: minCreatedDate,
+			MaxCreatedDate: maxCreatedDate,
 			SubText:        req.Filter.SubText,
 			UserId:         req.Filter.UserId,
 			UserIds:        req.Filter.UserIds,
 			ChatIds:        req.Filter.ChatIds,
 		},
-		//Sorts: req.Sorts TODO надо что-то придумать
-		Take: int(req.Take),
-		Skip: int(req.Skip),
+		Sorts: []dbHelper.SortField{{FieldName: "created", Direction: dbHelper.Desc}},
+		Take:  int(req.Take),
+		Skip:  int(req.Skip),
 	}
 }
 

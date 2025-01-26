@@ -34,18 +34,19 @@ func (e Exporter) ExportToDir(ctx context.Context, exportType backupv1.ExportTyp
 		writer = writers.ParquetWriter{}
 	}
 
-	writersWg := sync.WaitGroup{}
+	var err error
 
+	writersWg := sync.WaitGroup{}
 	taken := int32(0)
 	for {
-		messagesResponse, err := e.chatClient.GetMessages(ctx, &chatv1.SearchMessagesRequest{
+		messagesResponse, rpcErr := e.chatClient.GetMessages(ctx, &chatv1.SearchMessagesRequest{
 			Filter: messageFilter,
 			Skip:   taken,
 			Take:   messagesBatchSize,
 		})
 
-		if err != nil {
-			return err
+		if rpcErr != nil {
+			return rpcErr
 		}
 		if len(messagesResponse.Messages) == 0 {
 			break
@@ -59,9 +60,9 @@ func (e Exporter) ExportToDir(ctx context.Context, exportType backupv1.ExportTyp
 
 				errorMutex.Lock()
 				if err != nil {
-					err = writeErr
-				} else {
 					err = errors.Join(err, writeErr)
+				} else {
+					err = writeErr
 				}
 				errorMutex.Unlock()
 
@@ -72,5 +73,5 @@ func (e Exporter) ExportToDir(ctx context.Context, exportType backupv1.ExportTyp
 	}
 
 	writersWg.Wait()
-	return nil
+	return err
 }

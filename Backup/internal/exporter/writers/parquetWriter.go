@@ -2,18 +2,20 @@ package writers
 
 import (
 	"context"
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/contracts"
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"github.com/parquet-go/parquet-go"
 	"os"
+	"time"
 )
 
 type ParquetWriter struct{}
 
 func (ParquetWriter) WriteFile(_ context.Context, writeDir string, messages []*chatv1.ChatMessage) error {
 	schema := parquet.SchemaOf(new(contracts.ParquetMessageRow))
-	fileName := messages[0].Created.String() + ".parquet" //TODO Проверить
-	file, err := os.Create(writeDir + "/" + fileName)
+	fileName := messages[len(messages)-1].Created.AsTime().Format(time.DateOnly) + ".parquet" //TODO Проверить
+	file, err := os.Create(fmt.Sprintf("%s\\%s", writeDir, fileName))
 	if err != nil {
 		return err
 	}

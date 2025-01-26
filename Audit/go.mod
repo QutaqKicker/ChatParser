@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250119152516-e4e3f30d5bfb
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250126183655-031eee66dec2
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0

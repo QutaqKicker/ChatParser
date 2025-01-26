@@ -3,11 +3,13 @@ package grpc
 import (
 	"backups/internal/exporter"
 	"context"
+	"errors"
 	"fmt"
 	backupv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/backup"
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	commonv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/common"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"net"
 )
@@ -37,11 +39,12 @@ type App struct {
 	exportDir  string
 }
 
-func New(log *slog.Logger, exportDir string, port int, chatServicePort int) *App {
-	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", chatServicePort))
+func New(log *slog.Logger, exportDir string, port int, chatServicePort int) (*App, error) {
+	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", chatServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*20)))
 	if err != nil {
-		log.Error("grpc server connection failed: %v", err)
-		return nil
+		return nil, errors.New(fmt.Sprintf("grpc server connection failed: %v", err))
 	}
 
 	chatClient := chatv1.NewChatClient(cc)
@@ -54,7 +57,7 @@ func New(log *slog.Logger, exportDir string, port int, chatServicePort int) *App
 		gRPCServer: grpcServer,
 		port:       port,
 		exportDir:  exportDir,
-	}
+	}, nil
 }
 
 func (a *App) Run() error {

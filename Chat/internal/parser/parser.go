@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 // Parser осуществляет чтение дампа сообщений, их дозаполнение, подсчет и отправку в микросервис Users и сохранение данных в БД
@@ -69,7 +70,8 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	}
 
 	readersWg := &sync.WaitGroup{}
-	//Запускаем чтение сообщений из файлов в директориях
+	readersSemaphore := make(chan struct{}, 5)
+	//Запускаем чтение сообщений из файлов в директориях. Больше пяти горутин может помешать производительности
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -78,7 +80,9 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 		if strings.HasSuffix(file.Name(), string(reader.ReaderType())) {
 			readersWg.Add(1)
 			go func() {
+				readersSemaphore <- struct{}{}
 				reader.ReadMessages(ctx, dumpDir+"/"+file.Name())
+				<-readersSemaphore
 				readersWg.Done()
 			}()
 		}
@@ -87,8 +91,8 @@ func (p *Parser) ParseFromDir(ctx context.Context, dumpDir string) error {
 	tx, err := p.db.BeginTx(ctx, nil)
 
 	writersWg := &sync.WaitGroup{}
-	writersWg.Add(1)
 	//Заполняем сырые сообщения. У них могут быть не заполнены айдишники чата и юзера
+	writersWg.Add(1)
 	go func() {
 		processRawMessages(ctx, tx, rawMessagesChan, messagesChan, p.userMessageCounterProducer)
 		writersWg.Done()
@@ -135,27 +139,27 @@ chanLoop:
 			}
 
 			if rawMessage.ChatId == 0 {
-				if chatId, ok := caches.ChatsCache.Get(tx, rawMessage.ChatName); ok {
+				if chatId, ok := caches.ChatsCache.GetByName(tx, rawMessage.ChatName); ok {
 					rawMessage.ChatId = chatId
 				} else {
 					rawMessage.ChatId = caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
 				}
 			} else {
 				//Если такого чата в кэше нет или айди этого чата не совпадает с тем, что был в сообщении, апсертим этот чат
-				if chatId, ok := caches.ChatsCache.Get(tx, rawMessage.ChatName); !ok || rawMessage.ChatId != chatId {
+				if chatId, ok := caches.ChatsCache.GetByName(tx, rawMessage.ChatName); !ok || rawMessage.ChatId != chatId {
 					caches.ChatsCache.Set(tx, rawMessage.ChatName, rawMessage.ChatId)
 				}
 			}
 
 			if rawMessage.UserId == "" {
-				if userId, ok := caches.UsersCache.Get(tx, rawMessage.UserName); ok {
+				if userId, ok := caches.UsersCache.GetByName(tx, rawMessage.UserName); ok {
 					rawMessage.UserId = userId
 				} else {
 					rawMessage.UserId = caches.UsersCache.Set(tx, rawMessage.UserName, rawMessage.UserId)
 				}
 			} else {
 				//Если такого юзера в кэше нет или айди этого юзера не совпадает с тем, что был в сообщении, апсертим этого юзера
-				if userId, ok := caches.UsersCache.Get(tx, rawMessage.UserName); !ok || rawMessage.UserId != userId {
+				if userId, ok := caches.UsersCache.GetByName(tx, rawMessage.UserName); !ok || rawMessage.UserId != userId {
 					caches.UsersCache.Set(tx, rawMessage.UserName, rawMessage.UserId)
 				}
 			}
@@ -163,7 +167,9 @@ chanLoop:
 			outMessagesChan <- rawMessage
 
 			if counter, ok := messagesCountPerUser[rawMessage.UserName]; !ok {
-				messagesCountPerUser[rawMessage.UserName] = &atomic.Uint64{}
+				counter = &atomic.Uint64{}
+				counter.Add(1)
+				messagesCountPerUser[rawMessage.UserName] = counter
 			} else {
 				counter.Add(1)
 			}
@@ -190,11 +196,19 @@ func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.
 	}
 	defer insertQuery.Close()
 
+	messageCount := atomic.Uint64{}
+	var startTime time.Time
+	once := sync.Once{}
 	for message := range messagesChan {
+		once.Do(func() { startTime = time.Now() })
+
 		_, err := insertQuery.ExecContext(ctx, message.FieldValuesAsArray()...)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		messageCount.Add(1)
+		fmt.Printf("\rinserted %d messages. speed: %f messages per second", messageCount.Load(), float64(messageCount.Load())/time.Since(startTime).Seconds())
 	}
 }
 

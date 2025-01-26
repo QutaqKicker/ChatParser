@@ -78,7 +78,7 @@ func (r *CsvReader) ReadMessages(ctx context.Context, fileName string) {
 				return
 			}
 
-			created, err := time.Parse(time.DateTime, row[7]) //TODO уточнить формат даты
+			created, err := time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", row[7])
 			if err != nil {
 				r.errorsChan <- err
 				return

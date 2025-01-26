@@ -8,6 +8,7 @@ import (
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	"os"
 	"strconv"
+	"time"
 )
 
 type CsvWriter struct{}
@@ -17,8 +18,8 @@ func (CsvWriter) WriteFile(ctx context.Context, writeDir string, messages []*cha
 		return nil
 	}
 
-	fileName := messages[len(messages)-1].Created.String() + ".csv" //TODO Проверить
-	file, err := os.Create(fmt.Sprintf("%s/%s", writeDir, fileName))
+	fileName := messages[len(messages)-1].Created.AsTime().Format(time.DateOnly) + ".csv" //TODO Проверить
+	file, err := os.Create(fmt.Sprintf("%s\\%s", writeDir, fileName))
 	if err != nil {
 		return err
 	}
@@ -59,5 +60,5 @@ func FieldValuesAsArray(m *chatv1.ChatMessage) []string {
 		m.UserName,
 		strconv.Itoa(int(m.ReplyToMessageId)),
 		m.Text,
-		m.Created.String()}
+		m.Created.AsTime().String()}
 }

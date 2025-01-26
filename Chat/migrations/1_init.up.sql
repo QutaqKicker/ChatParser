@@ -22,10 +22,10 @@ CREATE TABLE IF NOT EXISTS messages
     created timestamp with time zone,
     constraint fk_chat
         foreign key(chat_id)
-            references chats(id),
+            references chats(id) ON UPDATE CASCADE,
     constraint fk_user
         foreign key(user_id)
-            references users(id)
+            references users(id) ON UPDATE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_created on messages(created);

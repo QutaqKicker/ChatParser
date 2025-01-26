@@ -3,7 +3,10 @@ package main
 import (
 	config "backups/internal"
 	"backups/internal/grpc"
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/constants"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
+	"github.com/QutaqKicker/ChatParser/Common/myLogs"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -14,13 +17,20 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	logger := setupLogger(cfg.Env)
+	auditProducer := myKafka.NewAuditProducer()
+	defer auditProducer.Close()
+
+	logger := myLogs.SetupLogger(auditProducer, "BackupService")
 
 	logger.Info("started application", slog.Any("config", cfg))
 
 	port, _ := strconv.Atoi(os.Getenv(constants.BackupPortEnvName))
 	chatServicePort, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
-	application := grpc.New(logger, cfg.ExportDir, port, chatServicePort)
+	application, err := grpc.New(logger, cfg.ExportDir, port, chatServicePort)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	go application.Run()
 
@@ -29,15 +39,4 @@ func main() {
 
 	<-stop
 	application.Stop()
-}
-
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-	switch env {
-	case "dev":
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	}
-	return log
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"chat/internal/caches"
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
 	"chat/internal/parser"
@@ -70,7 +71,17 @@ func (s *ChatService) SearchMessages(ctx context.Context, request *dbHelper.Sele
 		return nil, err
 	}
 
-	return dbHelper.RowsToEntities[models.Message](rows)
+	messages, err := dbHelper.RowsToEntities[models.Message](rows)
+	if err != nil {
+		return messages, err
+	}
+
+	for i := 0; i < len(messages); i++ {
+		messages[i].ChatName, _ = caches.ChatsCache.GetByKey(s.db, messages[i].ChatId)
+		messages[i].UserName, _ = caches.UsersCache.GetByKey(s.db, messages[i].UserId)
+	}
+
+	return messages, nil
 }
 
 func (s *ChatService) DeleteMessages(ctx context.Context, request *dbHelper.SelectBuildRequest) error {

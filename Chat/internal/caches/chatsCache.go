@@ -3,6 +3,7 @@ package caches
 import (
 	"chat/internal/domain/filters"
 	"chat/internal/domain/models"
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"log"
 	"sync"
@@ -48,14 +49,12 @@ func chatsCacheInitializer(querier dbOrTx, elems *map[string]int32) {
 }
 
 func chatsCacheDbUpdater(tx dbOrTx, oldKey int32, newKey int32) {
-	updateUserQuery, userParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("id", newKey),
+	updateChatQuery, chatParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("id", newKey),
 		filters.NewChatFilter().WhereId(oldKey))
-	tx.Exec(updateUserQuery, userParams...)
-
-	updateMessagesQuery, messageParams := dbHelper.BuildUpdate[models.Chat](dbHelper.SetUpdate("user_id", newKey),
-		filters.NewMessageFilter().WhereChatIds([]int32{oldKey}))
-
-	tx.Exec(updateMessagesQuery, messageParams...)
+	_, err := tx.Exec(updateChatQuery, chatParams...)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
@@ -76,7 +75,11 @@ func chatsCacheDbInserter(tx dbOrTx, name string, key int32) int32 {
 	} else {
 		newChat := models.Chat{Id: key, Name: name, Created: time.Now()}
 		insertQuery := dbHelper.BuildInsert[models.Chat](false)
-		tx.Exec(insertQuery, newChat.FieldValuesAsArray())
+		_, err := tx.Exec(insertQuery, newChat.FieldValuesAsArray()...)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		return key
 	}
 }

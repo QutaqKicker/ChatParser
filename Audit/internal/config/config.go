@@ -1,21 +1,14 @@
 package config
 
 import (
+	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"github.com/ilyakaznacheev/cleanenv"
 	"os"
 )
 
 type Config struct {
-	Env string   `yaml:"env" env-default:"local"`
-	Db  DbConfig `yaml:"db"`
-}
-
-type DbConfig struct {
-	Host     string `yaml:"host" env-required:"true"`
-	Port     int    `yaml:"port" env-required:"true"`
-	User     string `yaml:"user" env-required:"true"`
-	Password string `yaml:"password" env-required:"true"`
-	DbName   string `yaml:"dbName" env-required:"true"`
+	Env string            `yaml:"env" env-default:"local"`
+	Db  dbHelper.DbConfig `yaml:"db"`
 }
 
 func MustLoad() *Config {
