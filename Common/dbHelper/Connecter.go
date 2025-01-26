@@ -13,7 +13,7 @@ type DbConfig struct {
 	DbName   string `yaml:"dbName" env-required:"true"`
 }
 
-func connectDb(cfg DbConfig) (*sql.DB, error) {
+func ConnectDb(cfg DbConfig) (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DbName)

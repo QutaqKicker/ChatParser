@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func setupLogger(producer *myKafka.AuditProducer, serviceName string) *slog.Logger {
+func SetupLogger(producer *myKafka.AuditProducer, serviceName string) *slog.Logger {
 	log := slog.New(&AuditLogHandler{producer: producer, serviceName: serviceName})
 	return log
 }
