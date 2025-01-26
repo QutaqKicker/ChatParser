@@ -243,7 +243,7 @@ func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
 				whereBuilder.WriteString(fmt.Sprintf("\n  and %s %s $%d", columnName, relation, len(values)+firstParamIndex))
 				values = append(values, fieldValue.Interface())
 			case "like":
-				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%$%d%%'", columnName, len(values)+firstParamIndex))
+				whereBuilder.WriteString(fmt.Sprintf("\n  and %s like '%%' || $%d || '%%'", columnName, len(values)+firstParamIndex))
 				values = append(values, fieldValue.String())
 			case "in":
 				inParams := make([]string, 0, fieldValue.Len())
@@ -253,7 +253,7 @@ func buildWhere(filter any, firstParamIndex int) (string, []interface{}) {
 						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
 						values = append(values, value)
 					}
-				case []int:
+				case []int32:
 					for _, value := range inSlice {
 						inParams = append(inParams, fmt.Sprintf("$%d", len(values)+firstParamIndex))
 						values = append(values, value)
