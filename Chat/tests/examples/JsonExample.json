@@ -1,0 +1,216 @@
+{
+ "name": "chat name",
+ "type": "private_supergroup",
+ "id": 1124496986,
+ "messages": [
+  {
+   "id": 182649,
+   "type": "service",
+   "date": "2022-08-31T12:01:36",
+   "date_unixtime": "1661936496",
+   "actor": "user",
+   "actor_id": "user301222647",
+   "action": "invite_members",
+   "members": [
+    "user"
+   ],
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 182650,
+   "type": "service",
+   "date": "2022-08-31T12:01:42",
+   "date_unixtime": "1661936502",
+   "actor": "user",
+   "actor_id": "user301222647",
+   "action": "remove_members",
+   "members": [
+    "Я"
+   ],
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 182651,
+   "type": "message",
+   "date": "2022-08-31T12:01:45",
+   "date_unixtime": "1661936505",
+   "from": "user1",
+   "from_id": "user496709216",
+   "text": "message1",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message1"
+    }
+   ]
+  },
+  {
+   "id": 182652,
+   "type": "message",
+   "date": "2022-08-31T12:01:45",
+   "date_unixtime": "1661936505",
+   "from": "username2",
+   "from_id": "user272557771",
+   "text": "message2",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message2"
+    }
+   ]
+  },
+  {
+   "id": 182653,
+   "type": "message",
+   "date": "2022-08-31T12:01:52",
+   "date_unixtime": "1661936512",
+   "from": "username2",
+   "from_id": "user272557771",
+   "text": "message3",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message3"
+    }
+   ]
+  },
+  {
+   "id": 182654,
+   "type": "message",
+   "date": "2022-08-31T12:01:57",
+   "date_unixtime": "1661936517",
+   "from": "username3",
+   "from_id": "user204776088",
+   "reply_to_message_id": 182652,
+   "text": "message4",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message4"
+    }
+   ]
+  },
+  {
+   "id": 182655,
+   "type": "message",
+   "date": "2022-08-31T12:02:01",
+   "date_unixtime": "1661936521",
+   "from": "username4",
+   "from_id": "user232216121",
+   "text": "message5",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message5"
+    }
+   ]
+  },
+  {
+   "id": 182656,
+   "type": "message",
+   "date": "2022-08-31T12:02:03",
+   "date_unixtime": "1661936523",
+   "edited": "2022-08-31T12:38:02",
+   "edited_unixtime": "1661938682",
+   "from": "username5",
+   "from_id": "user968649833",
+   "photo": "(File not included. Change data exporting settings to download.)",
+   "width": 208,
+   "height": 87,
+   "text": "message6",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message6"
+    }
+   ],
+   "reactions": [
+     {
+      "type": "emoji",
+      "count": 1,
+      "emoji": "👍",
+      "recent": [
+       {
+        "from": "username11",
+        "from_id": "user289217002",
+        "date": "2022-08-31T12:38:02"
+       }
+      ]
+     }
+    ]
+  },
+  {
+   "id": 182657,
+   "type": "message",
+   "date": "2022-08-31T12:02:05",
+   "date_unixtime": "1661936525",
+   "from": "username4",
+   "from_id": "user204776088",
+   "text": "message7",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message7"
+    }
+   ]
+  },
+  {
+   "id": 182658,
+   "type": "message",
+   "date": "2022-08-31T12:02:09",
+   "date_unixtime": "1661936529",
+   "from": "username7",
+   "from_id": "user276461447",
+   "reply_to_message_id": 182649,
+   "text": "message8",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message8"
+    }
+   ]
+  },
+  {
+   "id": 182659,
+   "type": "message",
+   "date": "2022-08-31T12:02:15",
+   "date_unixtime": "1661936535",
+   "from": "username8",
+   "from_id": "user272557771",
+   "text": [
+    {
+     "type": "mention",
+     "text": "username4"
+    },
+    " message9"
+   ],
+   "text_entities": [
+    {
+     "type": "mention",
+     "text": "username4"
+    },
+    {
+     "type": "plain",
+     "text": " message9"
+    }
+   ]
+  },
+  {
+   "id": 182660,
+   "type": "message",
+   "date": "2022-08-31T12:02:15",
+   "date_unixtime": "1661936535",
+   "from": "username3",
+   "from_id": "user232216121",
+   "text": "message10",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "message10"
+    }
+   ]
+  }
+ ]
+}
