@@ -4,8 +4,8 @@ import "time"
 
 type ChatFilter struct {
 	Id             int32     `column:"id" relation:"="`
-	MinCreatedDate time.Time `column:"created" relation:"<"`
-	MaxCreatedDate time.Time `column:"created" relation:">"`
+	MinCreatedDate time.Time `column:"created" relation:">"`
+	MaxCreatedDate time.Time `column:"created" relation:"<"`
 	Name           string    `column:"text" relation:"="`
 }
 

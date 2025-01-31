@@ -3,8 +3,8 @@ package filters
 import "time"
 
 type UserFilter struct {
-	MinCreatedDate time.Time `column:"created" relation:"<"`
-	MaxCreatedDate time.Time `column:"created" relation:">"`
+	MinCreatedDate time.Time `column:"created" relation:">"`
+	MaxCreatedDate time.Time `column:"created" relation:"<"`
 	Name           string    `column:"name" relation:"="`
 }
 

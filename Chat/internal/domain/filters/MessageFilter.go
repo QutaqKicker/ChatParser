@@ -4,16 +4,12 @@ import "time"
 
 type MessageFilter struct {
 	Id             int32     `column:"id" relation:"="`
-	MinCreatedDate time.Time `column:"created" relation:"<"`
-	MaxCreatedDate time.Time `column:"created" relation:">"`
+	MinCreatedDate time.Time `column:"created" relation:">"`
+	MaxCreatedDate time.Time `column:"created" relation:"<"`
 	SubText        string    `column:"text" relation:"like"`
 	UserId         string    `column:"user_id" relation:"="`
 	UserIds        []string  `column:"user_id" relation:"in"`
 	ChatIds        []int32   `column:"chat_id" relation:"in"`
-}
-
-func NewMessageFilter() *MessageFilter {
-	return &MessageFilter{}
 }
 
 func (f *MessageFilter) WhereId(value int32) *MessageFilter {
