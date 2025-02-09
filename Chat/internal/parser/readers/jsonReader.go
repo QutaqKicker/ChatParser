@@ -115,7 +115,7 @@ type JsonChatContent struct {
 			Text string `json:"text"`
 			Data string `json:"data"`
 		} `json:"inline_bot_buttons,omitempty"`
-	} `json:"messages"`
+	} `json:"messageActions"`
 }
 
 type JsonReader struct {

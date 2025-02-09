@@ -208,7 +208,7 @@ func insertMessages(ctx context.Context, tx *sql.Tx, messagesChan <-chan models.
 		}
 
 		messageCount.Add(1)
-		fmt.Printf("\rinserted %d messages. speed: %f messages per second", messageCount.Load(), float64(messageCount.Load())/time.Since(startTime).Seconds())
+		fmt.Printf("\rinserted %d messageActions. speed: %f messageActions per second", messageCount.Load(), float64(messageCount.Load())/time.Since(startTime).Seconds())
 	}
 }
 
