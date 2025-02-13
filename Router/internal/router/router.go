@@ -7,13 +7,12 @@ import (
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	userv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/user"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"strings"
+	"router/internal/backupHandlers"
+	"router/internal/chatHandlers"
+	"router/internal/userHandlers"
 	"time"
 )
 
@@ -29,7 +28,7 @@ type Chat interface {
 		userId string)
 }
 
-func NewRouter(logger *slog.Logger, routerPort, chatPort, userPort, backupPort string) http.Handler {
+func NewRouter(logger *slog.Logger, chatPort, userPort, backupPort string) http.Handler {
 	mux := http.NewServeMux()
 
 	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", chatPort),
@@ -78,35 +77,10 @@ func addRoutes(
 	backupClient *backupv1.BackupClient,
 
 ) {
-	mux.Handle("/chat/messages/", getMessagesHandler(logger, chatClient))
-	mux.Handle("/chat/messages/", handleTenantsGet(logger, tenantsStore))
-	mux.Handle("/oauth2/", handleOAuth2Proxy(logger, authProxy))
-	mux.HandleFunc("/healthz", handleHealthzPlease(logger))
+	mux.Handle("/chat/messages/search", chatHandlers.SearchMessagesHandler(logger, chatClient))
+	mux.Handle("/chat/messages/count", chatHandlers.GetMessagesCountHandler(logger, chatClient))
+	mux.Handle("/chat/parse-from-dir", chatHandlers.ParseFromDirHandler(logger, chatClient))
+	mux.Handle("/backup/export-to-dir", backupHandlers.ExportToDirHandler(logger, backupClient))
+	mux.Handle("/user/messages-count", userHandlers.GetUsersWithMessagesCountHandler(logger, userClient))
 	mux.Handle("/", http.NotFoundHandler())
-}
-
-func getMessagesHandler(logger *slog.Logger, chatClient *chatv1.ChatClient) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := strings.TrimPrefix(r.URL.Path, prefix)
-		rp := strings.TrimPrefix(r.URL.RawPath, prefix)
-		if len(p) < len(r.URL.Path) && (r.URL.RawPath == "" || len(rp) < len(r.URL.RawPath)) {
-			r2 := new(Request)
-			*r2 = *r
-			r2.URL = new(url.URL)
-			*r2.URL = *r.URL
-			r2.URL.Path = p
-			r2.URL.RawPath = rp
-			h.ServeHTTP(w, r2)
-		} else {
-			NotFound(w, r)
-		}
-	})
-}
-
-func (s *serverAPI) ParseHtml(ctx context.Context, req *routerv1.ParseHtmlRequest) (*routerv1.ParseHtmlResponse, error) {
-	if req.DirPath == "" {
-		return nil, status.Error(codes.InvalidArgument, "dirPath is empty")
-	}
-	isSuccess, err := s.router.ParseHtml(ctx, req.DirPath)
-	return &routerv1.ParseHtmlResponse{IsSuccess: isSuccess}, err
 }

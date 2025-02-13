@@ -1,14 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	"github.com/QutaqKicker/ChatParser/Common/myLogs"
+	"net/http"
 	"os"
-	"os/signal"
 	"router/internal/router"
-	"strconv"
-	"syscall"
 )
 
 func main() {
@@ -20,24 +19,16 @@ func main() {
 
 	logger.Info("started router")
 
-	routerPort, _ := strconv.Atoi(os.Getenv(constants.RouterPortEnvName))
+	routerPort := os.Getenv(constants.RouterPortEnvName)
 
-	chatPort, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
-	userPort, _ := strconv.Atoi(os.Getenv(constants.UserPortEnvName))
-	backupPort, _ := strconv.Atoi(os.Getenv(constants.BackupPortEnvName))
+	chatPort := os.Getenv(constants.ChatPortEnvName)
+	userPort := os.Getenv(constants.UserPortEnvName)
+	backupPort := os.Getenv(constants.BackupPortEnvName)
 
-	router := router.NewRouter(logger)
+	routerMux := router.NewRouter(logger, chatPort, userPort, backupPort)
 
-	go func() {
-		err := application.Run()
-		if err != nil {
-			logger.Error(err.Error())
-		}
-	}()
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
-
-	<-stop
-	application.Stop()
+	err := http.ListenAndServe(fmt.Sprintf(":%s", routerPort), routerMux)
+	if err != nil {
+		logger.Error(err.Error())
+	}
 }

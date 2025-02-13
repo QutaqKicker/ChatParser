@@ -9,6 +9,7 @@ import (
 	"github.com/QutaqKicker/ChatParser/Common/dbHelper"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
+	commonv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/common"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,17 +18,6 @@ import (
 	"net"
 	"time"
 )
-
-type ChatService interface {
-	ParseFromDir(ctx context.Context,
-		diPath string) error
-	SearchMessages(ctx context.Context,
-		min time.Time,
-		max time.Time,
-		userIds []string) ([]*chatv1.ChatMessage, error)
-	GetStatistics(ctx context.Context,
-		userIds []string) (bool, error)
-}
 
 type App struct {
 	log        *slog.Logger
@@ -70,13 +60,23 @@ func (s *serverAPI) ParseFromDir(ctx context.Context, req *chatv1.ParseFromDirRe
 	return &chatv1.ParseFromDirResponse{Ok: ok}, err
 }
 
-func (s *serverAPI) GetMessages(ctx context.Context, request *chatv1.SearchMessagesRequest) (*chatv1.GetMessagesResponse, error) {
+func (s *serverAPI) GetMessagesCount(ctx context.Context, request *chatv1.GetMessagesCountRequest) (*chatv1.GetMessagesCountResponse, error) {
+	messagesCount, err := s.chat.GetMessagesCount(ctx, messagesFilterConvertGrpcToDbHelper(request.Filter))
+	if err != nil {
+		return nil, err
+	}
+
+	response := &chatv1.GetMessagesCountResponse{Count: messagesCount}
+	return response, err
+}
+
+func (s *serverAPI) SearchMessages(ctx context.Context, request *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
 	messages, err := s.chat.SearchMessages(ctx, searchMessagesRequestConvertGrpcToDbHelper(request))
 	if err != nil {
 		return nil, err
 	}
 
-	response := &chatv1.GetMessagesResponse{Messages: make([]*chatv1.ChatMessage, len(messages))}
+	response := &chatv1.SearchMessagesResponse{Messages: make([]*chatv1.ChatMessage, len(messages))}
 	for i := 0; i < len(messages); i++ {
 		response.Messages[i] = &chatv1.ChatMessage{
 			Id:               messages[i].Id,
@@ -98,28 +98,32 @@ func (s *serverAPI) DeleteMessages(ctx context.Context, request *chatv1.SearchMe
 }
 
 func searchMessagesRequestConvertGrpcToDbHelper(req *chatv1.SearchMessagesRequest) *dbHelper.SelectBuildRequest {
-	var minCreatedDate, maxCreatedDate time.Time
-	if req.Filter.MinCreatedDate != nil {
-		minCreatedDate = req.Filter.MinCreatedDate.AsTime()
-	}
-
-	if req.Filter.MinCreatedDate != nil {
-		maxCreatedDate = req.Filter.MaxCreatedDate.AsTime()
-	}
-
 	return &dbHelper.SelectBuildRequest{
-		Filter: filters.MessageFilter{
-			Id:             req.Filter.Id,
-			MinCreatedDate: minCreatedDate,
-			MaxCreatedDate: maxCreatedDate,
-			SubText:        req.Filter.SubText,
-			UserId:         req.Filter.UserId,
-			UserIds:        req.Filter.UserIds,
-			ChatIds:        req.Filter.ChatIds,
-		},
-		Sorts: []dbHelper.SortField{{FieldName: "created", Direction: dbHelper.Desc}},
-		Take:  int(req.Take),
-		Skip:  int(req.Skip),
+		Filter: messagesFilterConvertGrpcToDbHelper(req.Filter),
+		Sorts:  []dbHelper.SortField{{FieldName: "created", Direction: dbHelper.Desc}},
+		Take:   int(req.Take),
+		Skip:   int(req.Skip),
+	}
+}
+
+func messagesFilterConvertGrpcToDbHelper(filter *commonv1.MessagesFilter) *filters.MessageFilter {
+	var minCreatedDate, maxCreatedDate time.Time
+	if filter.MinCreatedDate != nil {
+		minCreatedDate = filter.MinCreatedDate.AsTime()
+	}
+
+	if filter.MinCreatedDate != nil {
+		maxCreatedDate = filter.MaxCreatedDate.AsTime()
+	}
+
+	return &filters.MessageFilter{
+		Id:             filter.Id,
+		MinCreatedDate: minCreatedDate,
+		MaxCreatedDate: maxCreatedDate,
+		SubText:        filter.SubText,
+		UserId:         filter.UserId,
+		UserIds:        filter.UserIds,
+		ChatIds:        filter.ChatIds,
 	}
 }
 

@@ -13,26 +13,13 @@ import (
 )
 
 type ChatService struct {
-	log *slog.Logger
-	db  *sql.DB
-	MessageSaver
-	MessageProvider
+	log                        *slog.Logger
+	db                         *sql.DB
 	userMessageCounterProducer *myKafka.UserMessageCounterProducer
 }
 
 type HtmlParser interface {
 	ParseFromDir(ctx context.Context, dumpDir string) (<-chan models.Message, error)
-}
-
-type MessageSaver interface {
-	SaveMessages(
-		ctx context.Context,
-		message []models.Message) error
-}
-
-type MessageProvider interface {
-	GetMessages(
-		filter filters.MessageFilter) ([]models.Message, error)
 }
 
 func NewChatService(
@@ -82,6 +69,28 @@ func (s *ChatService) SearchMessages(ctx context.Context, request *dbHelper.Sele
 	}
 
 	return messages, nil
+}
+
+func (s *ChatService) GetMessagesCount(ctx context.Context, filter *filters.MessageFilter) (int64, error) {
+	request := dbHelper.SelectBuildRequest{
+		Filter:     filter,
+		SelectType: dbHelper.Count,
+	}
+	selectQuery, selectParams := dbHelper.BuildQuery[models.Message](request)
+	rows, err := s.db.QueryContext(ctx, selectQuery, selectParams...)
+	if err != nil {
+		return 0, err
+	}
+
+	var messagesCount int64
+	for rows.Next() {
+		err := rows.Scan(&messagesCount)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return messagesCount, nil
 }
 
 func (s *ChatService) DeleteMessages(ctx context.Context, request *dbHelper.SelectBuildRequest) error {

@@ -5,8 +5,8 @@ go 1.22.0
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250201164326-a3505e3d0192
-	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250115190417-ed43718c303f
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250213192423-65325b3cc105
+	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250213192423-65325b3cc105
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/lib/pq v1.10.9
 	github.com/parquet-go/parquet-go v0.24.0
