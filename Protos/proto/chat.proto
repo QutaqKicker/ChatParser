@@ -10,6 +10,7 @@ option go_package = "chatparser.chat.v1;chatv1";
 
 service Chat {
   rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
+  rpc GetMessagesCount (SearchMessagesRequest) returns (GetMessagesCountResponse);
   rpc GetMessages (SearchMessagesRequest) returns (GetMessagesResponse);
   rpc DeleteMessages (SearchMessagesRequest) returns (DeleteMessageResponse);
 }
@@ -27,6 +28,10 @@ message SearchMessagesRequest {
   int32 Take = 3;
   int32 Skip = 4;
   repeated string Sorts = 5;
+}
+
+message GetMessagesCountResponse {
+  int64 Count = 1;
 }
 
 message GetMessagesResponse {
