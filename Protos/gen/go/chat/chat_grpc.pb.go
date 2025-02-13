@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Chat_ParseFromDir_FullMethodName     = "/chat.Chat/ParseFromDir"
 	Chat_GetMessagesCount_FullMethodName = "/chat.Chat/GetMessagesCount"
-	Chat_GetMessages_FullMethodName      = "/chat.Chat/GetMessages"
+	Chat_SearchMessages_FullMethodName   = "/chat.Chat/SearchMessages"
 	Chat_DeleteMessages_FullMethodName   = "/chat.Chat/DeleteMessages"
 )
 
@@ -30,8 +30,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatClient interface {
 	ParseFromDir(ctx context.Context, in *ParseFromDirRequest, opts ...grpc.CallOption) (*ParseFromDirResponse, error)
-	GetMessagesCount(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*GetMessagesCountResponse, error)
-	GetMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error)
+	GetMessagesCount(ctx context.Context, in *GetMessagesCountRequest, opts ...grpc.CallOption) (*GetMessagesCountResponse, error)
+	SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error)
 	DeleteMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*DeleteMessageResponse, error)
 }
 
@@ -53,7 +53,7 @@ func (c *chatClient) ParseFromDir(ctx context.Context, in *ParseFromDirRequest, 
 	return out, nil
 }
 
-func (c *chatClient) GetMessagesCount(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*GetMessagesCountResponse, error) {
+func (c *chatClient) GetMessagesCount(ctx context.Context, in *GetMessagesCountRequest, opts ...grpc.CallOption) (*GetMessagesCountResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetMessagesCountResponse)
 	err := c.cc.Invoke(ctx, Chat_GetMessagesCount_FullMethodName, in, out, cOpts...)
@@ -63,10 +63,10 @@ func (c *chatClient) GetMessagesCount(ctx context.Context, in *SearchMessagesReq
 	return out, nil
 }
 
-func (c *chatClient) GetMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*GetMessagesResponse, error) {
+func (c *chatClient) SearchMessages(ctx context.Context, in *SearchMessagesRequest, opts ...grpc.CallOption) (*SearchMessagesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMessagesResponse)
-	err := c.cc.Invoke(ctx, Chat_GetMessages_FullMethodName, in, out, cOpts...)
+	out := new(SearchMessagesResponse)
+	err := c.cc.Invoke(ctx, Chat_SearchMessages_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +88,8 @@ func (c *chatClient) DeleteMessages(ctx context.Context, in *SearchMessagesReque
 // for forward compatibility.
 type ChatServer interface {
 	ParseFromDir(context.Context, *ParseFromDirRequest) (*ParseFromDirResponse, error)
-	GetMessagesCount(context.Context, *SearchMessagesRequest) (*GetMessagesCountResponse, error)
-	GetMessages(context.Context, *SearchMessagesRequest) (*GetMessagesResponse, error)
+	GetMessagesCount(context.Context, *GetMessagesCountRequest) (*GetMessagesCountResponse, error)
+	SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error)
 	DeleteMessages(context.Context, *SearchMessagesRequest) (*DeleteMessageResponse, error)
 	mustEmbedUnimplementedChatServer()
 }
@@ -104,11 +104,11 @@ type UnimplementedChatServer struct{}
 func (UnimplementedChatServer) ParseFromDir(context.Context, *ParseFromDirRequest) (*ParseFromDirResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParseFromDir not implemented")
 }
-func (UnimplementedChatServer) GetMessagesCount(context.Context, *SearchMessagesRequest) (*GetMessagesCountResponse, error) {
+func (UnimplementedChatServer) GetMessagesCount(context.Context, *GetMessagesCountRequest) (*GetMessagesCountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMessagesCount not implemented")
 }
-func (UnimplementedChatServer) GetMessages(context.Context, *SearchMessagesRequest) (*GetMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+func (UnimplementedChatServer) SearchMessages(context.Context, *SearchMessagesRequest) (*SearchMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchMessages not implemented")
 }
 func (UnimplementedChatServer) DeleteMessages(context.Context, *SearchMessagesRequest) (*DeleteMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMessages not implemented")
@@ -153,7 +153,7 @@ func _Chat_ParseFromDir_Handler(srv interface{}, ctx context.Context, dec func(i
 }
 
 func _Chat_GetMessagesCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchMessagesRequest)
+	in := new(GetMessagesCountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -165,25 +165,25 @@ func _Chat_GetMessagesCount_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: Chat_GetMessagesCount_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetMessagesCount(ctx, req.(*SearchMessagesRequest))
+		return srv.(ChatServer).GetMessagesCount(ctx, req.(*GetMessagesCountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Chat_GetMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Chat_SearchMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchMessagesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServer).GetMessages(ctx, in)
+		return srv.(ChatServer).SearchMessages(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Chat_GetMessages_FullMethodName,
+		FullMethod: Chat_SearchMessages_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServer).GetMessages(ctx, req.(*SearchMessagesRequest))
+		return srv.(ChatServer).SearchMessages(ctx, req.(*SearchMessagesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -222,8 +222,8 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Chat_GetMessagesCount_Handler,
 		},
 		{
-			MethodName: "GetMessages",
-			Handler:    _Chat_GetMessages_Handler,
+			MethodName: "SearchMessages",
+			Handler:    _Chat_SearchMessages_Handler,
 		},
 		{
 			MethodName: "DeleteMessages",

@@ -10,8 +10,8 @@ option go_package = "chatparser.chat.v1;chatv1";
 
 service Chat {
   rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
-  rpc GetMessagesCount (SearchMessagesRequest) returns (GetMessagesCountResponse);
-  rpc GetMessages (SearchMessagesRequest) returns (GetMessagesResponse);
+  rpc GetMessagesCount (GetMessagesCountRequest) returns (GetMessagesCountResponse);
+  rpc SearchMessages (SearchMessagesRequest) returns (SearchMessagesResponse);
   rpc DeleteMessages (SearchMessagesRequest) returns (DeleteMessageResponse);
 }
 
@@ -23,18 +23,22 @@ message ParseFromDirResponse {
   bool Ok = 1;
 }
 
-message SearchMessagesRequest {
-  common.MessagesFilter Filter = 2;
-  int32 Take = 3;
-  int32 Skip = 4;
-  repeated string Sorts = 5;
+message GetMessagesCountRequest {
+  common.MessagesFilter Filter = 1;
 }
 
 message GetMessagesCountResponse {
   int64 Count = 1;
 }
 
-message GetMessagesResponse {
+message SearchMessagesRequest {
+  common.MessagesFilter Filter = 1;
+  int32 Take = 2;
+  int32 Skip = 3;
+  repeated string Sorts = 4;
+}
+
+message SearchMessagesResponse {
   repeated ChatMessage Messages = 1;
 }
 
