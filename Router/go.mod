@@ -6,6 +6,8 @@ require github.com/ilyakaznacheev/cleanenv v1.5.0
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250201164326-a3505e3d0192 // indirect
+	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250209202915-9ba51212424c // indirect
 	github.com/QutaqKicker/ChatParser/common v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/QutaqKicker/ChatParser/protos v0.0.0-20250102205628-28c8a7045ae3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect

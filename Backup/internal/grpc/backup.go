@@ -44,7 +44,7 @@ func New(log *slog.Logger, exportDir string, port int, chatServicePort int) (*Ap
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*20)))
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("grpc server connection failed: %v", err))
+		return nil, errors.New(fmt.Sprintf("router server connection failed: %v", err))
 	}
 
 	chatClient := chatv1.NewChatClient(cc)

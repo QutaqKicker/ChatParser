@@ -1,39 +1,43 @@
 package main
 
 import (
-	"log/slog"
+	"github.com/QutaqKicker/ChatParser/Common/constants"
+	"github.com/QutaqKicker/ChatParser/Common/myKafka"
+	"github.com/QutaqKicker/ChatParser/Common/myLogs"
 	"os"
 	"os/signal"
-	config "router/internal"
-	"router/internal/grpc"
+	"router/internal/router"
+	"strconv"
 	"syscall"
 )
 
 func main() {
-	cfg := config.MustLoad()
 
-	logger := setupLogger(cfg.Env)
+	auditProducer := myKafka.NewAuditProducer()
+	defer auditProducer.Close()
 
-	logger.Info("started application", slog.Any("config", cfg))
+	logger := myLogs.SetupLogger(auditProducer, "Router")
 
-	application := grpc.New(logger, cfg.Grpc.Port)
+	logger.Info("started router")
 
-	go application.Run()
+	routerPort, _ := strconv.Atoi(os.Getenv(constants.RouterPortEnvName))
+
+	chatPort, _ := strconv.Atoi(os.Getenv(constants.ChatPortEnvName))
+	userPort, _ := strconv.Atoi(os.Getenv(constants.UserPortEnvName))
+	backupPort, _ := strconv.Atoi(os.Getenv(constants.BackupPortEnvName))
+
+	router := router.NewRouter(logger)
+
+	go func() {
+		err := application.Run()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
 	<-stop
 	application.Stop()
-}
-
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-	switch env {
-	case "dev":
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	}
-	return log
 }
