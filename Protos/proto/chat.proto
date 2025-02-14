@@ -6,7 +6,7 @@ import "common.proto";
 
 package chat;
 
-option go_package = "chatparser.chat.v1;chatv1";
+option go_package = "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat;chatv1";
 
 service Chat {
   rpc ParseFromDir (ParseFromDirRequest) returns (ParseFromDirResponse);
