@@ -1,4 +1,4 @@
-package chatHandlers
+package handlers
 
 import (
 	"context"

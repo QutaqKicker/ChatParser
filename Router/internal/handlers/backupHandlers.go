@@ -1,4 +1,4 @@
-package backupHandlers
+package handlers
 
 import (
 	"context"

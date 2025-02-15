@@ -10,9 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"net/http"
-	"router/internal/backupHandlers"
-	"router/internal/chatHandlers"
-	"router/internal/userHandlers"
+	"router/internal/handlers"
 	"time"
 )
 
@@ -31,7 +29,7 @@ type Chat interface {
 func NewRouter(logger *slog.Logger, chatPort, userPort, backupPort string) http.Handler {
 	mux := http.NewServeMux()
 
-	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", chatPort),
+	cc, err := grpc.NewClient(fmt.Sprintf("localhost:%s", chatPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*20)))
 	if err != nil {
@@ -40,7 +38,7 @@ func NewRouter(logger *slog.Logger, chatPort, userPort, backupPort string) http.
 	}
 	chatClient := chatv1.NewChatClient(cc)
 
-	uc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", userPort),
+	uc, err := grpc.NewClient(fmt.Sprintf("localhost:%s", userPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions())
 	if err != nil {
@@ -49,7 +47,7 @@ func NewRouter(logger *slog.Logger, chatPort, userPort, backupPort string) http.
 	}
 	userClient := userv1.NewUserClient(uc)
 
-	bc, err := grpc.NewClient(fmt.Sprintf("localhost:%d", backupPort),
+	bc, err := grpc.NewClient(fmt.Sprintf("localhost:%s", backupPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions())
 	if err != nil {
@@ -77,10 +75,10 @@ func addRoutes(
 	backupClient *backupv1.BackupClient,
 
 ) {
-	mux.Handle("/chat/messages/search", chatHandlers.SearchMessagesHandler(logger, chatClient))
-	mux.Handle("/chat/messages/count", chatHandlers.GetMessagesCountHandler(logger, chatClient))
-	mux.Handle("/chat/parse-from-dir", chatHandlers.ParseFromDirHandler(logger, chatClient))
-	mux.Handle("/backup/export-to-dir", backupHandlers.ExportToDirHandler(logger, backupClient))
-	mux.Handle("/user/messages-count", userHandlers.GetUsersWithMessagesCountHandler(logger, userClient))
+	mux.Handle("/chat/messages/search", handlers.SearchMessagesHandler(logger, chatClient))
+	mux.Handle("/chat/messages/count", handlers.GetMessagesCountHandler(logger, chatClient))
+	mux.Handle("/chat/parse-from-dir", handlers.ParseFromDirHandler(logger, chatClient))
+	mux.Handle("/backup/export-to-dir", handlers.ExportToDirHandler(logger, backupClient))
+	mux.Handle("/user/messages-count", handlers.GetUsersWithMessagesCountHandler(logger, userClient))
 	mux.Handle("/", http.NotFoundHandler())
 }
