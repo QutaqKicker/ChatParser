@@ -1,13 +1,18 @@
 package actions
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"github.com/QutaqKicker/ChatParser/Router/pkg/routerClient"
 	"io/fs"
 	"os"
 )
 
-func ImportMessages() {
+func ImportMessages(router *routerClient.RouterClient) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	fmt.Println("Введите путь к файлам, которые нужно сымпортировать")
 	for {
 		var importPath string
@@ -23,7 +28,12 @@ func ImportMessages() {
 			continue
 		}
 
-		//TODO sending to chatservice dirPath
+		ok, err := router.ParseFromDir(ctx, importPath)
+		if !ok || err != nil {
+			fmt.Printf("Не получилось. Ошибка: %v. Повторите попытку \n", err)
+			continue
+		} else {
+			break
+		}
 	}
-
 }

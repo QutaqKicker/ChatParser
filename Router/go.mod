@@ -5,8 +5,8 @@ go 1.22
 toolchain go1.23.1
 
 require (
-	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250215173927-0d5290e214c5
-	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250215173927-0d5290e214c5
+	github.com/QutaqKicker/ChatParser/Common v0.0.0-20250215190657-fabf778fb15b
+	github.com/QutaqKicker/ChatParser/Protos v0.0.0-20250215190657-fabf778fb15b
 	google.golang.org/grpc v1.70.0
 )
 

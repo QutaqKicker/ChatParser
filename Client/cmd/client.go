@@ -3,10 +3,15 @@ package main
 import (
 	"Client/internal/actions"
 	"Client/internal/utils"
+	"fmt"
+	"github.com/QutaqKicker/ChatParser/Common/constants"
+	"github.com/QutaqKicker/ChatParser/Router/pkg/routerClient"
+	"os"
 )
 
 func main() {
-	//routerClient := struct{}{} //TODO set router client
+	routerPort := os.Getenv(constants.ChatPortEnvName)
+	router := routerClient.NewRouterClient(fmt.Sprintf("routerPort:%s", routerPort))
 
 	for {
 		mainActionCallback := utils.ShowActionsForSelect(actions.MainActions)
@@ -14,6 +19,6 @@ func main() {
 			break
 		}
 
-		mainActionCallback()
+		mainActionCallback(router)
 	}
 }
