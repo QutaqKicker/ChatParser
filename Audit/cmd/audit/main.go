@@ -15,7 +15,7 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
-	logger := setupLogger(cfg.Env)
+	logger := setupLogger()
 
 	db, err := dbHelper.ConnectDb(cfg.Db)
 	if err != nil {
@@ -62,13 +62,8 @@ func main() {
 	<-stop
 }
 
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-	switch env {
-	case "dev":
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	}
-	return log
+func setupLogger() *slog.Logger {
+	return slog.New(
+		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+	)
 }

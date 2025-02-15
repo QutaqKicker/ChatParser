@@ -17,7 +17,6 @@ func (u Log) TableName() string {
 	return "logs"
 }
 
-// FieldValuesAsArray / GetKeyByName fields values as any array. Needs for safe inserting
 func (u Log) FieldValuesAsArray() []any {
 	return []any{u.Id, u.ServiceName, u.Type, u.Message, u.Created}
 }

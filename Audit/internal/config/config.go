@@ -7,8 +7,7 @@ import (
 )
 
 type Config struct {
-	Env string            `yaml:"env" env-default:"local"`
-	Db  dbHelper.DbConfig `yaml:"db"`
+	Db dbHelper.DbConfig `yaml:"db"`
 }
 
 func MustLoad() *Config {

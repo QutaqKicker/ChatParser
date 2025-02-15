@@ -16,7 +16,6 @@ func main() {
 	flag.StringVar(&migrationPath, "migrations-path", "", "path of migrations")
 	flag.StringVar(&migrationsTable, "migrations-table", "", "path of migrations table")
 	flag.Parse()
-	//test := "?x-migrations-table="+migrationsTable
 
 	if storagePath == "" || migrationPath == "" {
 		panic("invalid arguments")
