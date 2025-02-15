@@ -1,6 +1,7 @@
 package router
 
 import (
+	"Router/internal/handlers"
 	"context"
 	"fmt"
 	backupv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/backup"
@@ -10,7 +11,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"net/http"
-	"router/internal/handlers"
 	"time"
 )
 

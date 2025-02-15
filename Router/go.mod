@@ -1,4 +1,4 @@
-module router
+module Router
 
 go 1.22
 

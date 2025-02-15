@@ -1,13 +1,13 @@
 package main
 
 import (
+	"Router/internal/router"
 	"fmt"
 	"github.com/QutaqKicker/ChatParser/Common/constants"
 	"github.com/QutaqKicker/ChatParser/Common/myKafka"
 	"github.com/QutaqKicker/ChatParser/Common/myLogs"
 	"net/http"
 	"os"
-	"router/internal/router"
 )
 
 func main() {
