@@ -1,30 +1,16 @@
 package router
 
 import (
-	"Router/internal/handlers"
-	"context"
 	"fmt"
 	backupv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/backup"
 	chatv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/chat"
 	userv1 "github.com/QutaqKicker/ChatParser/Protos/gen/go/user"
+	"github.com/QutaqKicker/ChatParser/Router/internal/handlers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"net/http"
-	"time"
 )
-
-type Chat interface {
-	ParseHtml(ctx context.Context,
-		diPath string)
-	SearchByDate(ctx context.Context,
-		min time.Time,
-		max time.Time)
-	SearchByUser(ctx context.Context,
-		userId string)
-	GetStatistics(ctx context.Context,
-		userId string)
-}
 
 func NewRouter(logger *slog.Logger, chatPort, userPort, backupPort string) http.Handler {
 	mux := http.NewServeMux()
