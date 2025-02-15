@@ -1,4 +1,4 @@
-module Router
+module github.com/QutaqKicker/ChatParser/Router
 
 go 1.22
 
