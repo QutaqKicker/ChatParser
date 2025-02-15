@@ -11,15 +11,34 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"time"
 )
 
-func GetMessagesCount(ctx context.Context, client *http.Client, filter *commonv1.MessagesFilter) (int64, error) {
-	request, err := getRequest(ctx, "/chat/messages/count", "POST", filter)
+type RouterClient struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewRouterClient(baseURL string) *RouterClient {
+	return &RouterClient{
+		baseURL: baseURL,
+		httpClient: &http.Client{
+			Timeout: 10 * time.Second, // Установите тайм-аут на 10 секунд (можно изменить)
+		},
+	}
+}
+
+func (c *RouterClient) BuildUrl(endpoint string) string {
+	return fmt.Sprintf("%s%s", c.baseURL, endpoint)
+}
+
+func (c *RouterClient) GetMessagesCount(ctx context.Context, filter *commonv1.MessagesFilter) (int64, error) {
+	request, err := c.getRequest(ctx, "/chat/messages/count", "POST", filter)
 	if err != nil {
 		return 0, err
 	}
 
-	response, err := client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return 0, err
 	}
@@ -36,13 +55,13 @@ func GetMessagesCount(ctx context.Context, client *http.Client, filter *commonv1
 	}
 }
 
-func SearchMessages(ctx context.Context, client *http.Client, messagesRequest *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
-	request, err := getRequest(ctx, "/chat/messages/search", "POST", messagesRequest)
+func (c *RouterClient) SearchMessages(ctx context.Context, messagesRequest *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
+	request, err := c.getRequest(ctx, "/chat/messages/search", "POST", messagesRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -56,14 +75,14 @@ func SearchMessages(ctx context.Context, client *http.Client, messagesRequest *c
 	return messagesResponse, err
 }
 
-func ParseFromDir(ctx context.Context, client *http.Client, dirPath string) (bool, error) {
-	request, err := getRequest(ctx, "/chat/parse-from-dir", "GET", nil)
+func (c *RouterClient) ParseFromDir(ctx context.Context, dirPath string) (bool, error) {
+	request, err := c.getRequest(ctx, "/chat/parse-from-dir", "GET", nil)
 	if err != nil {
 		return false, err
 	}
 
 	request.URL.Query().Set("dir-path", dirPath)
-	response, err := client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return false, err
 	}
@@ -75,14 +94,14 @@ func ParseFromDir(ctx context.Context, client *http.Client, dirPath string) (boo
 	}
 }
 
-func ExportToDir(ctx context.Context, client *http.Client, filter *commonv1.MessagesFilter, exportType string) (bool, error) {
-	request, err := getRequest(ctx, "/backup/export-to-dir", "POST", nil)
+func (c *RouterClient) ExportToDir(ctx context.Context, filter *commonv1.MessagesFilter, exportType string) (bool, error) {
+	request, err := c.getRequest(ctx, "/backup/export-to-dir", "POST", nil)
 	if err != nil {
 		return false, err
 	}
 
 	request.URL.Query().Set("export-type", exportType)
-	response, err := client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return false, err
 	}
@@ -94,13 +113,13 @@ func ExportToDir(ctx context.Context, client *http.Client, filter *commonv1.Mess
 	}
 }
 
-func GetUsersWithMessagesCount(ctx context.Context, client *http.Client) (*userv1.GetUsersResponse, error) {
-	request, err := getRequest(ctx, "/user/messages-count", "POST", nil)
+func (c *RouterClient) GetUsersWithMessagesCount(ctx context.Context) (*userv1.GetUsersResponse, error) {
+	request, err := c.getRequest(ctx, "/user/messages-count", "POST", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := client.Do(request)
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -114,13 +133,13 @@ func GetUsersWithMessagesCount(ctx context.Context, client *http.Client) (*userv
 
 }
 
-func getRequest(ctx context.Context, url, method string, payload any) (*http.Request, error) {
+func (c *RouterClient) getRequest(ctx context.Context, url, method string, payload any) (*http.Request, error) {
 	payloadBuffer := new(bytes.Buffer)
 	err := json.NewDecoder(payloadBuffer).Decode(payload)
 	if err != nil {
 		return nil, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, method, url, payloadBuffer)
+	request, err := http.NewRequestWithContext(ctx, method, c.BuildUrl(url), payloadBuffer)
 	return request, err
 }
