@@ -81,7 +81,9 @@ func (c *RouterClient) ParseFromDir(ctx context.Context, dirPath string) (bool, 
 		return false, err
 	}
 
-	request.URL.Query().Set("dir-path", dirPath)
+	q := request.URL.Query()
+	q.Set("dir-path", dirPath)
+	request.URL.RawQuery = q.Encode()
 	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return false, err
@@ -100,7 +102,10 @@ func (c *RouterClient) ExportToDir(ctx context.Context, filter *commonv1.Message
 		return false, err
 	}
 
-	request.URL.Query().Set("export-type", exportType)
+	q := request.URL.Query()
+	q.Set("export-type", exportType)
+	request.URL.RawQuery = q.Encode()
+
 	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return false, err
@@ -127,10 +132,9 @@ func (c *RouterClient) GetUsersWithMessagesCount(ctx context.Context) (*userv1.G
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("received from server incorrect status code: %d", response.StatusCode)
 	}
-
-	var userResponse *userv1.GetUsersResponse
-	err = json.NewDecoder(response.Body).Decode(userResponse)
-	return userResponse, err
+	var userResponse userv1.GetUsersResponse
+	err = json.NewDecoder(response.Body).Decode(&userResponse)
+	return &userResponse, err
 
 }
 
@@ -144,6 +148,5 @@ func (c *RouterClient) getRequest(ctx context.Context, url, method string, paylo
 	}
 
 	request, err := http.NewRequestWithContext(ctx, method, c.BuildUrl(url), payloadBuffer)
-	request.Header.Set("Content-Type", "application/json")
 	return request, err
 }

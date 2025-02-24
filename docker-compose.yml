@@ -47,10 +47,10 @@ services:
       depends_on:
         - zookeeper
 
-  testtask:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    restart: always
+#  testtask:
+#    build:
+##      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    restart: always

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	routerPort := os.Getenv(constants.ChatPortEnvName)
+	routerPort := os.Getenv(constants.RouterPortEnvName)
 	router := routerClient.NewRouterClient(fmt.Sprintf("http://localhost:%s", routerPort))
 
 	for {
@@ -18,7 +18,6 @@ func main() {
 		if mainActionCallback == nil { //Пришла команда на выход
 			break
 		}
-
 		mainActionCallback(router)
 	}
 }

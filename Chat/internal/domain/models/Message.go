@@ -18,7 +18,7 @@ type Message struct {
 }
 
 func (m Message) TableName() string {
-	return "messageActions"
+	return "messages"
 }
 
 // FieldValuesAsArray / GetKeyByName fields values as any array. Needs for safe inserting

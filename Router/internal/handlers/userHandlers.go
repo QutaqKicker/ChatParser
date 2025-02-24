@@ -17,12 +17,16 @@ func GetUsersWithMessagesCountHandler(logger *slog.Logger, userClient *userv1.Us
 		w.Header().Set("Content-Type", "application/json")
 
 		usersResponse, err := (*userClient).GetUsersMessagesCount(ctx, &userv1.GetUsersRequest{})
+		if err != nil {
+			logger.Error(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
 		err = json.NewEncoder(w).Encode(usersResponse)
 		if err != nil {
 			logger.Error(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
-			return
 		}
 	})
 }
