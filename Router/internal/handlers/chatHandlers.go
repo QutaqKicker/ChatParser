@@ -16,6 +16,7 @@ import (
 func GetMessagesCountHandler(logger *slog.Logger, chatClient *chatv1.ChatClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var chatFilter *commonv1.MessagesFilter
+		w.Header().Set("Content-Type", "application/json")
 
 		err := json.NewDecoder(r.Body).Decode(chatFilter)
 		if err != nil {
@@ -48,6 +49,7 @@ func GetMessagesCountHandler(logger *slog.Logger, chatClient *chatv1.ChatClient)
 func SearchMessagesHandler(logger *slog.Logger, chatClient *chatv1.ChatClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var messagesRequest *chatv1.SearchMessagesRequest
+		w.Header().Set("Content-Type", "application/json")
 
 		err := json.NewDecoder(r.Body).Decode(messagesRequest)
 		if err != nil {

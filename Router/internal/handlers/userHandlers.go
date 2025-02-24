@@ -14,6 +14,8 @@ func GetUsersWithMessagesCountHandler(logger *slog.Logger, userClient *userv1.Us
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 		defer cancel()
 
+		w.Header().Set("Content-Type", "application/json")
+
 		usersResponse, err := (*userClient).GetUsersMessagesCount(ctx, &userv1.GetUsersRequest{})
 
 		err = json.NewEncoder(w).Encode(usersResponse)

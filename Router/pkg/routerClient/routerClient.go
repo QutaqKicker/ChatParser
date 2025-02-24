@@ -33,7 +33,7 @@ func (c *RouterClient) BuildUrl(endpoint string) string {
 }
 
 func (c *RouterClient) GetMessagesCount(ctx context.Context, filter *commonv1.MessagesFilter) (int64, error) {
-	request, err := c.getRequest(ctx, "/chat/messages/count", "POST", filter)
+	request, err := c.getRequest(ctx, "/chat/messages/count", http.MethodPost, filter)
 	if err != nil {
 		return 0, err
 	}
@@ -56,7 +56,7 @@ func (c *RouterClient) GetMessagesCount(ctx context.Context, filter *commonv1.Me
 }
 
 func (c *RouterClient) SearchMessages(ctx context.Context, messagesRequest *chatv1.SearchMessagesRequest) (*chatv1.SearchMessagesResponse, error) {
-	request, err := c.getRequest(ctx, "/chat/messages/search", "POST", messagesRequest)
+	request, err := c.getRequest(ctx, "/chat/messages/search", http.MethodPost, messagesRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (c *RouterClient) SearchMessages(ctx context.Context, messagesRequest *chat
 }
 
 func (c *RouterClient) ParseFromDir(ctx context.Context, dirPath string) (bool, error) {
-	request, err := c.getRequest(ctx, "/chat/parse-from-dir", "GET", nil)
+	request, err := c.getRequest(ctx, "/chat/parse-from-dir", http.MethodGet, nil)
 	if err != nil {
 		return false, err
 	}
@@ -95,7 +95,7 @@ func (c *RouterClient) ParseFromDir(ctx context.Context, dirPath string) (bool, 
 }
 
 func (c *RouterClient) ExportToDir(ctx context.Context, filter *commonv1.MessagesFilter, exportType string) (bool, error) {
-	request, err := c.getRequest(ctx, "/backup/export-to-dir", "POST", nil)
+	request, err := c.getRequest(ctx, "/backup/export-to-dir", http.MethodPost, nil)
 	if err != nil {
 		return false, err
 	}
@@ -114,7 +114,7 @@ func (c *RouterClient) ExportToDir(ctx context.Context, filter *commonv1.Message
 }
 
 func (c *RouterClient) GetUsersWithMessagesCount(ctx context.Context) (*userv1.GetUsersResponse, error) {
-	request, err := c.getRequest(ctx, "/user/messages-count", "POST", nil)
+	request, err := c.getRequest(ctx, "/user/messages-count", http.MethodPost, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +127,7 @@ func (c *RouterClient) GetUsersWithMessagesCount(ctx context.Context) (*userv1.G
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("received from server incorrect status code: %d", response.StatusCode)
 	}
+
 	var userResponse *userv1.GetUsersResponse
 	err = json.NewDecoder(response.Body).Decode(userResponse)
 	return userResponse, err
@@ -135,11 +136,14 @@ func (c *RouterClient) GetUsersWithMessagesCount(ctx context.Context) (*userv1.G
 
 func (c *RouterClient) getRequest(ctx context.Context, url, method string, payload any) (*http.Request, error) {
 	payloadBuffer := new(bytes.Buffer)
-	err := json.NewDecoder(payloadBuffer).Decode(payload)
-	if err != nil {
-		return nil, err
+	if payload != nil {
+		err := json.NewDecoder(payloadBuffer).Decode(payload)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	request, err := http.NewRequestWithContext(ctx, method, c.BuildUrl(url), payloadBuffer)
+	request.Header.Set("Content-Type", "application/json")
 	return request, err
 }

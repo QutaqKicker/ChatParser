@@ -11,7 +11,7 @@ import (
 
 func main() {
 	routerPort := os.Getenv(constants.ChatPortEnvName)
-	router := routerClient.NewRouterClient(fmt.Sprintf("routerPort:%s", routerPort))
+	router := routerClient.NewRouterClient(fmt.Sprintf("http://localhost:%s", routerPort))
 
 	for {
 		mainActionCallback := utils.ShowActionsForSelect(actions.MainActions)
